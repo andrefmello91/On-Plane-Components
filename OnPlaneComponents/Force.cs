@@ -20,30 +20,30 @@ namespace OnPlaneComponents
 	public struct Force : IEquatable<Force>
 	{
 		// Auxiliary fields
-		public UnitsNet.Force ForceX, ForceY;
+		private UnitsNet.Force _forceX, _forceY;
 
 		/// <summary>
         /// Get/set the force unit.
         /// </summary>
 		public ForceUnit Unit
 		{
-			get => ForceX.Unit;
+			get => _forceX.Unit;
 			set
 			{
-				ForceX.ToUnit(value);
-				ForceY.ToUnit(value);
+				_forceX.ToUnit(value);
+				_forceY.ToUnit(value);
 			}
 		}
 
 		/// <summary>
 		/// Get the force component value in X direction, in the unit constructed (<see cref="Unit"/>).
 		/// </summary>
-		public double ComponentX => ForceX.Value;
+		public double ComponentX => _forceX.Value;
 
         /// <summary>
         /// Get the force component value in Y direction, in the unit constructed (<see cref="Unit"/>).
         /// </summary>
-        public double ComponentY => ForceY.Value;
+        public double ComponentY => _forceY.Value;
 
         /// <summary>
         /// Get the resultant force value, in the unit constructed (<see cref="Unit"/>).
@@ -53,7 +53,7 @@ namespace OnPlaneComponents
         /// <summary>
         /// Get the resultant force, in the unit constructed (<see cref="Unit"/>).
         /// </summary>
-        public UnitsNet.Force ResultantForce => CalculateResultant(ForceX, ForceY, Unit);
+        public UnitsNet.Force ResultantForce => CalculateResultant(_forceX, _forceY, Unit);
 
 		/// <summary>
 		/// Get the resultant force angle, in radians.
@@ -88,8 +88,8 @@ namespace OnPlaneComponents
         /// <param name="unit">The unit of force (default: N).</param>
         public Force(double componentX, double componentY, ForceUnit unit = ForceUnit.Newton)
 		{
-			ForceX = UnitsNet.Force.From(componentX, unit);
-			ForceY = UnitsNet.Force.From(componentY, unit);
+			_forceX = UnitsNet.Force.From(componentX, unit);
+			_forceY = UnitsNet.Force.From(componentY, unit);
 		}
 
         /// <summary>
@@ -100,8 +100,8 @@ namespace OnPlaneComponents
         /// <param name="unit">The unit of force (default: N).</param>
         public Force(UnitsNet.Force forceX, UnitsNet.Force forceY, ForceUnit unit = ForceUnit.Newton)
 		{
-			ForceX = forceX.ToUnit(unit);
-			ForceY = forceY.ToUnit(unit);
+			_forceX = forceX.ToUnit(unit);
+			_forceY = forceY.ToUnit(unit);
 		}
 
 		/// <summary>
@@ -113,10 +113,82 @@ namespace OnPlaneComponents
 			Unit = toUnit;
 		}
 
-		/// <summary>
-		/// Get a Force with zero value.
-		/// </summary>
-		public static Force Zero => new Force(0, 0);
+        /// <summary>
+        /// Add values to current forces.
+        /// </summary>
+        /// <param name="incrementX">The increment for X component, in current unit (<see cref="Unit"/>).</param>
+        /// <param name="incrementY">The increment for Y component, in current unit (<see cref="Unit"/>).</param>
+        public void Add(double incrementX, double incrementY) =>
+			Add(UnitsNet.Force.From(incrementX, Unit), UnitsNet.Force.From(incrementY, Unit));
+
+        /// <summary>
+        /// Add values to current forces.
+        /// </summary>
+        /// <param name="incrementX">The force increment for X component.</param>
+        /// <param name="incrementY">The force increment for Y component.</param>
+        public void Add(UnitsNet.Force incrementX, UnitsNet.Force incrementY)
+		{
+			_forceX += incrementX;
+			_forceY += incrementY;
+		}
+
+        /// <summary>
+        /// Subtract values from current forces.
+        /// </summary>
+        /// <param name="decrementX">The decrement for X component (positive value), in current unit (<see cref="Unit"/>).</param>
+        /// <param name="decrementY">The decrement for Y component (positive value), in current unit (<see cref="Unit"/>).</param>
+        public void Subtract(double decrementX, double decrementY) =>
+			Subtract(UnitsNet.Force.From(decrementX, Unit), UnitsNet.Force.From(decrementY, Unit));
+
+        /// <summary>
+        /// Subtract values from current forces.
+        /// </summary>
+        /// <param name="decrementX">The force decrement for X component (positive value).</param>
+        /// <param name="decrementY">The force decrement for Y component (positive value).</param>
+        public void Subtract(UnitsNet.Force decrementX, UnitsNet.Force decrementY)
+		{
+			_forceX -= decrementX;
+			_forceY -= decrementY;
+		}
+
+        /// <summary>
+        /// Multiply current forces by a value.
+        /// </summary>
+        /// <param name="multiplier">The multiplier for X and Y components.</param>
+        public void Multiply(double multiplier) => Multiply(multiplier, multiplier);
+
+        /// <summary>
+        /// Multiply current forces by values.
+        /// </summary>
+        /// <param name="multiplierX">The multiplier for X component.</param>
+        /// <param name="multiplierY">The multiplier for Y component.</param>
+        public void Multiply(double multiplierX, double multiplierY)
+        {
+	        _forceX *= multiplierX;
+	        _forceY *= multiplierY;
+        }
+
+        /// <summary>
+        /// Divide current forces by a value.
+        /// </summary>
+        /// <param name="divider">The divider for X and Y components.</param>
+        public void Divide(double divider) => Divide(divider, divider);
+
+        /// <summary>
+        /// Divide current forces by values.
+        /// </summary>
+        /// <param name="dividerX">The divider for X component.</param>
+        /// <param name="dividerY">The divider for Y component.</param>
+        public void Divide(double dividerX, double dividerY)
+        {
+	        _forceX /= dividerX;
+	        _forceY /= dividerY;
+        }
+
+        /// <summary>
+        /// Get a Force with zero value.
+        /// </summary>
+        public static Force Zero => new Force(0, 0);
 
         /// <summary>
         /// Get a Force in X direction.
@@ -273,11 +345,7 @@ namespace OnPlaneComponents
 		/// Compare two force objects.
 		/// </summary>
 		/// <param name="other">The force to compare.</param>
-		public bool Equals(Force other)
-		{
-			return
-				ForceX == other.ForceX && ForceY == other.ForceY;
-		}
+		public bool Equals(Force other) => _forceX == other._forceX && _forceY == other._forceY;
 
 		public override bool Equals(object obj)
 		{
@@ -290,47 +358,60 @@ namespace OnPlaneComponents
 		public override string ToString()
 		{
 			return
-				"Fx = " + ForceX + "\n" + 
-				"Fy = " + ForceY;
+				"Fx = " + _forceX + "\n" + 
+				"Fy = " + _forceY;
 		}
 
-        public override int GetHashCode()
-		{
-			return (int) (ComponentX * ComponentY);
-		}
+        public override int GetHashCode() => (int) (ComponentX * ComponentY);
 
 		/// <summary>
         /// Returns true if components are equal.
         /// </summary>
-		public static bool operator == (Force left, Force right)
-		{
-			return left.Equals(right);
-		}
+		public static bool operator == (Force left, Force right) => left.Equals(right);
 
 		/// <summary>
 		/// Returns true if components are different.
 		/// </summary>
-		public static bool operator != (Force left, Force right)
-		{
-			return !left.Equals(right);
-		}
+		public static bool operator != (Force left, Force right) => !left.Equals(right);
 
 		/// <summary>
         /// Returns a force object with summed components, in left argument's unit.
         /// </summary>
-		public static Force operator + (Force left, Force right)
-		{
-			return
-				new Force(left.ForceX + right.ForceX, left.ForceY + right.ForceY, left.Unit);
-		}
+		public static Force operator + (Force left, Force right) => new Force(left._forceX + right._forceX, left._forceY + right._forceY, left.Unit);
 
 		/// <summary>
         /// Returns a force object with subtracted components, in left argument's unit.
         /// </summary>
-		public static Force operator - (Force left, Force right)
-		{
-			return
-				new Force(left.ForceX - right.ForceX, left.ForceY - right.ForceY, left.Unit);
-		}
+		public static Force operator - (Force left, Force right) => new Force(left._forceX - right._forceX, left._forceY - right._forceY, left.Unit);
+
+		/// <summary>
+        /// Returns a force object with multiplied components by a double.
+        /// </summary>
+		public static Force operator * (Force force, double multiplier) => new Force(multiplier * force._forceX, multiplier * force._forceY, force.Unit);
+
+		/// <summary>
+        /// Returns a force object with multiplied components by a double.
+        /// </summary>
+		public static Force operator * (double multiplier, Force force) => force * multiplier;
+
+		/// <summary>
+        /// Returns a force object with multiplied components by an integer.
+        /// </summary>
+		public static Force operator * (Force force, int multiplier) => force * (double) multiplier;
+
+		/// <summary>
+        /// Returns a force object with multiplied components by an integer.
+        /// </summary>
+		public static Force operator * (int multiplier, Force force) => force * (double) multiplier;
+
+		/// <summary>
+		/// Returns a force object with components divided by a double.
+		/// </summary>
+		public static Force operator / (Force force, double divider) => new Force(force._forceX / divider, force._forceY / divider, force.Unit);
+
+		/// <summary>
+		/// Returns a force object with components divided by an integer.
+		/// </summary>
+		public static Force operator / (Force force, int divider) => force / (double) divider;
 	}
 }
