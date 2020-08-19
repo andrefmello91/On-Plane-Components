@@ -7,8 +7,8 @@ using UnitsNet.Units;
 
 namespace OnPlaneComponents
 {
-	/// <summary>
-    /// Stress struct.
+    /// <summary>
+    /// Stress object for XY components.
     /// </summary>
     public struct Stress : IEquatable<Stress>
     {
@@ -73,8 +73,33 @@ namespace OnPlaneComponents
         /// </summary>
         public Matrix<double> TransformationMatrix => StressRelations.TransformationMatrix(PrincipalAngles.theta1);
 
+		/// <summary>
+        /// Returns true if <see cref="SigmaX"/> is zero.
+        /// </summary>
+		public bool IsSigmaXZero => SigmaX == 0;
+
+		/// <summary>
+        /// Returns true if <see cref="SigmaY"/> is zero.
+        /// </summary>
+		public bool IsSigmaYZero => SigmaY == 0;
+
+		/// <summary>
+        /// Returns true if <see cref="TauXY"/> is zero.
+        /// </summary>
+		public bool IsTauXYZero => TauXY == 0;
+
+		/// <summary>
+        /// Returns true if pure shear state of stresses.
+        /// </summary>
+		public bool IsPureShear => IsSigmaXZero && IsSigmaYZero && !IsTauXYZero;
+
+		/// <summary>
+        /// Returns true if principal state of stresses.
+        /// </summary>
+		public bool IsPrincipal => !IsSigmaXZero && !IsSigmaYZero && IsTauXYZero;
+
         /// <summary>
-        /// Stress object
+        /// Stress object for XY components.
         /// </summary>
         /// <param name="sigmaX">The normal stress in X direction (positive for tensile).</param>
         /// <param name="sigmaY">The normal stress in Y direction (positive for tensile).</param>
@@ -88,7 +113,7 @@ namespace OnPlaneComponents
 		}
 
         /// <summary>
-        /// Stress object
+        /// Stress object for XY components.
         /// </summary>
         /// <param name="sigmaX">The normal stress in X direction (positive for tensile).</param>
         /// <param name="sigmaY">The normal stress in Y direction (positive for tensile).</param>
@@ -102,7 +127,7 @@ namespace OnPlaneComponents
 		}
 
         /// <summary>
-        /// Stress object
+        /// Stress object for XY components.
         /// </summary>
         /// <param name="stressVector">The vector of stresses, in considered <paramref name="unit"/>.
         ///	<para>{SigmaX, SigmaY, TauXY}</para></param>
@@ -121,19 +146,6 @@ namespace OnPlaneComponents
         public void ChangeUnit(PressureUnit toUnit)
         {
 	        Unit = toUnit;
-        }
-
-        /// <summary>
-        /// Transform this stresses by a rotation angle.
-        /// </summary>
-        /// <param name="theta">Rotation angle, in radians.</param>
-        public void Transform(double theta)
-        {
-	        var sVec = StressRelations.Transform(Vector, theta);
-
-	        _sigmaX = Pressure.From(sVec[0], Unit);
-	        _sigmaY = Pressure.From(sVec[1], Unit);
-	        _tauXY  = Pressure.From(sVec[2], Unit);
         }
 
         /// <summary>
@@ -218,6 +230,10 @@ namespace OnPlaneComponents
             _tauXY  /= dividerXY;
         }
 
+		/// <summary>
+        /// Get a stress with zero elements.
+        /// </summary>
+		public static Stress Zero => new Stress(0, 0, 0);
 
         /// <summary>
         /// Get a stress from known principal stresses values.

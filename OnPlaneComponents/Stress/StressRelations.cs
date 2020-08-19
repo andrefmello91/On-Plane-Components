@@ -1,7 +1,7 @@
 ﻿using System;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
-using OnPlaneComponents;
+using MathNet.Numerics.LinearAlgebra.Double;
 using UnitsNet;
 using UnitsNet.Units;
 
@@ -31,7 +31,7 @@ namespace OnPlaneComponents
 				e = f[2] * cos2Theta;
 
             return
-                Vector<double>.Build.DenseOfArray(new []
+               DenseVector.OfArray(new []
 				{
 					a + b + c,
 					a - b - c,
@@ -140,7 +140,7 @@ namespace OnPlaneComponents
             }
 
             // Calculate theta2
-            double theta2 = Constants.PiOver2 - theta1;
+            double theta2 = Constants.PiOver2 + theta1;
 
             return
                 (theta1, theta2);
