@@ -65,6 +65,11 @@ namespace OnPlaneComponents
 		/// </summary>
 		public bool IsGammaXYZero => GammaXY == 0;
 
+        /// <summary>
+        /// Returns true if all components are zero.
+		/// </summary>
+        public bool IsZero => IsEpsilonXZero && IsEpsilonYZero && IsGammaXYZero;
+
 		/// <summary>
 		/// Returns true if pure shear state of strains.
 		/// </summary>

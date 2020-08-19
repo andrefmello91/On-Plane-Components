@@ -89,6 +89,11 @@ namespace OnPlaneComponents
 		public bool IsTauXYZero => TauXY == 0;
 
 		/// <summary>
+        /// Returns true if all components are zero.
+        /// </summary>
+		public bool IsZero => IsSigmaXZero && IsSigmaYZero && IsTauXYZero;
+
+		/// <summary>
         /// Returns true if pure shear state of stresses.
         /// </summary>
 		public bool IsPureShear => IsSigmaXZero && IsSigmaYZero && !IsTauXYZero;
