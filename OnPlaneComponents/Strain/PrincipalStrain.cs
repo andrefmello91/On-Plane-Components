@@ -56,7 +56,7 @@ namespace OnPlaneComponents
         public bool IsHorizontal => Theta1 == 0;
 
         /// <summary>
-        /// Strain object for XY components.
+        /// Principal Strain object.
         /// </summary>
         /// <param name="epsilon1">The maximum principal strain (positive for tensile).</param>
         /// <param name="epsilon2">The minimum principal strain (positive for tensile).</param>
@@ -112,7 +112,6 @@ namespace OnPlaneComponents
         {
 	        char
 		        epsilon = (char) Characters.Epsilon,
-		        gamma   = (char) Characters.Gamma,
 		        theta   = (char) Characters.Theta;
 
 	        return

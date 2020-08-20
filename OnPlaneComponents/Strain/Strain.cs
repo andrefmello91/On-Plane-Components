@@ -217,7 +217,7 @@ namespace OnPlaneComponents
             return
                 epsilon + "x = "  + $"{EpsilonX:0.##E+00}" + "\n" +
 		        epsilon + "y = "  + $"{EpsilonY:0.##E+00}" + "\n" +
-		        gamma   + "xy = " + $"{GammaXY:0.##E+00}" +
+		        gamma   + "xy = " + $"{GammaXY:0.##E+00}" + "\n"  +
                 theta + "x = "    + $"{ThetaX:0.00}" + " rad";
         }
 
