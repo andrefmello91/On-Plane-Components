@@ -167,6 +167,22 @@ namespace OnPlaneComponents
         /// </summary>
 		public static Stress Zero => new Stress(0, 0, 0);
 
+		/// <summary>
+		/// Get <see cref="Stress"/> transformed to horizontal direction (<see cref="ThetaX"/> = 0).
+		/// </summary>
+		/// <param name="stress">The <see cref="Stress"/> to transform.</param>
+		public static Stress ToHorizontal(Stress stress)
+		{
+			if (stress.IsHorizontal)
+				return stress;
+
+			// Get the strain vector transformed
+			var sVec = StressRelations.Transform(stress.Vector, -stress.ThetaX);
+
+			// Return with corrected angle
+			return new Stress(sVec);
+		}
+
         /// <summary>
         /// Get <see cref="Stress"/> transformed by a rotation angle.
         /// </summary>
@@ -185,15 +201,58 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Compare two stress objects.
+        /// Get <see cref="PrincipalStress"/> transformed by a rotation angle.
         /// </summary>
-        /// <param name="other">The stress to compare.</param>
-        public bool Equals(Stress other) => _sigmaX == other._sigmaX && _sigmaY == other._sigmaY && _tauXY == other._tauXY;
+        /// <param name="principalStress">The <see cref="PrincipalStress"/> to transform.</param>
+        /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
+        public static Stress Transform(PrincipalStress principalStress, double theta)
+        {
+	        if (theta == 0)
+		        return new Stress(principalStress.Vector, principalStress.Theta1, principalStress.Unit);
+
+	        // Get the strain vector transformed
+	        var sVec = StressRelations.Transform(principalStress.Vector, theta);
+
+	        // Return with corrected angle
+	        return new Stress(sVec, principalStress.Theta1 + theta, principalStress.Unit);
+        }
+
+
+        /// <summary>
+        /// Get <see cref="Stress"/> from a <see cref="PrincipalStress"/> in horizontal direction (<see cref="ThetaX"/> = 0).
+        /// </summary>
+        /// <param name="principalStress">The <see cref="PrincipalStress"/> to horizontal <see cref="Stress"/>.</param>
+        public static Stress FromPrincipal(PrincipalStress principalStress)
+        {
+	        if (principalStress.Theta1 == 0)
+		        return new Stress(principalStress.Vector);
+
+	        // Get the strain vector transformed
+	        var sVec = StrainRelations.Transform(principalStress.Vector, -principalStress.Theta1);
+
+	        // Return with corrected angle
+	        return new Stress(sVec);
+        }
+
+        /// <summary>
+        /// Compare two <see cref="Stress"/> objects.
+        /// </summary>
+        /// <param name="other">The <see cref="Stress"/> to compare.</param>
+        public bool Equals(Stress other) => ThetaX == other.ThetaX && _sigmaX == other._sigmaX && _sigmaY == other._sigmaY && _tauXY == other._tauXY;
+
+        /// <summary>
+        /// Compare a <see cref="Stress"/> to a <see cref="PrincipalStress"/> object.
+        /// </summary>
+        /// <param name="other">The <see cref="PrincipalStress"/> to compare.</param>
+        public bool Equals(PrincipalStress other) => Equals(FromPrincipal(other));
 
         public override bool Equals(object obj)
         {
 	        if (obj is Stress other)
 		        return Equals(other);
+
+	        if (obj is PrincipalStress principalStress)
+		        return Equals(principalStress);
 
 	        return false;
         }
@@ -202,12 +261,14 @@ namespace OnPlaneComponents
         {
 	        char
 		        sigma = (char) Characters.Sigma,
-		        tau   = (char) Characters.Tau;
+		        tau   = (char) Characters.Tau,
+		        theta = (char)Characters.Theta;
 
-	        return
-		        sigma + "x = "  + _sigmaX + "\n" +
+            return
+                sigma + "x = "  + _sigmaX + "\n" +
 		        sigma + "y = "  + _sigmaY + "\n" +
-		        tau   + "xy = " + _tauXY;
+		        tau   + "xy = " + _tauXY  + "\n" +
+                theta + "x = "  + $"{ThetaX:0.00}" + " rad";
         }
 
         public override int GetHashCode() => (int)(SigmaX * SigmaY * TauXY);
@@ -223,25 +284,91 @@ namespace OnPlaneComponents
         public static bool operator != (Stress left, Stress right) => !left.Equals(right);
 
         /// <summary>
-        /// Returns a stress object with summed components, in left argument's <see cref="Unit"/> and angle <see cref="ThetaX"/>.
+        /// Returns true if components are equal.
+        /// </summary>
+        public static bool operator == (Stress left, PrincipalStress right) => left.Equals(right);
+
+        /// <summary>
+        /// Returns true if components are different.
+        /// </summary>
+        public static bool operator != (Stress left, PrincipalStress right) => !left.Equals(right);
+
+        /// <summary>
+        /// Returns a stress object with summed components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
         /// </summary>
         public static Stress operator + (Stress left, Stress right)
         {
-			// Transform right argument
-			var rTrans = Transform(right, left.ThetaX - right.ThetaX);
+	        // Transform to horizontal
+	        Stress
+		        lTrans = ToHorizontal(left),
+		        rTrans = ToHorizontal(right);
 
-			return new Stress(left._sigmaX + rTrans._sigmaX, left._sigmaY + rTrans._sigmaY, left._tauXY + rTrans._tauXY, left.ThetaX, left.Unit);
+            return new Stress(lTrans._sigmaX + rTrans._sigmaX, lTrans._sigmaY + rTrans._sigmaY, lTrans._tauXY + rTrans._tauXY, 0, left.Unit);
         }
 
         /// <summary>
-        /// Returns a stress object with subtracted components, in left argument's <see cref="Unit"/> and angle <see cref="ThetaX"/>.
+        /// Returns a stress object with subtracted components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
         /// </summary>
         public static Stress operator - (Stress left, Stress right)
         {
-	        // Transform right argument
-	        var rTrans = Transform(right, left.ThetaX - right.ThetaX);
+	        // Transform to horizontal
+	        Stress
+		        lTrans = ToHorizontal(left),
+		        rTrans = ToHorizontal(right);
 
-	        return new Stress(left._sigmaX - rTrans._sigmaX, left._sigmaY - rTrans._sigmaY, left._tauXY - rTrans._tauXY, left.ThetaX, left.Unit);
+	        return new Stress(lTrans._sigmaX - rTrans._sigmaX, lTrans._sigmaY - rTrans._sigmaY, lTrans._tauXY - rTrans._tauXY, 0, left.Unit);
+        }
+
+        /// <summary>
+        /// Returns a stress object with summed components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
+        /// </summary>
+        public static Stress operator + (Stress left, PrincipalStress right)
+        {
+	        // Transform to horizontal
+	        Stress
+		        lTrans = ToHorizontal(left),
+		        rTrans = FromPrincipal(right);
+
+            return new Stress(lTrans._sigmaX + rTrans._sigmaX, lTrans._sigmaY + rTrans._sigmaY, lTrans._tauXY + rTrans._tauXY, 0, left.Unit);
+        }
+
+        /// <summary>
+        /// Returns a stress object with subtracted components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
+        /// </summary>
+        public static Stress operator - (Stress left, PrincipalStress right)
+        {
+	        // Transform to horizontal
+	        Stress
+		        lTrans = ToHorizontal(left),
+		        rTrans = FromPrincipal(right);
+
+	        return new Stress(lTrans._sigmaX - rTrans._sigmaX, lTrans._sigmaY - rTrans._sigmaY, lTrans._tauXY - rTrans._tauXY, 0, left.Unit);
+        }
+
+        /// <summary>
+        /// Returns a stress object with summed components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
+        /// </summary>
+        public static Stress operator + (PrincipalStress left, Stress right)
+        {
+	        // Transform to horizontal
+	        Stress
+		        lTrans = FromPrincipal(left),
+		        rTrans = ToHorizontal(right);
+
+            return new Stress(lTrans._sigmaX + rTrans._sigmaX, lTrans._sigmaY + rTrans._sigmaY, lTrans._tauXY + rTrans._tauXY, 0, left.Unit);
+        }
+
+        /// <summary>
+        /// Returns a stress object with subtracted components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
+        /// </summary>
+        public static Stress operator - (PrincipalStress left, Stress right)
+        {
+	        // Transform to horizontal
+	        Stress
+		        lTrans = FromPrincipal(left),
+		        rTrans = ToHorizontal(right);
+
+	        return new Stress(lTrans._sigmaX - rTrans._sigmaX, lTrans._sigmaY - rTrans._sigmaY, lTrans._tauXY - rTrans._tauXY, 0, left.Unit);
         }
 
         /// <summary>

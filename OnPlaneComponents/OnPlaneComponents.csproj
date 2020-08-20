@@ -61,6 +61,7 @@
     <Compile Include="Strain\PrincipalStrain.cs" />
     <Compile Include="Strain\StrainRelations.cs" />
     <Compile Include="Strain\Strain.cs" />
+    <Compile Include="Stress\PrincipalStress.cs" />
     <Compile Include="Stress\Stress.cs" />
     <Compile Include="Stress\StressRelations.cs" />
   </ItemGroup>
