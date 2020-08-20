@@ -12,7 +12,7 @@ namespace OnPlaneComponents
     /// </summary>
     public struct Stress : IEquatable<Stress>
     {
-		// Auxiliar fields
+		// Auxiliary fields
 		private Pressure
 			_sigmaX,
 			_sigmaY,
@@ -51,16 +51,14 @@ namespace OnPlaneComponents
         public double TauXY => _tauXY.Value;
 
         /// <summary>
-        /// Get principal stresses, in unit constructed (<see cref="Unit"/>).
-        /// <para>sigma1 is the maximum stress and sigma2 is the minimum stress.</para>
+        /// Get the angle of X direction, related to horizontal axis.
         /// </summary>
-        public (double sigma1, double sigma2) PrincipalStresses => StressRelations.CalculatePrincipal(SigmaX, SigmaY, TauXY);
+        public double ThetaX { get; }
 
         /// <summary>
-        /// Get principal stress angles, in radians.
-        /// <para>theta1 is the maximum stress angle and theta2 is the minimum stress angle.</para>
+        /// Get the angle of Y direction, related to horizontal axis.
         /// </summary>
-        public (double theta1, double theta2) PrincipalAngles => StressRelations.CalculatePrincipalAngles(SigmaX, SigmaY, TauXY);
+        public double ThetaY => ThetaX + Constants.PiOver2;
 
         /// <summary>
         /// Get the stress vector, in unit constructed (<see cref="Unit"/>).
@@ -68,10 +66,10 @@ namespace OnPlaneComponents
         /// </summary>
         public Vector<double> Vector => DenseVector.OfArray(new []{SigmaX, SigmaY, TauXY});
 
-		/// <summary>
-        /// Get transformation matrix from principal stresses to xy stresses.
+        /// <summary>
+        /// Get transformation matrix from XY plane to horizontal plane.
         /// </summary>
-        public Matrix<double> TransformationMatrix => StressRelations.TransformationMatrix(PrincipalAngles.theta1);
+        public Matrix<double> TransformationMatrix => StressRelations.TransformationMatrix(ThetaX);
 
 		/// <summary>
         /// Returns true if <see cref="SigmaX"/> is zero.
@@ -103,18 +101,25 @@ namespace OnPlaneComponents
         /// </summary>
 		public bool IsPrincipal => !IsSigmaXZero && !IsSigmaYZero && IsTauXYZero;
 
+		/// <summary>
+		/// Returns true if X direction coincides to horizontal axis.
+		/// </summary>
+		public bool IsHorizontal => ThetaX == 0;
+
         /// <summary>
         /// Stress object for XY components.
         /// </summary>
         /// <param name="sigmaX">The normal stress in X direction (positive for tensile).</param>
         /// <param name="sigmaY">The normal stress in Y direction (positive for tensile).</param>
         /// <param name="tauXY">The shear stress (positive if upwards in right face of element).</param>
+        /// <param name="thetaX">The angle of X direction, related to horizontal axis.</param>
         /// <param name="unit">The unit of stresses (default: MPa).</param>
-        public Stress(double sigmaX, double sigmaY, double tauXY, PressureUnit unit = PressureUnit.Megapascal)
+        public Stress(double sigmaX, double sigmaY, double tauXY, double thetaX = 0, PressureUnit unit = PressureUnit.Megapascal)
 		{
 			_sigmaX = Pressure.From(sigmaX, unit);
 			_sigmaY = Pressure.From(sigmaY, unit);
 			_tauXY  = Pressure.From(tauXY,  unit);
+			ThetaX  = thetaX;
 		}
 
         /// <summary>
@@ -123,12 +128,14 @@ namespace OnPlaneComponents
         /// <param name="sigmaX">The normal stress in X direction (positive for tensile).</param>
         /// <param name="sigmaY">The normal stress in Y direction (positive for tensile).</param>
         /// <param name="tauXY">The shear stress (positive if upwards in right face of element).</param>
+        /// <param name="thetaX">The angle of X direction, related to horizontal axis.</param>
         /// <param name="unit">The unit of stresses (default: MPa).</param>
-        public Stress(Pressure sigmaX, Pressure sigmaY, Pressure tauXY, PressureUnit unit = PressureUnit.Megapascal)
+        public Stress(Pressure sigmaX, Pressure sigmaY, Pressure tauXY, double thetaX = 0, PressureUnit unit = PressureUnit.Megapascal)
 		{
 			_sigmaX = sigmaX.ToUnit(unit);
 			_sigmaY = sigmaY.ToUnit(unit);
 			_tauXY  = tauXY.ToUnit(unit);
+			ThetaX  = thetaX;
 		}
 
         /// <summary>
@@ -136,15 +143,17 @@ namespace OnPlaneComponents
         /// </summary>
         /// <param name="stressVector">The vector of stresses, in considered <paramref name="unit"/>.
         ///	<para>{SigmaX, SigmaY, TauXY}</para></param>
+        /// <param name="thetaX">The angle of X direction, related to horizontal axis.</param>
         /// <param name="unit">The unit of stresses (default: MPa).</param>
-        public Stress(Vector<double> stressVector, PressureUnit unit = PressureUnit.Megapascal)
+        public Stress(Vector<double> stressVector, double thetaX = 0, PressureUnit unit = PressureUnit.Megapascal)
         {
 	        _sigmaX = Pressure.From(stressVector[0], unit);
 	        _sigmaY = Pressure.From(stressVector[1], unit);
 	        _tauXY  = Pressure.From(stressVector[2], unit);
+	        ThetaX  = thetaX;
         }
 
-		/// <summary>
+        /// <summary>
         /// Change the unit of stresses.
         /// </summary>
         /// <param name="toUnit">The unit to convert (<see cref="PressureUnit"/>).</param>
@@ -241,33 +250,20 @@ namespace OnPlaneComponents
 		public static Stress Zero => new Stress(0, 0, 0);
 
         /// <summary>
-        /// Get a stress from known principal stresses values.
+        /// Get <see cref="Stress"/> transformed by a rotation angle.
         /// </summary>
-        /// <param name="sigma1">Maximum principal stress.</param>
-        /// <param name="sigma2">Minimum principal stress.</param>
-        /// <param name="theta1">Angle of the maximum principal stress, in radians.</param>
-        /// <param name="unit">The unit of stress to return (default: MPa).</param>
-        public static Stress FromPrincipal(Pressure sigma1, Pressure sigma2, double theta1, PressureUnit unit = PressureUnit.Megapascal)
+        /// <param name="stress">The <see cref="Stress"/> to transform.</param>
+        /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
+        public static Stress Transform(Stress stress, double theta)
         {
-	        var sVec = StressRelations.StressesFromPrincipal(sigma1, sigma2, theta1);
+	        if (theta == 0)
+		        return stress;
 
-			return
-				new Stress(sVec, unit);
-        }
+	        // Get the strain vector transformed
+	        var sVec = StressRelations.Transform(stress.Vector, theta);
 
-        /// <summary>
-        /// Get a stress from known principal stresses values.
-        /// </summary>
-        /// <param name="sigma1">Maximum principal stress.</param>
-        /// <param name="sigma2">Minimum principal stress.</param>
-        /// <param name="theta1">Angle of the maximum principal stress, in radians.</param>
-        /// <param name="unit">The unit of stresses (default: MPa).</param>
-        public static Stress FromPrincipal(double sigma1, double sigma2, double theta1, PressureUnit unit = PressureUnit.Megapascal)
-        {
-	        var sVec = StressRelations.StressesFromPrincipal(sigma1, sigma2, theta1);
-
-			return
-				new Stress(sVec, unit);
+	        // Return with corrected angle
+	        return new Stress(sVec, stress.ThetaX + theta, stress.Unit);
         }
 
         /// <summary>
@@ -309,19 +305,31 @@ namespace OnPlaneComponents
         public static bool operator != (Stress left, Stress right) => !left.Equals(right);
 
         /// <summary>
-        /// Returns a stress object with summed components, in left argument's unit.
+        /// Returns a stress object with summed components, in left argument's <see cref="Unit"/> and angle <see cref="ThetaX"/>.
         /// </summary>
-        public static Stress operator + (Stress left, Stress right) => new Stress(left._sigmaX + right._sigmaX, left._sigmaY + right._sigmaY, left._tauXY + right._tauXY, left.Unit);
+        public static Stress operator + (Stress left, Stress right)
+        {
+			// Transform right argument
+			var rTrans = Transform(right, left.ThetaX - right.ThetaX);
+
+			return new Stress(left._sigmaX + rTrans._sigmaX, left._sigmaY + rTrans._sigmaY, left._tauXY + rTrans._tauXY, left.ThetaX, left.Unit);
+        }
 
         /// <summary>
-        /// Returns a stress object with subtracted components, in left argument's unit.
+        /// Returns a stress object with subtracted components, in left argument's <see cref="Unit"/> and angle <see cref="ThetaX"/>.
         /// </summary>
-        public static Stress operator - (Stress left, Stress right) => new Stress(left._sigmaX - right._sigmaX, left._sigmaY - right._sigmaY, left._tauXY - right._tauXY, left.Unit);
+        public static Stress operator - (Stress left, Stress right)
+        {
+	        // Transform right argument
+	        var rTrans = Transform(right, left.ThetaX - right.ThetaX);
+
+	        return new Stress(left._sigmaX - rTrans._sigmaX, left._sigmaY - rTrans._sigmaY, left._tauXY - rTrans._tauXY, left.ThetaX, left.Unit);
+        }
 
         /// <summary>
         /// Returns a stress object with multiplied components by a double.
         /// </summary>
-        public static Stress operator * (Stress stress, double multiplier) => new Stress(multiplier * stress._sigmaX, multiplier * stress._sigmaY, multiplier * stress._tauXY, stress.Unit);
+        public static Stress operator * (Stress stress, double multiplier) => new Stress(multiplier * stress._sigmaX, multiplier * stress._sigmaY, multiplier * stress._tauXY, stress.ThetaX, stress.Unit);
 
         /// <summary>
         /// Returns a stress object with multiplied components by a double.
@@ -341,7 +349,7 @@ namespace OnPlaneComponents
         /// <summary>
         /// Returns a stress object with components divided by a double.
         /// </summary>
-        public static Stress operator / (Stress stress, double divider) => new Stress(stress._sigmaX / divider, stress._sigmaY / divider, stress._tauXY / divider, stress.Unit);
+        public static Stress operator / (Stress stress, double divider) => new Stress(stress._sigmaX / divider, stress._sigmaY / divider, stress._tauXY / divider, stress.ThetaX, stress.Unit);
 
         /// <summary>
         /// Returns a stress object with components divided by an integer.

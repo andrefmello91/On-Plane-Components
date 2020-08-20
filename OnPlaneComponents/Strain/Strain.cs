@@ -13,7 +13,7 @@ namespace OnPlaneComponents
     public struct Strain : IEquatable<Strain>
     {
 		// Auxiliary fields
-		private double _epsilonX, _epsilonY, _gammaXY, _theta;
+		private double _epsilonX, _epsilonY, _gammaXY;
 
 		/// <summary>
 		/// Get normal strain in X direction.
@@ -33,30 +33,23 @@ namespace OnPlaneComponents
 		/// <summary>
         /// Get the angle of X direction, related to horizontal axis.
         /// </summary>
-		public double Theta => _theta;
+		public double ThetaX { get; }
 
-        /// <summary>
-        /// Get principal strains.
-        /// <para>epsilon1 is the maximum strain and epsilon2 is the minimum strain.</para>
+		/// <summary>
+        /// Get the angle of Y direction, related to horizontal axis.
         /// </summary>
-        public (double epsilon1, double epsilon2) PrincipalStrains => StrainRelations.CalculatePrincipal(EpsilonX, EpsilonY, GammaXY);
+		public double ThetaY => ThetaX + Constants.PiOver2;
 
         /// <summary>
-        /// Get principal strain angles, in radians.
-        /// <para>theta1 is the maximum strain angle and theta2 is the minimum strain angle.</para>
-        /// </summary>
-        public (double theta1, double theta2) PrincipalAngles => StrainRelations.CalculatePrincipalAngles(EpsilonX, EpsilonY, GammaXY);
-
-        /// <summary>
-        /// Get the strain vector, in unit constructed (<see cref="Unit"/>).
+        /// Get the strain vector, in unit constructed.
         /// <para>{ EpsilonX, EpsilonY, GammaXY }</para>
         /// </summary>
         public Vector<double> Vector => DenseVector.OfArray(new []{EpsilonX, EpsilonY, GammaXY});
 
 		/// <summary>
-        /// Get transformation matrix from principal strains to xy strains.
+        /// Get transformation matrix from XY plane to horizontal plane.
         /// </summary>
-        public Matrix<double> TransformationMatrix => StrainRelations.TransformationMatrix(PrincipalAngles.theta1);
+        public Matrix<double> TransformationMatrix => StrainRelations.TransformationMatrix(ThetaX);
 
 		/// <summary>
 		/// Returns true if <see cref="EpsilonX"/> is zero.
@@ -88,19 +81,24 @@ namespace OnPlaneComponents
 		/// </summary>
 		public bool IsPrincipal => !IsEpsilonXZero && !IsEpsilonYZero && IsGammaXYZero;
 
+		/// <summary>
+		/// Returns true if X direction coincides to horizontal axis.
+		/// </summary>
+		public bool IsHorizontal => ThetaX == 0;
+
         /// <summary>
         /// Strain object for XY components.
         /// </summary>
         /// <param name="epsilonX">The normal strain in X direction (positive for tensile).</param>
         /// <param name="epsilonY">The normal strain in Y direction (positive for tensile).</param>
         /// <param name="gammaXY">The shear strain (positive if right face of element displaces upwards).</param>
-        /// <param name="theta">The angle of X direction, related to horizontal axis.</param>
-        public Strain(double epsilonX, double epsilonY, double gammaXY, double theta = 0)
+        /// <param name="thetaX">The angle of X direction, related to horizontal axis.</param>
+        public Strain(double epsilonX, double epsilonY, double gammaXY, double thetaX = 0)
         {
 	        _epsilonX = epsilonX;
 	        _epsilonY = epsilonY;
 	        _gammaXY  = gammaXY;
-	        _theta    = theta;
+	        ThetaX    = thetaX;
         }
 
         /// <summary>
@@ -108,13 +106,13 @@ namespace OnPlaneComponents
         /// </summary>
         /// <param name="strainVector">The vector of strains.
         ///	<para>{EpsilonX, EpsilonY, GammaXY}</para></param>
-        /// <param name="theta">The angle of X direction, related to horizontal axis.</param>
-        public Strain(Vector<double> strainVector, double theta = 0)
+        /// <param name="thetaX">The angle of X direction, related to horizontal axis.</param>
+        public Strain(Vector<double> strainVector, double thetaX = 0)
         {
 	        _epsilonX = strainVector[0];
 	        _epsilonY = strainVector[1];
             _gammaXY  = strainVector[2];
-            _theta    = theta;
+            ThetaX    = thetaX;
         }
 
         /// <summary>
@@ -186,25 +184,28 @@ namespace OnPlaneComponents
         /// </summary>
         public static Strain Zero => new Strain(0, 0, 0);
 
-        /// <summary>
-        /// Get a strain from known principal strains values.
+		/// <summary>
+        /// Get <see cref="Strain"/> transformed by a rotation angle.
         /// </summary>
-        /// <param name="epsilon1">Maximum principal strain.</param>
-        /// <param name="epsilon2">Minimum principal strain.</param>
-        /// <param name="theta1">Angle of the maximum principal strain, in radians.</param>
-        public static Strain FromPrincipal(double epsilon1, double epsilon2, double theta1)
+        /// <param name="strain">The <see cref="Strain"/> to transform.</param>
+        /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
+        public static Strain Transform(Strain strain, double theta)
         {
-	        var sVec = StrainRelations.StrainsFromPrincipal(epsilon1, epsilon2, theta1);
+	        if (theta == 0)
+		        return strain;
 
-			return
-				new Strain(sVec);
+			// Get the strain vector transformed
+			var sVec = StrainRelations.Transform(strain.Vector, theta);
+
+			// Return with corrected angle
+			return new Strain(sVec, strain.ThetaX + theta);
         }
 
         /// <summary>
         /// Compare two strain objects.
         /// </summary>
         /// <param name="other">The strain to compare.</param>
-        public bool Equals(Strain other) => EpsilonX == other.EpsilonX && EpsilonY == other.EpsilonY && GammaXY == other.GammaXY;
+        public bool Equals(Strain other) => ThetaX == other.ThetaX && EpsilonX == other.EpsilonX && EpsilonY == other.EpsilonY && GammaXY == other.GammaXY;
 
         public override bool Equals(object obj)
         {
@@ -239,19 +240,31 @@ namespace OnPlaneComponents
         public static bool operator != (Strain left, Strain right) => !left.Equals(right);
 
         /// <summary>
-        /// Returns a strain object with summed components.
+        /// Returns a strain object with summed components, in left argument's direction <see cref="ThetaX"/>.
         /// </summary>
-        public static Strain operator + (Strain left, Strain right) => new Strain(left.Vector + right.Vector);
+        public static Strain operator + (Strain left, Strain right)
+        {
+	        // Transform right argument
+	        var rTrans = Transform(right, left.ThetaX - right.ThetaX);
+
+            return new Strain(left.Vector + rTrans.Vector, left.ThetaX);
+        }
 
         /// <summary>
-        /// Returns a strain object with subtracted components.
+        /// Returns a strain object with subtracted components, in left argument's direction <see cref="ThetaX"/>.
         /// </summary>
-        public static Strain operator - (Strain left, Strain right) => new Strain(left.Vector - right.Vector);
+        public static Strain operator - (Strain left, Strain right)
+        {
+	        // Transform right argument
+	        var rTrans = Transform(right, left.ThetaX - right.ThetaX);
+
+            return new Strain(left.Vector - rTrans.Vector, left.ThetaX);
+        }
 
         /// <summary>
         /// Returns a strain object with multiplied components by a double.
         /// </summary>
-        public static Strain operator * (Strain strain, double multiplier) => new Strain(multiplier * strain.Vector);
+        public static Strain operator * (Strain strain, double multiplier) => new Strain(multiplier * strain.Vector, strain.ThetaX);
 
         /// <summary>
         /// Returns a strain object with multiplied components by a double.
@@ -271,7 +284,7 @@ namespace OnPlaneComponents
         /// <summary>
         /// Returns a strain object with components divided by a double.
         /// </summary>
-        public static Strain operator / (Strain strain, double divider) => new Strain(strain.Vector / divider);
+        public static Strain operator / (Strain strain, double divider) => new Strain(strain.Vector / divider, strain.ThetaX);
 
         /// <summary>
         /// Returns a strain object with components divided by an integer.

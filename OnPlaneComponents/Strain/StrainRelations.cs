@@ -11,17 +11,17 @@ namespace OnPlaneComponents
         /// Strain transformation.
         /// </summary>
         /// <param name="strainVector">Vector of strains.</param>
-        /// <param name="theta">Rotation angle, in radians.</param>
+        /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
         public static Vector<double> Transform(Vector<double> strainVector, double theta)
 	    {
-		    // Get the straines
+		    // Get the strains
 		    var eps = strainVector;
 
 		    var (cos2Theta, sin2Theta) = DirectionCosines(2 * theta);
 
-		    // Calculate radius and center of Mohr's Circle
+		    // Calculate equation components
 		    double
-			    a = 0.5 * (eps[0] + eps[1]),
+                a = 0.5 * (eps[0] + eps[1]),
 			    b = 0.5 * (eps[0] - eps[1]) * cos2Theta,
 			    c = 0.5 * eps[2] * sin2Theta,
 			    d = (eps[0] - eps[1]) * sin2Theta,

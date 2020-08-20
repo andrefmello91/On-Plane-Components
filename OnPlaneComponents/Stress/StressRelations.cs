@@ -13,8 +13,7 @@ namespace OnPlaneComponents
         /// Stress transformation.
         /// </summary>
         /// <param name="stresses">Vector of stresses.</param>
-        /// <param name="theta">Rotation angle, in radians.</param>
-        /// <returns></returns>
+        /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
         public static Vector<double> Transform(Vector<double> stresses, double theta)
 		{
             // Get the stresses
