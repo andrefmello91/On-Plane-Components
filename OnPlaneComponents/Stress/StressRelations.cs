@@ -10,9 +10,9 @@ namespace OnPlaneComponents
     public static class StressRelations
     {
         /// <summary>
-        /// Stress transformation.
+        /// Get a <see cref="DenseVector"/> of stresses transformed by a rotation angle.
         /// </summary>
-        /// <param name="stresses">Vector of stresses.</param>
+        /// <param name="stresses"><see cref="DenseVector"/> of stresses.</param>
         /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
         public static Vector<double> Transform(Vector<double> stresses, double theta)
 		{
@@ -74,7 +74,7 @@ namespace OnPlaneComponents
         /// <param name="sigmaX">The normal stress in X direction (positive for tensile).</param>
         /// <param name="sigmaY">The normal stress in Y direction (positive for tensile).</param>
         /// <param name="tauXY">The shear stress (positive if upwards in right face of element).</param>
-        /// <param name="unit">The unit of stress to return (default: MPa).</param>
+        /// <param name="unit">The <see cref="PressureUnit"/> of stress to return (default: <see cref="PressureUnit.Megapascal"/>).</param>
         public static (Pressure sigma1, Pressure sigma2) CalculatePrincipal(Pressure sigmaX, Pressure sigmaY, Pressure tauXY, PressureUnit unit = PressureUnit.Megapascal)
         {
             var (s1, s2) = CalculatePrincipal(sigmaX.Value, sigmaY.ToUnit(sigmaX.Unit).Value, tauXY.ToUnit(sigmaX.Unit).Value);
@@ -87,7 +87,7 @@ namespace OnPlaneComponents
         /// Calculate principal stresses.
         /// <para>sigma1 is the maximum stress and sigma2 is the minimum stress.</para>
         /// </summary>
-        /// <param name="stresses">Vector of stresses.</param>
+        /// <param name="stresses"><see cref="DenseVector"/> of stresses.</param>
         public static (double sigma1, double sigma2) CalculatePrincipal(Vector<double> stresses) =>
             CalculatePrincipal(stresses[0], stresses[1], stresses[2]);
 
@@ -173,11 +173,11 @@ namespace OnPlaneComponents
             CalculatePrincipalAngles(stresses[0], stresses[1], stresses[2], sigma2);
 
         /// <summary>
-        /// Calculate the vector of stresses, in X and Y, from principal stresses.
+        /// Calculate the <see cref="DenseVector"/> of stresses, in X and Y, from principal stresses.
         /// </summary>
         /// <param name="sigma1">Maximum principal stress.</param>
         /// <param name="sigma2">Minimum principal stress.</param>
-        /// <param name="theta1">Angle of the maximum principal stress, in radians.</param>
+        /// <param name="theta1">Angle of <paramref name="sigma1"/>, in radians.</param>
 		public static Vector<double> StressesFromPrincipal(double sigma1, double sigma2, double theta1)
 		{
 			// Calculate theta2
@@ -197,7 +197,7 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Calculate the vector of stresses, in X and Y, from principal stresses.
+        /// Calculate the <see cref="DenseVector"/> of stresses, in X and Y, from principal stresses.
         /// </summary>
         /// <param name="sigma1">Maximum principal stress.</param>
         /// <param name="sigma2">Minimum principal stress.</param>

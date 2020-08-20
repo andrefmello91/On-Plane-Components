@@ -72,7 +72,7 @@ namespace OnPlaneComponents
         public bool IsZero => IsSigma1Zero && IsSigma2Zero;
 
         /// <summary>
-        /// Returns true if direction maximum principal stress <see cref="Theta1"/> coincides to horizontal axis.
+        /// Returns true if <see cref="Sigma1"/> direction coincides to horizontal axis.
         /// </summary>
         public bool IsHorizontal => Theta1 == 0;
 
@@ -81,8 +81,8 @@ namespace OnPlaneComponents
         /// </summary>
         /// <param name="sigma1">The maximum principal stress (positive for tensile).</param>
         /// <param name="sigma2">The minimum principal stress (positive for tensile).</param>
-        /// <param name="theta1">The angle of maximum principal stress, related to horizontal axis (positive to counterclockwise).</param>
-        /// <param name="unit">The <see cref="PressureUnit"/> of <paramref name="sigma1"/> and <paramref name="sigma2"/>.</param>
+        /// <param name="theta1">The angle of <paramref name="sigma1"/>, related to horizontal axis (positive to counterclockwise).</param>
+        /// <param name="unit">The <see cref="PressureUnit"/> of stresses (default: <see cref="PressureUnit.Megapascal"/>).</param>
         public PrincipalStress(double sigma1, double sigma2, double theta1 = Constants.PiOver4, PressureUnit unit = PressureUnit.Megapascal)
         {
 			_sigma1 = Pressure.From(sigma1, unit);
@@ -95,8 +95,8 @@ namespace OnPlaneComponents
         /// </summary>
         /// <param name="sigma1">The maximum principal <see cref="Pressure"/> (positive for tensile).</param>
         /// <param name="sigma2">The minimum principal <see cref="Pressure"/> (positive for tensile).</param>
-        /// <param name="theta1">The angle of maximum principal stress, related to horizontal axis (positive to counterclockwise).</param>
-        /// <param name="unit">The <see cref="PressureUnit"/> of <paramref name="sigma1"/> and <paramref name="sigma2"/>.</param>
+        /// <param name="theta1">The angle of <paramref name="sigma1"/>, related to horizontal axis (positive to counterclockwise).</param>
+        /// <param name="unit">The <see cref="PressureUnit"/> of stresses (default: <see cref="PressureUnit.Megapascal"/>).</param>
         public PrincipalStress(Pressure sigma1, Pressure sigma2, double theta1 = Constants.PiOver4, PressureUnit unit = PressureUnit.Megapascal)
         {
 	        _sigma1 = sigma1.ToUnit(unit);
@@ -107,7 +107,7 @@ namespace OnPlaneComponents
         /// <summary>
         /// Change the unit of stresses.
         /// </summary>
-        /// <param name="toUnit">The unit to convert (<see cref="PressureUnit"/>).</param>
+        /// <param name="toUnit">The <see cref="PressureUnit"/> to convert.</param>
         public void ChangeUnit(PressureUnit toUnit)
         {
 	        Unit = toUnit;

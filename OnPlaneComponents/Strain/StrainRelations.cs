@@ -8,9 +8,9 @@ namespace OnPlaneComponents
     public static class StrainRelations
     {
         /// <summary>
-        /// Strain transformation.
+        /// Get a <see cref="DenseVector"/> of strains transformed by a rotation angle.
         /// </summary>
-        /// <param name="strainVector">Vector of strains.</param>
+        /// <param name="strainVector"><see cref="DenseVector"/> of strains.</param>
         /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
         public static Vector<double> Transform(Vector<double> strainVector, double theta)
 	    {
@@ -65,7 +65,7 @@ namespace OnPlaneComponents
         /// Calculate principal strains.
         /// <para>epsilon1 is the maximum strain and epsilon2 is the minimum strain.</para>
         /// </summary>
-        /// <param name="strainVector">The vector of strains.
+        /// <param name="strainVector">The <see cref="DenseVector"/> of strains.
         /// <para>{ EpsilonX, EpsilonY, GammaXY }</para></param>
         public static (double epsilon1, double epsilon2) CalculatePrincipal(Vector<double> strainVector) =>
 	        CalculatePrincipal(strainVector[0], strainVector[1], strainVector[2]);
@@ -128,42 +128,18 @@ namespace OnPlaneComponents
         /// Calculate principal strains angles, in radians.
         /// <para>theta1 is the maximum strain angle and theta2 is the minimum strain angle.</para>
         /// </summary>
-        /// <param name="strainVector">The vector of strains.
+        /// <param name="strainVector">The <see cref="DenseVector"/> of strains.
         /// <para>{ EpsilonX, EpsilonY, GammaXY }</para></param>
         /// <param name="epsilon2">Minimum principal strain, if known.</param>
         public static (double theta1, double theta2) CalculatePrincipalAngles(Vector<double> strainVector, double? epsilon2 = null) =>
 	        CalculatePrincipalAngles(strainVector[0], strainVector[1], strainVector[2], epsilon2);
 
         /// <summary>
-        /// Calculate principal strains.
-        /// <para>e1 is the maximum strain angle and e2 is the minimum strain.</para>
-        /// </summary>
-        /// <param name="strains">Vector of strains.</param>
-        public static (double e1, double e2) PrincipalStrains(Vector<double> strains)
-        {
-            // Get the strains
-            var e = strains;
-
-	        // Calculate radius and center of Mohr's Circle
-	        double
-		        cen = 0.5 * (e[0] + e[1]),
-		        rad = 0.5 * Math.Sqrt((e[1] - e[0]) * (e[1] - e[0]) + e[2] * e[2]);
-
-	        // Calculate principal strains in concrete
-	        double
-		        e1 = cen + rad,
-		        e2 = cen - rad;
-
-	        return
-		        (e1, e2);
-        }
-
-        /// <summary>
         /// Calculate the vector of strains, in X and Y, from principal strains.
         /// </summary>
         /// <param name="epsilon1">Maximum principal strain.</param>
         /// <param name="epsilon2">Minimum principal strain.</param>
-        /// <param name="theta1">Angle of the maximum principal strain, in radians.</param>
+        /// <param name="theta1">Angle of the <paramref name="epsilon1"/>, in radians.</param>
         /// <returns></returns>
         public static Vector<double> StrainsFromPrincipal(double epsilon1, double epsilon2, double theta1)
         {

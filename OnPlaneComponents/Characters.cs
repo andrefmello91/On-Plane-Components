@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace OnPlaneComponents
 {
-	// Special characters
-	public enum Characters
+    /// <summary>
+    /// Special characters in Unicode.
+    /// </summary>
+    public enum Characters
 	{
 		Alpha   = '\u03B1',
 		Epsilon = '\u03B5',

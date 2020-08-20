@@ -14,7 +14,7 @@ namespace OnPlaneComponents
         private Length _displacementX, _displacementY;
 		
         /// <summary>
-        /// Get/set the displacement unit.
+        /// Get/set the displacement unit (<see cref="LengthUnit"/>).
         /// </summary>
         public LengthUnit Unit
         {
@@ -79,7 +79,7 @@ namespace OnPlaneComponents
         /// </summary>
         /// <param name="componentX">Value of displacement component in X direction (positive to right).</param>
         /// <param name="componentY">Value of displacement component in Y direction (positive upwards).</param>
-        /// <param name="unit">The unit of displacement (default: mm).</param>
+        /// <param name="unit">The <see cref="LengthUnit"/> of displacement (default: <see cref="LengthUnit.Millimeter"/>).</param>
         public Displacement(double componentX, double componentY, LengthUnit unit = LengthUnit.Millimeter)
         {
             _displacementX = Length.From(componentX, unit);
@@ -91,7 +91,7 @@ namespace OnPlaneComponents
         /// </summary>
         /// <param name="displacementX">Displacement component in X direction (positive to right) (<see cref="Length"/>).</param>
         /// <param name="displacementY">Displacement component in Y direction (positive upwards) (<see cref="Length"/>).</param>
-        /// <param name="unit">The unit of displacement (default: mm).</param>
+        /// <param name="unit">The <see cref="LengthUnit"/> of displacement (default: <see cref="LengthUnit.Millimeter"/>).</param>
         public Displacement(Length displacementX, Length displacementY, LengthUnit unit = LengthUnit.Millimeter)
         {
             _displacementX = displacementX.ToUnit(unit);
@@ -99,7 +99,7 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Change the displacement unit.
+        /// Change the displacement unit (<see cref="LengthUnit"/).
         /// </summary>
         /// <param name="toUnit">The unit to convert.</param>
         public void ChangeUnit(LengthUnit toUnit)
@@ -108,115 +108,42 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Add values to current displacements.
-        /// </summary>
-        /// <param name="incrementX">The increment for X component, in current unit (<see cref="Unit"/>).</param>
-        /// <param name="incrementY">The increment for Y component, in current unit (<see cref="Unit"/>).</param>
-        public void Add(double incrementX, double incrementY) =>
-            Add(Length.From(incrementX, Unit), Length.From(incrementY, Unit));
-
-        /// <summary>
-        /// Add values to current displacements.
-        /// </summary>
-        /// <param name="incrementX">The displacement increment for X component.</param>
-        /// <param name="incrementY">The displacement increment for Y component.</param>
-        public void Add(Length incrementX, Length incrementY)
-        {
-            _displacementX += incrementX;
-            _displacementY += incrementY;
-        }
-
-        /// <summary>
-        /// Subtract values from current displacements.
-        /// </summary>
-        /// <param name="decrementX">The decrement for X component (positive value), in current unit (<see cref="Unit"/>).</param>
-        /// <param name="decrementY">The decrement for Y component (positive value), in current unit (<see cref="Unit"/>).</param>
-        public void Subtract(double decrementX, double decrementY) =>
-            Subtract(Length.From(decrementX, Unit), Length.From(decrementY, Unit));
-
-        /// <summary>
-        /// Subtract values from current displacements.
-        /// </summary>
-        /// <param name="decrementX">The displacement decrement for X component (positive value).</param>
-        /// <param name="decrementY">The displacement decrement for Y component (positive value).</param>
-        public void Subtract(Length decrementX, Length decrementY)
-        {
-            _displacementX -= decrementX;
-            _displacementY -= decrementY;
-        }
-
-        /// <summary>
-        /// Multiply current displacements by a value.
-        /// </summary>
-        /// <param name="multiplier">The multiplier for X and Y components.</param>
-        public void Multiply(double multiplier) => Multiply(multiplier, multiplier);
-
-        /// <summary>
-        /// Multiply current displacements by values.
-        /// </summary>
-        /// <param name="multiplierX">The multiplier for X component.</param>
-        /// <param name="multiplierY">The multiplier for Y component.</param>
-        public void Multiply(double multiplierX, double multiplierY)
-        {
-            _displacementX *= multiplierX;
-            _displacementY *= multiplierY;
-        }
-
-        /// <summary>
-        /// Divide current displacements by a value.
-        /// </summary>
-        /// <param name="divider">The divider for X and Y components.</param>
-        public void Divide(double divider) => Divide(divider, divider);
-
-        /// <summary>
-        /// Divide current displacements by values.
-        /// </summary>
-        /// <param name="dividerX">The divider for X component.</param>
-        /// <param name="dividerY">The divider for Y component.</param>
-        public void Divide(double dividerX, double dividerY)
-        {
-            _displacementX /= dividerX;
-            _displacementY /= dividerY;
-        }
-
-
-        /// <summary>
-        /// Get a Displacement with zero value.
+        /// Get a <see cref="Displacement"/> with zero value.
         /// </summary>
         public static Displacement Zero => new Displacement(0, 0);
 
         /// <summary>
-        /// Get a Displacement in X direction.
+        /// Get a <see cref="Displacement"/> in X direction.
         /// </summary>
         /// <param name="value">Value of displacement component in X direction (positive to right).</param>
-        /// <param name="unit">The unit of displacement (default: mm).</param>
+        /// <param name="unit">The <see cref="LengthUnit"/> of displacement (default: <see cref="LengthUnit.Millimeter"/>).</param>
         public static Displacement InX(double value, LengthUnit unit = LengthUnit.Millimeter) => new Displacement(value, 0, unit);
 
         /// <summary>
-        /// Get a Displacement in X direction.
+        /// Get a <see cref="Displacement"/> in X direction.
         /// </summary>
         /// <param name="displacement">Displacement component in X direction (positive to right).</param>
         public static Displacement InX(Length displacement) => new Displacement(displacement, Length.Zero, displacement.Unit);
 
         /// <summary>
-        /// Get a Displacement in X direction.
+        /// Get a <see cref="Displacement"/> in X direction.
         /// </summary>
         /// <param name="value">Value of displacement component in Y direction (positive upwards).</param>
-        /// <param name="unit">The unit of displacement (default: mm).</param>
+        /// <param name="unit">The <see cref="LengthUnit"/> of displacement (default: <see cref="LengthUnit.Millimeter"/>).</param>
         public static Displacement InY(double value, LengthUnit unit = LengthUnit.Millimeter) => new Displacement(0, value, unit);
 
         /// <summary>
-        /// Get a Displacement in Y direction.
+        /// Get a <see cref="Displacement"/> in Y direction.
         /// </summary>
         /// <param name="displacement">Displacement component in Y direction (positive to right).</param>
         public static Displacement InY(Length displacement) => new Displacement(Length.Zero, displacement, displacement.Unit);
 
         /// <summary>
-        /// Get a Displacement in from a resultant.
+        /// Get a <see cref="Displacement"/> in from a resultant.
         /// </summary>
         /// <param name="resultant">Absolute value of displacement resultant.</param>
         /// <param name="angle">Angle that displacement resultant is pointing at, in radians.</param>
-        /// <param name="unit">The unit of displacement (default: mm).</param>
+        /// <param name="unit">The <see cref="LengthUnit"/> of displacement (default: <see cref="LengthUnit.Millimeter"/>).</param>
         public static Displacement FromResultant(double resultant, double angle, LengthUnit unit = LengthUnit.Millimeter)
         {
             var (x, y) = DisplacementRelations.CalculateComponents(resultant, angle);
@@ -226,7 +153,7 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Get a Displacement in from a resultant.
+        /// Get a <see cref="Displacement"/> in from a resultant.
         /// </summary>
         /// <param name="resultantDisplacement">Absolute value of displacement resultant.</param>
         /// <param name="angle">Angle that displacement resultant is pointing at, in radians.</param>
@@ -239,9 +166,9 @@ namespace OnPlaneComponents
 
 
         /// <summary>
-        /// Compare two displacement objects.
+        /// Compare two <see cref="Displacement"/> objects.
         /// </summary>
-        /// <param name="other">The displacement to compare.</param>
+        /// <param name="other">The <see cref="Displacement"/> to compare.</param>
         /// <returns></returns>
         public bool Equals(Displacement other) => _displacementX == other._displacementX && _displacementY == other._displacementY;
 
@@ -274,42 +201,42 @@ namespace OnPlaneComponents
         public static bool operator != (Displacement left, Displacement right) => !left.Equals(right);
 
         /// <summary>
-        /// Returns a displacement object with summed components, in left argument's unit.
+        /// Returns a <see cref="Displacement"/> object with summed components, in left argument's unit.
         /// </summary>
         public static Displacement operator + (Displacement left, Displacement right) => new Displacement(left._displacementX + right._displacementX, left._displacementY + right._displacementY, left.Unit);
 
         /// <summary>
-        /// Returns a displacement object with subtracted components, in left argument's unit.
+        /// Returns a <see cref="Displacement"/> object with subtracted components, in left argument's unit.
         /// </summary>
         public static Displacement operator - (Displacement left, Displacement right) => new Displacement(left._displacementX - right._displacementX, left._displacementY - right._displacementY, left.Unit);
 
         /// <summary>
-        /// Returns a displacement object with multiplied components by a double.
+        /// Returns a <see cref="Displacement"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
         public static Displacement operator *(Displacement displacement, double multiplier) => new Displacement(multiplier * displacement._displacementX, multiplier * displacement._displacementY, displacement.Unit);
 
         /// <summary>
-        /// Returns a displacement object with multiplied components by a double.
+        /// Returns a <see cref="Displacement"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
         public static Displacement operator *(double multiplier, Displacement displacement) => displacement * multiplier;
 
         /// <summary>
-        /// Returns a displacement object with multiplied components by an integer.
+        /// Returns a <see cref="Displacement"/> object with multiplied components by an <see cref="int"/>.
         /// </summary>
         public static Displacement operator *(Displacement displacement, int multiplier) => displacement * (double)multiplier;
 
         /// <summary>
-        /// Returns a displacement object with multiplied components by an integer.
+        /// Returns a <see cref="Displacement"/> object with multiplied components by an <see cref="int"/>.
         /// </summary>
         public static Displacement operator *(int multiplier, Displacement displacement) => displacement * (double)multiplier;
 
         /// <summary>
-        /// Returns a displacement object with components divided by a double.
+        /// Returns a <see cref="Displacement"/> object with components divided by a <see cref="double"/>.
         /// </summary>
         public static Displacement operator /(Displacement displacement, double divider) => new Displacement(displacement._displacementX / divider, displacement._displacementY / divider, displacement.Unit);
 
         /// <summary>
-        /// Returns a displacement object with components divided by an integer.
+        /// Returns a <see cref="Displacement"/> object with components divided by an <see cref="int"/>.
         /// </summary>
         public static Displacement operator /(Displacement displacement, int divider) => displacement / (double)divider;
 

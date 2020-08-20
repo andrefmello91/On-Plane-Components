@@ -20,17 +20,17 @@ namespace OnPlaneComponents
         public double Epsilon2 { get; }
 
         /// <summary>
-        /// Get the angle of maximum principal strain, related to horizontal axis.
+        /// Get the angle of maximum principal strain (<see cref="Epsilon1"/>), related to horizontal axis.
         /// </summary>
         public double Theta1 { get; }
 
         /// <summary>
-        /// Get the angle of minimum principal strain, related to horizontal axis.
+        /// Get the angle of minimum principal strain (<see cref="Epsilon2"/>), related to horizontal axis.
         /// </summary>
         public double Theta2 => Theta1 + Constants.PiOver2;
 
         /// <summary>
-        /// Get principal strains as vector.
+        /// Get principal strains as <see cref="DenseVector"/>.
         /// <para>{ Epsilon1, Epsilon2, 0 }</para>
         /// </summary>
         public Vector<double> Vector => DenseVector.OfArray(new[] { Epsilon1, Epsilon2, 0 });
@@ -51,7 +51,7 @@ namespace OnPlaneComponents
         public bool IsZero => IsEpsilon1Zero && IsEpsilon2Zero;
 
         /// <summary>
-        /// Returns true if maximum principal strain coincides to horizontal axis.
+        /// Returns true if <see cref="Epsilon1"/> direction coincides to horizontal axis.
         /// </summary>
         public bool IsHorizontal => Theta1 == 0;
 
@@ -60,7 +60,7 @@ namespace OnPlaneComponents
         /// </summary>
         /// <param name="epsilon1">The maximum principal strain (positive for tensile).</param>
         /// <param name="epsilon2">The minimum principal strain (positive for tensile).</param>
-        /// <param name="theta1">The angle of maximum principal strain, related to horizontal axis (positive to counterclockwise).</param>
+        /// <param name="theta1">The angle of maximum principal strain (<paramref name="epsilon1"/>), related to horizontal axis (positive to counterclockwise).</param>
         public PrincipalStrain(double epsilon1, double epsilon2, double theta1 = Constants.PiOver4)
         {
 	        Epsilon1 = epsilon1;
@@ -153,32 +153,32 @@ namespace OnPlaneComponents
         public static Strain operator - (PrincipalStrain left, PrincipalStrain right) => Strain.FromPrincipal(left) - Strain.FromPrincipal(right);
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStrain"/> object with multiplied components by a double.
+        /// Returns a <see cref="PrincipalStrain"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
         public static PrincipalStrain operator * (PrincipalStrain principalStrain, double multiplier) => new PrincipalStrain(multiplier * principalStrain.Epsilon1, multiplier * principalStrain.Epsilon2, principalStrain.Theta1);
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStrain"/> object with multiplied components by a double.
+        /// Returns a <see cref="PrincipalStrain"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
         public static PrincipalStrain operator *(double multiplier, PrincipalStrain strain) => strain * multiplier;
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStrain"/> object with multiplied components by an integer.
+        /// Returns a <see cref="PrincipalStrain"/> object with multiplied components by an <see cref="int"/>.
         /// </summary>
         public static PrincipalStrain operator *(PrincipalStrain principalStrain, int multiplier) => principalStrain * (double)multiplier;
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStrain"/> object with multiplied components by an integer.
+        /// Returns a <see cref="PrincipalStrain"/> object with multiplied components by an <see cref="int"/>.
         /// </summary>
         public static PrincipalStrain operator *(int multiplier, PrincipalStrain strain) => strain * (double)multiplier;
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStrain"/> object with components divided by a double.
+        /// Returns a <see cref="PrincipalStrain"/> object with components divided by a <see cref="double"/>.
         /// </summary>
         public static PrincipalStrain operator /(PrincipalStrain principalStrain, double divider) => new PrincipalStrain(principalStrain.Epsilon1 / divider, principalStrain.Epsilon2 / divider, principalStrain.Theta1);
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStrain"/> object with components divided by an integer.
+        /// Returns a <see cref="PrincipalStrain"/> object with components divided by an <see cref="int"/>.
         /// </summary>
         public static PrincipalStrain operator /(PrincipalStrain principalStrain, int divider) => principalStrain / (double)divider;
 
