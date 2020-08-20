@@ -12,20 +12,28 @@ namespace OnPlaneComponents
     /// </summary>
     public struct Strain : IEquatable<Strain>
     {
-        /// <summary>
-        /// Get/set normal strain in X direction.
-        /// </summary>
-        public double EpsilonX { get; set; }
+		// Auxiliary fields
+		private double _epsilonX, _epsilonY, _gammaXY, _theta;
 
-        /// <summary>
-        /// Get/set normal strain in Y direction.
-        /// </summary>
-        public double EpsilonY { get; set; }
+		/// <summary>
+		/// Get normal strain in X direction.
+		/// </summary>
+		public double EpsilonX => _epsilonX;
 
-        /// <summary>
-        /// Get/set shear strain.
+		/// <summary>
+		/// Get normal strain in Y direction.
+		/// </summary>
+		public double EpsilonY => _epsilonY;
+
+		/// <summary>
+		/// Get shear strain.
+		/// </summary>
+		public double GammaXY => _gammaXY;
+
+		/// <summary>
+        /// Get the angle of X direction, related to horizontal axis.
         /// </summary>
-        public double GammaXY { get; set; }
+		public double Theta => _theta;
 
         /// <summary>
         /// Get principal strains.
@@ -86,11 +94,13 @@ namespace OnPlaneComponents
         /// <param name="epsilonX">The normal strain in X direction (positive for tensile).</param>
         /// <param name="epsilonY">The normal strain in Y direction (positive for tensile).</param>
         /// <param name="gammaXY">The shear strain (positive if right face of element displaces upwards).</param>
-        public Strain(double epsilonX, double epsilonY, double gammaXY)
+        /// <param name="theta">The angle of X direction, related to horizontal axis.</param>
+        public Strain(double epsilonX, double epsilonY, double gammaXY, double theta = 0)
         {
-	        EpsilonX = epsilonX;
-	        EpsilonY = epsilonY;
-	        GammaXY  = gammaXY;
+	        _epsilonX = epsilonX;
+	        _epsilonY = epsilonY;
+	        _gammaXY  = gammaXY;
+	        _theta    = theta;
         }
 
         /// <summary>
@@ -98,11 +108,13 @@ namespace OnPlaneComponents
         /// </summary>
         /// <param name="strainVector">The vector of strains.
         ///	<para>{EpsilonX, EpsilonY, GammaXY}</para></param>
-        public Strain(Vector<double> strainVector)
+        /// <param name="theta">The angle of X direction, related to horizontal axis.</param>
+        public Strain(Vector<double> strainVector, double theta = 0)
         {
-	        EpsilonX = strainVector[0];
-	        EpsilonY = strainVector[1];
-            GammaXY  = strainVector[2];
+	        _epsilonX = strainVector[0];
+	        _epsilonY = strainVector[1];
+            _gammaXY  = strainVector[2];
+            _theta    = theta;
         }
 
         /// <summary>
@@ -113,9 +125,9 @@ namespace OnPlaneComponents
         /// <param name="incrementXY">The increment for shear strain.</param>
         public void Add(double incrementX, double incrementY, double incrementXY)
         {
-	        EpsilonX += incrementX;
-	        EpsilonY += incrementY;
-	        GammaXY  += incrementXY;
+	        _epsilonX += incrementX;
+	        _epsilonY += incrementY;
+	        _gammaXY  += incrementXY;
         }
 
         /// <summary>
@@ -126,9 +138,9 @@ namespace OnPlaneComponents
         /// <param name="decrementXY">The decrement for shear strain (positive value).</param>
         public void Subtract(double decrementX, double decrementY, double decrementXY) 
         {
-	        EpsilonX -= decrementX;
-	        EpsilonY -= decrementY;
-	        GammaXY  -= decrementXY;
+	        _epsilonX -= decrementX;
+	        _epsilonY -= decrementY;
+	        _gammaXY  -= decrementXY;
         }
 
         /// <summary>
@@ -145,9 +157,9 @@ namespace OnPlaneComponents
         /// <param name="multiplierXY">The multiplier for shear strain.</param>
         public void Multiply(double multiplierX, double multiplierY, double multiplierXY)
         {
-            EpsilonX *= multiplierX;
-            EpsilonY *= multiplierY;
-            GammaXY  *= multiplierXY;
+            _epsilonX *= multiplierX;
+            _epsilonY *= multiplierY;
+            _gammaXY  *= multiplierXY;
         }
 
         /// <summary>
@@ -164,9 +176,9 @@ namespace OnPlaneComponents
         /// <param name="dividerXY">The divider for shear strain.</param>
         public void Divide(double dividerX, double dividerY, double dividerXY)
         {
-            EpsilonX /= dividerX;
-            EpsilonY /= dividerY;
-            GammaXY  /= dividerXY;
+            _epsilonX /= dividerX;
+            _epsilonY /= dividerY;
+            _gammaXY  /= dividerXY;
         }
 
         /// <summary>
