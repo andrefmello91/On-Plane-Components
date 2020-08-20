@@ -118,6 +118,22 @@ namespace OnPlaneComponents
         public static Strain Zero => new Strain(0, 0, 0);
 
 		/// <summary>
+        /// Get <see cref="Strain"/> transformed to horizontal direction (<see cref="ThetaX"/> = 0).
+        /// </summary>
+        /// <param name="strain">The <see cref="Strain"/> to transform.</param>
+        public static Strain ToHorizontal(Strain strain)
+        {
+	        if (strain.IsHorizontal)
+		        return strain;
+
+			// Get the strain vector transformed
+			var sVec = StrainRelations.Transform(strain.Vector, - strain.ThetaX);
+
+			// Return with corrected angle
+			return new Strain(sVec);
+        }
+
+		/// <summary>
         /// Get <see cref="Strain"/> transformed by a rotation angle.
         /// </summary>
         /// <param name="strain">The <see cref="Strain"/> to transform.</param>
@@ -228,49 +244,82 @@ namespace OnPlaneComponents
         public static bool operator != (Strain left, PrincipalStrain right) => !left.Equals(right);
 
         /// <summary>
-        /// Returns a strain object with summed components, in left argument's direction <see cref="ThetaX"/>.
+        /// Returns a <see cref="Strain"/> object with summed components, in horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
         public static Strain operator + (Strain left, Strain right)
         {
-	        // Transform right argument
-	        var rTrans = Transform(right, left.ThetaX - right.ThetaX);
+            // Transform to horizontal
+            Strain
+                lTrans = ToHorizontal(left),
+		        rTrans = ToHorizontal(right);
 
-            return new Strain(left.Vector + rTrans.Vector, left.ThetaX);
+            return new Strain(lTrans.Vector + rTrans.Vector);
         }
 
         /// <summary>
-        /// Returns a strain object with subtracted components, in left argument's direction <see cref="ThetaX"/>.
+        /// Returns a <see cref="Strain"/> object with subtracted components, in horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
         public static Strain operator - (Strain left, Strain right)
         {
-	        // Transform right argument
-	        var rTrans = Transform(right, left.ThetaX - right.ThetaX);
+	        // Transform to horizontal
+	        Strain
+		        lTrans = ToHorizontal(left),
+		        rTrans = ToHorizontal(right);
 
-            return new Strain(left.Vector - rTrans.Vector, left.ThetaX);
+	        return new Strain(lTrans.Vector - rTrans.Vector);
         }
 
         /// <summary>
-        /// Returns a strain object with summed components, in left argument's direction <see cref="ThetaX"/>.
+        /// Returns a <see cref="Strain"/> object with summed components, in horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
         public static Strain operator + (Strain left, PrincipalStrain right)
         {
-	        // Transform right argument
-	        var rTrans = Transform(right, left.ThetaX - right.Theta1);
+	        // Transform to horizontal
+	        Strain
+		        lTrans = ToHorizontal(left),
+		        rTrans = FromPrincipal(right);
 
-            return new Strain(left.Vector + rTrans.Vector, left.ThetaX);
+            return new Strain(lTrans.Vector + rTrans.Vector);
         }
 
         /// <summary>
-        /// Returns a strain object with subtracted components, in left argument's direction <see cref="ThetaX"/>.
+        /// Returns a <see cref="Strain"/> object with subtracted components, in horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
         public static Strain operator - (Strain left, PrincipalStrain right)
         {
-	        // Transform right argument
-	        var rTrans = Transform(right, left.ThetaX - right.Theta1);
+	        // Transform to horizontal
+	        Strain
+		        lTrans = ToHorizontal(left),
+		        rTrans = FromPrincipal(right);
 
-            return new Strain(left.Vector - rTrans.Vector, left.ThetaX);
+	        return new Strain(lTrans.Vector - rTrans.Vector);
         }
 
+        /// <summary>
+        /// Returns a <see cref="Strain"/> object with summed components, in horizontal direction (<see cref="ThetaX"/> = 0).
+        /// </summary>
+        public static Strain operator + (PrincipalStrain left, Strain right)
+        {
+	        // Transform to horizontal
+	        Strain
+		        lTrans = FromPrincipal(left),
+		        rTrans = ToHorizontal(right);
+
+            return new Strain(lTrans.Vector + rTrans.Vector);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Strain"/> object with subtracted components, in horizontal direction (<see cref="ThetaX"/> = 0).
+        /// </summary>
+        public static Strain operator - (PrincipalStrain left, Strain right)
+        {
+	        // Transform to horizontal
+	        Strain
+		        lTrans = FromPrincipal(left),
+		        rTrans = ToHorizontal(right);
+
+            return new Strain(lTrans.Vector - rTrans.Vector);
+        }
 
         /// <summary>
         /// Returns a strain object with multiplied components by a double.

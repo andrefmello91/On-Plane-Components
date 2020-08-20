@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MathNet.Numerics;
+﻿using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 
@@ -157,16 +152,6 @@ namespace OnPlaneComponents
         /// Returns a <see cref="Strain"/> object with subtracted components, in horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
         public static Strain operator - (PrincipalStrain left, PrincipalStrain right) => Strain.FromPrincipal(left) - Strain.FromPrincipal(right);
-
-        /// <summary>
-        /// Returns a <see cref="Strain"/> object with summed components, in horizontal direction (<see cref="ThetaX"/> = 0).
-        /// </summary>
-        public static Strain operator + (PrincipalStrain left, Strain right) => right + left;
-
-        /// <summary>
-        /// Returns a <see cref="Strain"/> object with subtracted components, in horizontal direction (<see cref="ThetaX"/> = 0).
-        /// </summary>
-        public static Strain operator - (PrincipalStrain left, Strain right) => right - left;
 
         /// <summary>
         /// Returns a <see cref="PrincipalStrain"/> object with multiplied components by a double.
