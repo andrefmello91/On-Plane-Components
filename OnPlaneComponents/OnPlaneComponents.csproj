@@ -58,6 +58,7 @@
     <Compile Include="Force\Force.cs" />
     <Compile Include="Force\ForceRelations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Strain\PrincipalStrain.cs" />
     <Compile Include="Strain\StrainRelations.cs" />
     <Compile Include="Strain\Strain.cs" />
     <Compile Include="Stress\Stress.cs" />

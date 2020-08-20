@@ -38,7 +38,7 @@ namespace OnPlaneComponents
 		public double ThetaY => ThetaX + Constants.PiOver2;
 
         /// <summary>
-        /// Get the strain vector, in unit constructed.
+        /// Get strains as vector.
         /// <para>{ EpsilonX, EpsilonY, GammaXY }</para>
         /// </summary>
         public Vector<double> Vector => DenseVector.OfArray(new []{EpsilonX, EpsilonY, GammaXY});
@@ -135,15 +135,57 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Compare two strain objects.
+        /// Get <see cref="Strain"/> transformed by a rotation angle.
+        /// </summary>
+        /// <param name="principalStrain">The <see cref="PrincipalStrain"/> to transform.</param>
+        /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
+        public static Strain Transform(PrincipalStrain principalStrain, double theta)
+        {
+	        if (theta == 0)
+		        return new Strain(principalStrain.Vector, principalStrain.Theta1);
+
+			// Get the strain vector transformed
+			var sVec = StrainRelations.Transform(principalStrain.Vector, theta);
+
+			// Return with corrected angle
+			return new Strain(sVec, principalStrain.Theta1 + theta);
+        }
+
+        /// <summary>
+        /// Get <see cref="Strain"/> from a <see cref="PrincipalStrain"/> in horizontal direction (<see cref="ThetaX"/> = 0).
+        /// </summary>
+        /// <param name="principalStrain">The <see cref="PrincipalStrain"/> to horizontal <see cref="Strain"/>.</param>
+        public static Strain FromPrincipal(PrincipalStrain principalStrain)
+        {
+	        if (principalStrain.Theta1 == 0)
+		        return new Strain(principalStrain.Vector);
+
+			// Get the strain vector transformed
+			var sVec = StrainRelations.Transform(principalStrain.Vector, - principalStrain.Theta1);
+
+			// Return with corrected angle
+			return new Strain(sVec);
+        }
+		
+		/// <summary>
+        /// Compare two <see cref="Strain"/> objects.
         /// </summary>
         /// <param name="other">The strain to compare.</param>
         public bool Equals(Strain other) => ThetaX == other.ThetaX && EpsilonX == other.EpsilonX && EpsilonY == other.EpsilonY && GammaXY == other.GammaXY;
+
+        /// <summary>
+        /// Compare a <see cref="Strain"/> to a <see cref="PrincipalStrain"/> object.
+        /// </summary>
+        /// <param name="other">The <see cref="PrincipalStrain"/> to compare.</param>
+        public bool Equals(PrincipalStrain other) => Equals(FromPrincipal(other));
 
         public override bool Equals(object obj)
         {
 	        if (obj is Strain other)
 		        return Equals(other);
+
+	        if (obj is PrincipalStrain principalStrain)
+		        return Equals(principalStrain);
 
 	        return false;
         }
@@ -152,12 +194,15 @@ namespace OnPlaneComponents
         {
 	        char
 		        epsilon = (char) Characters.Epsilon,
-		        gamma   = (char) Characters.Gamma;
+		        gamma   = (char) Characters.Gamma,
+	            theta   = (char)Characters.Theta;
 
-	        return
-		        epsilon + "x = "  + $"{EpsilonX:0.##E+00}" + "\n" +
+
+            return
+                epsilon + "x = "  + $"{EpsilonX:0.##E+00}" + "\n" +
 		        epsilon + "y = "  + $"{EpsilonY:0.##E+00}" + "\n" +
-		        gamma   + "xy = " + $"{GammaXY:0.##E+00}";
+		        gamma   + "xy = " + $"{GammaXY:0.##E+00}" +
+                theta + "x = "    + $"{ThetaX:0.00}" + " rad";
         }
 
         public override int GetHashCode() => (int)(EpsilonX * EpsilonY * GammaXY);
@@ -171,6 +216,16 @@ namespace OnPlaneComponents
         /// Returns true if components are different.
         /// </summary>
         public static bool operator != (Strain left, Strain right) => !left.Equals(right);
+
+        /// <summary>
+        /// Returns true if components are equal.
+        /// </summary>
+        public static bool operator == (Strain left, PrincipalStrain right) => left.Equals(right);
+
+        /// <summary>
+        /// Returns true if components are different.
+        /// </summary>
+        public static bool operator != (Strain left, PrincipalStrain right) => !left.Equals(right);
 
         /// <summary>
         /// Returns a strain object with summed components, in left argument's direction <see cref="ThetaX"/>.
@@ -193,6 +248,29 @@ namespace OnPlaneComponents
 
             return new Strain(left.Vector - rTrans.Vector, left.ThetaX);
         }
+
+        /// <summary>
+        /// Returns a strain object with summed components, in left argument's direction <see cref="ThetaX"/>.
+        /// </summary>
+        public static Strain operator + (Strain left, PrincipalStrain right)
+        {
+	        // Transform right argument
+	        var rTrans = Transform(right, left.ThetaX - right.Theta1);
+
+            return new Strain(left.Vector + rTrans.Vector, left.ThetaX);
+        }
+
+        /// <summary>
+        /// Returns a strain object with subtracted components, in left argument's direction <see cref="ThetaX"/>.
+        /// </summary>
+        public static Strain operator - (Strain left, PrincipalStrain right)
+        {
+	        // Transform right argument
+	        var rTrans = Transform(right, left.ThetaX - right.Theta1);
+
+            return new Strain(left.Vector - rTrans.Vector, left.ThetaX);
+        }
+
 
         /// <summary>
         /// Returns a strain object with multiplied components by a double.

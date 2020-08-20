@@ -16,6 +16,7 @@ namespace OnPlaneComponents
 		Sigma   = '\u03C3',
 		Rho     = '\u03C1',
 		Tau     = '\u03C4',
+		Theta   = '\u03B8',
 		Times   = '\u00D7'
 	}
 }
