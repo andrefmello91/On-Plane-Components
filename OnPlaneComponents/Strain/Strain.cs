@@ -12,28 +12,25 @@ namespace OnPlaneComponents
     /// </summary>
     public struct Strain : IEquatable<Strain>
     {
-		// Auxiliary fields
-		private double _epsilonX, _epsilonY, _gammaXY;
-
 		/// <summary>
 		/// Get normal strain in X direction.
 		/// </summary>
-		public double EpsilonX => _epsilonX;
+		public double EpsilonX { get; }
 
-		/// <summary>
-		/// Get normal strain in Y direction.
-		/// </summary>
-		public double EpsilonY => _epsilonY;
+        /// <summary>
+        /// Get normal strain in Y direction.
+        /// </summary>
+        public double EpsilonY { get; }
 
-		/// <summary>
-		/// Get shear strain.
-		/// </summary>
-		public double GammaXY => _gammaXY;
+        /// <summary>
+        /// Get shear strain.
+        /// </summary>
+        public double GammaXY { get; }
 
-		/// <summary>
+        /// <summary>
         /// Get the angle of X direction, related to horizontal axis.
         /// </summary>
-		public double ThetaX { get; }
+        public double ThetaX { get; }
 
 		/// <summary>
         /// Get the angle of Y direction, related to horizontal axis.
@@ -95,9 +92,9 @@ namespace OnPlaneComponents
         /// <param name="thetaX">The angle of X direction, related to horizontal axis.</param>
         public Strain(double epsilonX, double epsilonY, double gammaXY, double thetaX = 0)
         {
-	        _epsilonX = epsilonX;
-	        _epsilonY = epsilonY;
-	        _gammaXY  = gammaXY;
+	        EpsilonX = epsilonX;
+	        EpsilonY = epsilonY;
+	        GammaXY  = gammaXY;
 	        ThetaX    = thetaX;
         }
 
@@ -109,9 +106,9 @@ namespace OnPlaneComponents
         /// <param name="thetaX">The angle of X direction, related to horizontal axis.</param>
         public Strain(Vector<double> strainVector, double thetaX = 0)
         {
-	        _epsilonX = strainVector[0];
-	        _epsilonY = strainVector[1];
-            _gammaXY  = strainVector[2];
+	        EpsilonX = strainVector[0];
+	        EpsilonY = strainVector[1];
+            GammaXY  = strainVector[2];
             ThetaX    = thetaX;
         }
 
