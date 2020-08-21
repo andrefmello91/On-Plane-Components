@@ -53,15 +53,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Characters.cs" />
+    <Compile Include="Displacement\DisplacementOperators.cs" />
     <Compile Include="Displacement\Displacement.cs" />
     <Compile Include="Displacement\DisplacementRelations.cs" />
+    <Compile Include="Force\ForceOperators.cs" />
     <Compile Include="Force\Force.cs" />
     <Compile Include="Force\ForceRelations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Strain\PrincipalStrain.cs" />
+    <Compile Include="Strain\StrainOperators.cs" />
     <Compile Include="Strain\StrainRelations.cs" />
     <Compile Include="Strain\Strain.cs" />
     <Compile Include="Stress\PrincipalStress.cs" />
+    <Compile Include="Stress\StressOperators.cs" />
     <Compile Include="Stress\Stress.cs" />
     <Compile Include="Stress\StressRelations.cs" />
   </ItemGroup>
