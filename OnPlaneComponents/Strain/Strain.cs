@@ -10,7 +10,7 @@ namespace OnPlaneComponents
 	/// <summary>
     /// Strain struct for XY components.
     /// </summary>
-    public struct Strain : IEquatable<Strain>
+    public struct StrainState : IEquatable<StrainState>
     {
 		/// <summary>
 		/// Get normal strain in X direction.
@@ -91,7 +91,7 @@ namespace OnPlaneComponents
         /// <param name="epsilonY">The normal strain in Y direction (positive for tensile).</param>
         /// <param name="gammaXY">The shear strain (positive if right face of element displaces upwards).</param>
         /// <param name="thetaX">The angle of <paramref name="epsilonX"/> direction, related to horizontal axis (positive counterclockwise).</param>
-        public Strain(double epsilonX, double epsilonY, double gammaXY, double thetaX = 0)
+        public StrainState(double epsilonX, double epsilonY, double gammaXY, double thetaX = 0)
         {
 	        EpsilonX = epsilonX;
 	        EpsilonY = epsilonY;
@@ -100,108 +100,103 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
+        /// Get a <see cref="StrainState"/> with zero elements.
+        /// </summary>
+        public static StrainState Zero => new StrainState(0, 0, 0);
+
+        /// <summary>
         /// Strain object for XY components.
         /// </summary>
         /// <param name="strainVector">The <see cref="DenseVector"/> of strains.
         ///	<para>{EpsilonX, EpsilonY, GammaXY}</para></param>
         /// <param name="thetaX">The angle of X direction, related to horizontal axis (positive counterclockwise).</param>
-        public Strain(Vector<double> strainVector, double thetaX = 0)
-        {
-	        EpsilonX = strainVector[0];
-	        EpsilonY = strainVector[1];
-            GammaXY  = strainVector[2];
-            ThetaX    = thetaX;
-        }
+        public static StrainState FromVector(Vector<double> strainVector, double thetaX = 0) =>
+			new StrainState(strainVector[0], strainVector[1], strainVector[2], thetaX);
 
         /// <summary>
-        /// Get a <see cref="Strain"/> with zero elements.
+        /// Get <see cref="StrainState"/> transformed to horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
-        public static Strain Zero => new Strain(0, 0, 0);
-
-		/// <summary>
-        /// Get <see cref="Strain"/> transformed to horizontal direction (<see cref="ThetaX"/> = 0).
-        /// </summary>
-        /// <param name="strain">The <see cref="Strain"/> to transform.</param>
-        public static Strain ToHorizontal(Strain strain)
+        /// <param name="strainState">The <see cref="StrainState"/> to transform.</param>
+        public static StrainState ToHorizontal(StrainState strainState)
         {
-	        if (strain.IsHorizontal)
-		        return strain;
+	        if (strainState.IsHorizontal)
+		        return strainState;
 
 			// Get the strain vector transformed
-			var sVec = StrainRelations.Transform(strain.Vector, - strain.ThetaX);
+			var sVec = StrainRelations.Transform(strainState.Vector, - strainState.ThetaX);
 
 			// Return with corrected angle
-			return new Strain(sVec);
+			return FromVector(sVec);
         }
 
 		/// <summary>
-        /// Get <see cref="Strain"/> transformed by a rotation angle.
+        /// Get <see cref="StrainState"/> transformed by a rotation angle.
         /// </summary>
-        /// <param name="strain">The <see cref="Strain"/> to transform.</param>
+        /// <param name="strainState">The <see cref="StrainState"/> to transform.</param>
         /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
-        public static Strain Transform(Strain strain, double theta)
+        public static StrainState Transform(StrainState strainState, double theta)
         {
 	        if (theta == 0)
-		        return strain;
+		        return strainState;
 
 			// Get the strain vector transformed
-			var sVec = StrainRelations.Transform(strain.Vector, theta);
+			var sVec = StrainRelations.Transform(strainState.Vector, theta);
 
 			// Return with corrected angle
-			return new Strain(sVec, strain.ThetaX + theta);
+			return FromVector(sVec, strainState.ThetaX + theta);
         }
 
         /// <summary>
-        /// Get <see cref="Strain"/> transformed by a rotation angle.
+        /// Get <see cref="StrainState"/> transformed by a rotation angle.
         /// </summary>
-        /// <param name="principalStrain">The <see cref="PrincipalStrain"/> to transform.</param>
+        /// <param name="principalStrainState">The <see cref="PrincipalStrainState"/> to transform.</param>
         /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
-        public static Strain Transform(PrincipalStrain principalStrain, double theta)
+        public static StrainState Transform(PrincipalStrainState principalStrainState, double theta)
         {
 	        if (theta == 0)
-		        return new Strain(principalStrain.Vector, principalStrain.Theta1);
+		        return FromVector(principalStrainState.Vector, principalStrainState.Theta1);
 
 			// Get the strain vector transformed
-			var sVec = StrainRelations.Transform(principalStrain.Vector, theta);
+			var sVec = StrainRelations.Transform(principalStrainState.Vector, theta);
 
 			// Return with corrected angle
-			return new Strain(sVec, principalStrain.Theta1 + theta);
+			return FromVector(sVec, principalStrainState.Theta1 + theta);
         }
 
         /// <summary>
-        /// Get <see cref="Strain"/> from a <see cref="PrincipalStrain"/> in horizontal direction (<see cref="ThetaX"/> = 0).
+        /// Get <see cref="StrainState"/> from a <see cref="PrincipalStrainState"/> in horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
-        /// <param name="principalStrain">The <see cref="PrincipalStrain"/> to horizontal <see cref="Strain"/>.</param>
-        public static Strain FromPrincipal(PrincipalStrain principalStrain)
+        /// <param name="principalStrainState">The <see cref="PrincipalStrainState"/> to horizontal <see cref="StrainState"/>.</param>
+        public static StrainState FromPrincipal(PrincipalStrainState principalStrainState)
         {
-	        if (principalStrain.Theta1 == 0)
-		        return new Strain(principalStrain.Vector);
+	        if (principalStrainState.Theta1 == 0)
+		        return FromVector(principalStrainState.Vector);
 
 			// Get the strain vector transformed
-			var sVec = StrainRelations.StrainsFromPrincipal(principalStrain.Epsilon1, principalStrain.Epsilon2, principalStrain.Theta1);
+			var sVec = StrainRelations.StrainsFromPrincipal(principalStrainState.Epsilon1, principalStrainState.Epsilon2, principalStrainState.Theta1);
 
 			// Return with corrected angle
-			return new Strain(sVec);
+			return FromVector(sVec);
         }
 		
 		/// <summary>
-        /// Compare two <see cref="Strain"/> objects.
+        /// Compare two <see cref="StrainState"/> objects.
         /// </summary>
         /// <param name="other">The strain to compare.</param>
-        public bool Equals(Strain other) => ThetaX == other.ThetaX && EpsilonX == other.EpsilonX && EpsilonY == other.EpsilonY && GammaXY == other.GammaXY;
+        public bool Equals(StrainState other) => ThetaX == other.ThetaX && EpsilonX == other.EpsilonX && EpsilonY == other.EpsilonY && GammaXY == other.GammaXY;
 
         /// <summary>
-        /// Compare a <see cref="Strain"/> to a <see cref="PrincipalStrain"/> object.
+        /// Compare a <see cref="StrainState"/> to a <see cref="PrincipalStrainState"/> object.
         /// </summary>
-        /// <param name="other">The <see cref="PrincipalStrain"/> to compare.</param>
-        public bool Equals(PrincipalStrain other) => Equals(FromPrincipal(other));
+        /// <param name="other">The <see cref="PrincipalStrainState"/> to compare.</param>
+        public bool Equals(PrincipalStrainState other) => Equals(FromPrincipal(other));
 
         public override bool Equals(object obj)
         {
-	        if (obj is Strain other)
+	        if (obj is StrainState other)
 		        return Equals(other);
 
-	        if (obj is PrincipalStrain principalStrain)
+	        if (obj is PrincipalStrainState principalStrain)
 		        return Equals(principalStrain);
 
 	        return false;
@@ -227,129 +222,129 @@ namespace OnPlaneComponents
         /// <summary>
         /// Returns true if components are equal.
         /// </summary>
-        public static bool operator == (Strain left, Strain right) => left.Equals(right);
+        public static bool operator == (StrainState left, StrainState right) => left.Equals(right);
 
         /// <summary>
         /// Returns true if components are different.
         /// </summary>
-        public static bool operator != (Strain left, Strain right) => !left.Equals(right);
+        public static bool operator != (StrainState left, StrainState right) => !left.Equals(right);
 
         /// <summary>
         /// Returns true if components are equal.
         /// </summary>
-        public static bool operator == (Strain left, PrincipalStrain right) => left.Equals(right);
+        public static bool operator == (StrainState left, PrincipalStrainState right) => left.Equals(right);
 
         /// <summary>
         /// Returns true if components are different.
         /// </summary>
-        public static bool operator != (Strain left, PrincipalStrain right) => !left.Equals(right);
+        public static bool operator != (StrainState left, PrincipalStrainState right) => !left.Equals(right);
 
         /// <summary>
-        /// Returns a <see cref="Strain"/> object with summed components, in horizontal direction (<see cref="ThetaX"/> = 0).
+        /// Returns a <see cref="StrainState"/> object with summed components, in horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
-        public static Strain operator + (Strain left, Strain right)
+        public static StrainState operator + (StrainState left, StrainState right)
         {
             // Transform to horizontal
-            Strain
+            StrainState
                 lTrans = ToHorizontal(left),
 		        rTrans = ToHorizontal(right);
 
-            return new Strain(lTrans.Vector + rTrans.Vector);
+            return FromVector(lTrans.Vector + rTrans.Vector);
         }
 
         /// <summary>
-        /// Returns a <see cref="Strain"/> object with subtracted components, in horizontal direction (<see cref="ThetaX"/> = 0).
+        /// Returns a <see cref="StrainState"/> object with subtracted components, in horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
-        public static Strain operator - (Strain left, Strain right)
+        public static StrainState operator - (StrainState left, StrainState right)
         {
 	        // Transform to horizontal
-	        Strain
+	        StrainState
 		        lTrans = ToHorizontal(left),
 		        rTrans = ToHorizontal(right);
 
-	        return new Strain(lTrans.Vector - rTrans.Vector);
+	        return FromVector(lTrans.Vector - rTrans.Vector);
         }
 
         /// <summary>
-        /// Returns a <see cref="Strain"/> object with summed components, in horizontal direction (<see cref="ThetaX"/> = 0).
+        /// Returns a <see cref="StrainState"/> object with summed components, in horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
-        public static Strain operator + (Strain left, PrincipalStrain right)
+        public static StrainState operator + (StrainState left, PrincipalStrainState right)
         {
 	        // Transform to horizontal
-	        Strain
-		        lTrans = ToHorizontal(left),
-		        rTrans = FromPrincipal(right);
-
-            return new Strain(lTrans.Vector + rTrans.Vector);
-        }
-
-        /// <summary>
-        /// Returns a <see cref="Strain"/> object with subtracted components, in horizontal direction (<see cref="ThetaX"/> = 0).
-        /// </summary>
-        public static Strain operator - (Strain left, PrincipalStrain right)
-        {
-	        // Transform to horizontal
-	        Strain
+	        StrainState
 		        lTrans = ToHorizontal(left),
 		        rTrans = FromPrincipal(right);
 
-	        return new Strain(lTrans.Vector - rTrans.Vector);
+            return FromVector(lTrans.Vector + rTrans.Vector);
         }
 
         /// <summary>
-        /// Returns a <see cref="Strain"/> object with summed components, in horizontal direction (<see cref="ThetaX"/> = 0).
+        /// Returns a <see cref="StrainState"/> object with subtracted components, in horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
-        public static Strain operator + (PrincipalStrain left, Strain right)
+        public static StrainState operator - (StrainState left, PrincipalStrainState right)
         {
 	        // Transform to horizontal
-	        Strain
+	        StrainState
+		        lTrans = ToHorizontal(left),
+		        rTrans = FromPrincipal(right);
+
+	        return FromVector(lTrans.Vector - rTrans.Vector);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="StrainState"/> object with summed components, in horizontal direction (<see cref="ThetaX"/> = 0).
+        /// </summary>
+        public static StrainState operator + (PrincipalStrainState left, StrainState right)
+        {
+	        // Transform to horizontal
+	        StrainState
 		        lTrans = FromPrincipal(left),
 		        rTrans = ToHorizontal(right);
 
-            return new Strain(lTrans.Vector + rTrans.Vector);
+            return FromVector(lTrans.Vector + rTrans.Vector);
         }
 
         /// <summary>
-        /// Returns a <see cref="Strain"/> object with subtracted components, in horizontal direction (<see cref="ThetaX"/> = 0).
+        /// Returns a <see cref="StrainState"/> object with subtracted components, in horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
-        public static Strain operator - (PrincipalStrain left, Strain right)
+        public static StrainState operator - (PrincipalStrainState left, StrainState right)
         {
 	        // Transform to horizontal
-	        Strain
+	        StrainState
 		        lTrans = FromPrincipal(left),
 		        rTrans = ToHorizontal(right);
 
-            return new Strain(lTrans.Vector - rTrans.Vector);
+            return FromVector(lTrans.Vector - rTrans.Vector);
         }
 
         /// <summary>
-        /// Returns a <see cref="Strain"/> object with multiplied components by a <see cref="double"/>.
+        /// Returns a <see cref="StrainState"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
-        public static Strain operator * (Strain strain, double multiplier) => new Strain(multiplier * strain.Vector, strain.ThetaX);
+        public static StrainState operator * (StrainState strainState, double multiplier) => FromVector(multiplier * strainState.Vector, strainState.ThetaX);
 
         /// <summary>
-        /// Returns a <see cref="Strain"/> object with multiplied components by a <see cref="double"/>.
+        /// Returns a <see cref="StrainState"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
-        public static Strain operator * (double multiplier, Strain strain) => strain * multiplier;
+        public static StrainState operator * (double multiplier, StrainState strainState) => strainState * multiplier;
 
         /// <summary>
-        /// Returns a <see cref="Strain"/> object with multiplied components by an <see cref="int"/>.
+        /// Returns a <see cref="StrainState"/> object with multiplied components by an <see cref="int"/>.
         /// </summary>
-        public static Strain operator * (Strain strain, int multiplier) => strain * (double)multiplier;
+        public static StrainState operator * (StrainState strainState, int multiplier) => strainState * (double)multiplier;
 
         /// <summary>
-        /// Returns a <see cref="Strain"/> object with multiplied components by an <see cref="int"/>.
+        /// Returns a <see cref="StrainState"/> object with multiplied components by an <see cref="int"/>.
         /// </summary>
-        public static Strain operator * (int multiplier, Strain strain) => strain * (double)multiplier;
+        public static StrainState operator * (int multiplier, StrainState strainState) => strainState * (double)multiplier;
 
         /// <summary>
-        /// Returns a <see cref="Strain"/> object with components divided by a <see cref="double"/>.
+        /// Returns a <see cref="StrainState"/> object with components divided by a <see cref="double"/>.
         /// </summary>
-        public static Strain operator / (Strain strain, double divider) => new Strain(strain.Vector / divider, strain.ThetaX);
+        public static StrainState operator / (StrainState strainState, double divider) => FromVector(strainState.Vector / divider, strainState.ThetaX);
 
         /// <summary>
-        /// Returns a <see cref="Strain"/> object with components divided by an <see cref="int"/>.
+        /// Returns a <see cref="StrainState"/> object with components divided by an <see cref="int"/>.
         /// </summary>
-        public static Strain operator / (Strain strain, int divider) => strain / (double)divider;
+        public static StrainState operator / (StrainState strainState, int divider) => strainState / (double)divider;
 	}
 }

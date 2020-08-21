@@ -1,4 +1,5 @@
-﻿using MathNet.Numerics;
+﻿using System;
+using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 
@@ -7,7 +8,7 @@ namespace OnPlaneComponents
     /// <summary>
     /// Principal strain struct.
     /// </summary>
-	public struct PrincipalStrain
+	public struct PrincipalStrainState : IEquatable<PrincipalStrainState>
     {
 	    /// <summary>
 	    /// Get maximum principal strain.
@@ -61,7 +62,7 @@ namespace OnPlaneComponents
         /// <param name="epsilon1">The maximum principal strain (positive for tensile).</param>
         /// <param name="epsilon2">The minimum principal strain (positive for tensile).</param>
         /// <param name="theta1">The angle of maximum principal strain (<paramref name="epsilon1"/>), related to horizontal axis (positive to counterclockwise).</param>
-        public PrincipalStrain(double epsilon1, double epsilon2, double theta1 = Constants.PiOver4)
+        public PrincipalStrainState(double epsilon1, double epsilon2, double theta1 = Constants.PiOver4)
         {
 	        Epsilon1 = epsilon1;
 	        Epsilon2 = epsilon2;
@@ -69,40 +70,40 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Get a <see cref="PrincipalStrain"/> with zero elements.
+        /// Get a <see cref="PrincipalStrainState"/> with zero elements.
         /// </summary>
-        public static PrincipalStrain Zero => new PrincipalStrain(0, 0);
+        public static PrincipalStrainState Zero => new PrincipalStrainState(0, 0);
 
         /// <summary>
-        /// Get a <see cref="PrincipalStrain"/> from a <see cref="Strain"/>.
+        /// Get a <see cref="PrincipalStrainState"/> from a <see cref="StrainState"/>.
         /// </summary>
-        /// <param name="strain">The <see cref="Strain"/> to transform.</param>
-        public static PrincipalStrain FromStrain(Strain strain)
+        /// <param name="strainState">The <see cref="StrainState"/> to transform.</param>
+        public static PrincipalStrainState FromStrain(StrainState strainState)
         {
-	        var (e1, e2) = StrainRelations.CalculatePrincipal(strain.Vector);
-	        var theta1   = StrainRelations.CalculatePrincipalAngles(strain.Vector, e2).theta1;
+	        var (e1, e2) = StrainRelations.CalculatePrincipal(strainState.Vector);
+	        var theta1   = StrainRelations.CalculatePrincipalAngles(strainState.Vector, e2).theta1;
 
-			return new PrincipalStrain(e1, e2, strain.ThetaX + theta1);
+			return new PrincipalStrainState(e1, e2, strainState.ThetaX + theta1);
         }
 
         /// <summary>
-        /// Compare two <see cref="PrincipalStrain"/> objects.
+        /// Compare two <see cref="PrincipalStrainState"/> objects.
         /// </summary>
-        /// <param name="other">The other <see cref="PrincipalStrain"/> to compare.</param>
-        public bool Equals(PrincipalStrain other) => Theta1 == other.Theta1 && Epsilon1 == other.Epsilon1 && Epsilon2 == other.Epsilon2;
+        /// <param name="other">The other <see cref="PrincipalStrainState"/> to compare.</param>
+        public bool Equals(PrincipalStrainState other) => Theta1 == other.Theta1 && Epsilon1 == other.Epsilon1 && Epsilon2 == other.Epsilon2;
 
         /// <summary>
-        /// Compare a <see cref="PrincipalStrain"/> to a <see cref="Strain"/> object.
+        /// Compare a <see cref="PrincipalStrainState"/> to a <see cref="StrainState"/> object.
         /// </summary>
-        /// <param name="other">The <see cref="Strain"/> to compare.</param>
-        public bool Equals(Strain other) => Equals(FromStrain(other));
+        /// <param name="other">The <see cref="StrainState"/> to compare.</param>
+        public bool Equals(StrainState other) => Equals(FromStrain(other));
 
         public override bool Equals(object obj)
         {
-	        if (obj is PrincipalStrain other)
+	        if (obj is PrincipalStrainState other)
 		        return Equals(other);
 
-	        if (obj is Strain strain)
+	        if (obj is StrainState strain)
 		        return Equals(strain);
 
 	        return false;
@@ -125,62 +126,62 @@ namespace OnPlaneComponents
         /// <summary>
         /// Returns true if components are equal.
         /// </summary>
-        public static bool operator == (PrincipalStrain left, PrincipalStrain right) => left.Equals(right);
+        public static bool operator == (PrincipalStrainState left, PrincipalStrainState right) => left.Equals(right);
 
         /// <summary>
         /// Returns true if components are different.
         /// </summary>
-        public static bool operator != (PrincipalStrain left, PrincipalStrain right) => !left.Equals(right);
+        public static bool operator != (PrincipalStrainState left, PrincipalStrainState right) => !left.Equals(right);
 
         /// <summary>
         /// Returns true if components are equal.
         /// </summary>
-        public static bool operator == (PrincipalStrain left, Strain right) => left.Equals(right);
+        public static bool operator == (PrincipalStrainState left, StrainState right) => left.Equals(right);
 
         /// <summary>
         /// Returns true if components are different.
         /// </summary>
-        public static bool operator != (PrincipalStrain left, Strain right) => !left.Equals(right);
+        public static bool operator != (PrincipalStrainState left, StrainState right) => !left.Equals(right);
 
         /// <summary>
-        /// Returns a <see cref="Strain"/> object with summed components, in horizontal direction (<see cref="ThetaX"/> = 0).
+        /// Returns a <see cref="StrainState"/> object with summed components, in horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
-        public static Strain operator + (PrincipalStrain left, PrincipalStrain right) => Strain.FromPrincipal(left) + Strain.FromPrincipal(right);
+        public static StrainState operator + (PrincipalStrainState left, PrincipalStrainState right) => StrainState.FromPrincipal(left) + StrainState.FromPrincipal(right);
 
         /// <summary>
-        /// Returns a <see cref="Strain"/> object with subtracted components, in horizontal direction (<see cref="ThetaX"/> = 0).
+        /// Returns a <see cref="StrainState"/> object with subtracted components, in horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
-        public static Strain operator - (PrincipalStrain left, PrincipalStrain right) => Strain.FromPrincipal(left) - Strain.FromPrincipal(right);
+        public static StrainState operator - (PrincipalStrainState left, PrincipalStrainState right) => StrainState.FromPrincipal(left) - StrainState.FromPrincipal(right);
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStrain"/> object with multiplied components by a <see cref="double"/>.
+        /// Returns a <see cref="PrincipalStrainState"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
-        public static PrincipalStrain operator * (PrincipalStrain principalStrain, double multiplier) => new PrincipalStrain(multiplier * principalStrain.Epsilon1, multiplier * principalStrain.Epsilon2, principalStrain.Theta1);
+        public static PrincipalStrainState operator * (PrincipalStrainState principalStrainState, double multiplier) => new PrincipalStrainState(multiplier * principalStrainState.Epsilon1, multiplier * principalStrainState.Epsilon2, principalStrainState.Theta1);
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStrain"/> object with multiplied components by a <see cref="double"/>.
+        /// Returns a <see cref="PrincipalStrainState"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
-        public static PrincipalStrain operator *(double multiplier, PrincipalStrain strain) => strain * multiplier;
+        public static PrincipalStrainState operator *(double multiplier, PrincipalStrainState strainState) => strainState * multiplier;
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStrain"/> object with multiplied components by an <see cref="int"/>.
+        /// Returns a <see cref="PrincipalStrainState"/> object with multiplied components by an <see cref="int"/>.
         /// </summary>
-        public static PrincipalStrain operator *(PrincipalStrain principalStrain, int multiplier) => principalStrain * (double)multiplier;
+        public static PrincipalStrainState operator *(PrincipalStrainState principalStrainState, int multiplier) => principalStrainState * (double)multiplier;
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStrain"/> object with multiplied components by an <see cref="int"/>.
+        /// Returns a <see cref="PrincipalStrainState"/> object with multiplied components by an <see cref="int"/>.
         /// </summary>
-        public static PrincipalStrain operator *(int multiplier, PrincipalStrain strain) => strain * (double)multiplier;
+        public static PrincipalStrainState operator *(int multiplier, PrincipalStrainState strainState) => strainState * (double)multiplier;
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStrain"/> object with components divided by a <see cref="double"/>.
+        /// Returns a <see cref="PrincipalStrainState"/> object with components divided by a <see cref="double"/>.
         /// </summary>
-        public static PrincipalStrain operator /(PrincipalStrain principalStrain, double divider) => new PrincipalStrain(principalStrain.Epsilon1 / divider, principalStrain.Epsilon2 / divider, principalStrain.Theta1);
+        public static PrincipalStrainState operator /(PrincipalStrainState principalStrainState, double divider) => new PrincipalStrainState(principalStrainState.Epsilon1 / divider, principalStrainState.Epsilon2 / divider, principalStrainState.Theta1);
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStrain"/> object with components divided by an <see cref="int"/>.
+        /// Returns a <see cref="PrincipalStrainState"/> object with components divided by an <see cref="int"/>.
         /// </summary>
-        public static PrincipalStrain operator /(PrincipalStrain principalStrain, int divider) => principalStrain / (double)divider;
+        public static PrincipalStrainState operator /(PrincipalStrainState principalStrainState, int divider) => principalStrainState / (double)divider;
 
     }
 }

@@ -10,7 +10,7 @@ namespace OnPlaneComponents
     /// <summary>
     /// Stress object for XY components.
     /// </summary>
-    public struct Stress : IEquatable<Stress>
+    public struct StressState : IEquatable<StressState>
     {
 		// Auxiliary fields
 		private Pressure _sigmaX, _sigmaY, _tauXY;
@@ -112,7 +112,7 @@ namespace OnPlaneComponents
         /// <param name="tauXY">The shear stress (positive if upwards in right face of element).</param>
         /// <param name="thetaX">The angle of <paramref name="sigmaX"/>, related to horizontal axis (positive to counterclockwise).</param>
         /// <param name="unit">The <see cref="PressureUnit"/> of stresses (default: <see cref="PressureUnit.Megapascal"/>).</param>
-        public Stress(double sigmaX, double sigmaY, double tauXY, double thetaX = 0, PressureUnit unit = PressureUnit.Megapascal)
+        public StressState(double sigmaX, double sigmaY, double tauXY, double thetaX = 0, PressureUnit unit = PressureUnit.Megapascal)
 		{
 			_sigmaX = Pressure.From(sigmaX, unit);
 			_sigmaY = Pressure.From(sigmaY, unit);
@@ -128,28 +128,13 @@ namespace OnPlaneComponents
         /// <param name="tauXY">The shear stress (positive if upwards in right face of element).</param>
         /// <param name="thetaX">The angle of <paramref name="sigmaX"/>, related to horizontal axis (positive to counterclockwise).</param>
         /// <param name="unit">The <see cref="PressureUnit"/> of stresses (default: <see cref="PressureUnit.Megapascal"/>).</param>
-        public Stress(Pressure sigmaX, Pressure sigmaY, Pressure tauXY, double thetaX = 0, PressureUnit unit = PressureUnit.Megapascal)
+        public StressState(Pressure sigmaX, Pressure sigmaY, Pressure tauXY, double thetaX = 0, PressureUnit unit = PressureUnit.Megapascal)
 		{
 			_sigmaX = sigmaX.ToUnit(unit);
 			_sigmaY = sigmaY.ToUnit(unit);
 			_tauXY  = tauXY.ToUnit(unit);
 			ThetaX  = thetaX;
 		}
-
-        /// <summary>
-        /// Stress object for XY components.
-        /// </summary>
-        /// <param name="stressVector">The vector of stresses, in considered <paramref name="unit"/>.
-        ///	<para>{SigmaX, SigmaY, TauXY}</para></param>
-        /// <param name="thetaX">The angle of X direction, related to horizontal axis.</param>
-        /// <param name="unit">The <see cref="PressureUnit"/> of stresses (default: <see cref="PressureUnit.Megapascal"/>).</param>
-        public Stress(Vector<double> stressVector, double thetaX = 0, PressureUnit unit = PressureUnit.Megapascal)
-        {
-	        _sigmaX = Pressure.From(stressVector[0], unit);
-	        _sigmaY = Pressure.From(stressVector[1], unit);
-	        _tauXY  = Pressure.From(stressVector[2], unit);
-	        ThetaX  = thetaX;
-        }
 
         /// <summary>
         /// Change the unit of stresses.
@@ -161,95 +146,105 @@ namespace OnPlaneComponents
         }
 
 		/// <summary>
-        /// Get a <see cref="Stress"/> with zero elements.
+        /// Get a <see cref="StressState"/> with zero elements.
         /// </summary>
-		public static Stress Zero => new Stress(0, 0, 0);
+		public static StressState Zero => new StressState(0, 0, 0);
 
 		/// <summary>
-		/// Get <see cref="Stress"/> transformed to horizontal direction (<see cref="ThetaX"/> = 0).
+		/// Stress object for XY components.
 		/// </summary>
-		/// <param name="stress">The <see cref="Stress"/> to transform.</param>
-		public static Stress ToHorizontal(Stress stress)
+		/// <param name="stressVector">The vector of stresses, in considered <paramref name="unit"/>.
+		///	<para>{SigmaX, SigmaY, TauXY}</para></param>
+		/// <param name="thetaX">The angle of X direction, related to horizontal axis.</param>
+		/// <param name="unit">The <see cref="PressureUnit"/> of stresses (default: <see cref="PressureUnit.Megapascal"/>).</param>
+		public static StressState FromVector(Vector<double> stressVector, double thetaX = 0, PressureUnit unit = PressureUnit.Megapascal) => 
+			new StressState(stressVector[0], stressVector[1], stressVector[2], thetaX, unit);
+
+		/// <summary>
+        /// Get <see cref="StressState"/> transformed to horizontal direction (<see cref="ThetaX"/> = 0).
+        /// </summary>
+        /// <param name="stressState">The <see cref="StressState"/> to transform.</param>
+        public static StressState ToHorizontal(StressState stressState)
 		{
-			if (stress.IsHorizontal)
-				return stress;
+			if (stressState.IsHorizontal)
+				return stressState;
 
 			// Get the strain vector transformed
-			var sVec = StressRelations.Transform(stress.Vector, -stress.ThetaX);
+			var sVec = StressRelations.Transform(stressState.Vector, -stressState.ThetaX);
 
 			// Return with corrected angle
-			return new Stress(sVec);
+			return FromVector(sVec);
 		}
 
         /// <summary>
-        /// Get <see cref="Stress"/> transformed by a rotation angle.
+        /// Get <see cref="StressState"/> transformed by a rotation angle.
         /// </summary>
-        /// <param name="stress">The <see cref="Stress"/> to transform.</param>
+        /// <param name="stressState">The <see cref="StressState"/> to transform.</param>
         /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
-        public static Stress Transform(Stress stress, double theta)
+        public static StressState Transform(StressState stressState, double theta)
         {
 	        if (theta == 0)
-		        return stress;
+		        return stressState;
 
 	        // Get the strain vector transformed
-	        var sVec = StressRelations.Transform(stress.Vector, theta);
+	        var sVec = StressRelations.Transform(stressState.Vector, theta);
 
 	        // Return with corrected angle
-	        return new Stress(sVec, stress.ThetaX + theta, stress.Unit);
+	        return FromVector(sVec, stressState.ThetaX + theta, stressState.Unit);
         }
 
         /// <summary>
-        /// Get <see cref="PrincipalStress"/> transformed by a rotation angle.
+        /// Get <see cref="PrincipalStressState"/> transformed by a rotation angle.
         /// </summary>
-        /// <param name="principalStress">The <see cref="PrincipalStress"/> to transform.</param>
+        /// <param name="principalStressState">The <see cref="PrincipalStressState"/> to transform.</param>
         /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
-        public static Stress Transform(PrincipalStress principalStress, double theta)
+        public static StressState Transform(PrincipalStressState principalStressState, double theta)
         {
 	        if (theta == 0)
-		        return new Stress(principalStress.Vector, principalStress.Theta1, principalStress.Unit);
+		        return FromVector(principalStressState.Vector, principalStressState.Theta1, principalStressState.Unit);
 
 	        // Get the strain vector transformed
-	        var sVec = StressRelations.Transform(principalStress.Vector, theta);
+	        var sVec = StressRelations.Transform(principalStressState.Vector, theta);
 
 	        // Return with corrected angle
-	        return new Stress(sVec, principalStress.Theta1 + theta, principalStress.Unit);
+	        return FromVector(sVec, principalStressState.Theta1 + theta, principalStressState.Unit);
         }
 
 
         /// <summary>
-        /// Get <see cref="Stress"/> from a <see cref="PrincipalStress"/> in horizontal direction (<see cref="ThetaX"/> = 0).
+        /// Get <see cref="StressState"/> from a <see cref="PrincipalStressState"/> in horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
-        /// <param name="principalStress">The <see cref="PrincipalStress"/> to horizontal <see cref="Stress"/>.</param>
-        public static Stress FromPrincipal(PrincipalStress principalStress)
+        /// <param name="principalStressState">The <see cref="PrincipalStressState"/> to horizontal <see cref="StressState"/>.</param>
+        public static StressState FromPrincipal(PrincipalStressState principalStressState)
         {
-	        if (principalStress.Theta1 == 0)
-		        return new Stress(principalStress.Vector);
+	        if (principalStressState.Theta1 == 0)
+		        return FromVector(principalStressState.Vector);
 
 	        // Get the strain vector transformed
-	        var sVec = StressRelations.StressesFromPrincipal(principalStress.Sigma1, principalStress.Sigma2, principalStress.Theta1);
+	        var sVec = StressRelations.StressesFromPrincipal(principalStressState.Sigma1, principalStressState.Sigma2, principalStressState.Theta1);
 
 	        // Return with corrected angle
-	        return new Stress(sVec, 0, principalStress.Unit);
+	        return FromVector(sVec, 0, principalStressState.Unit);
         }
 
         /// <summary>
-        /// Compare two <see cref="Stress"/> objects.
+        /// Compare two <see cref="StressState"/> objects.
         /// </summary>
-        /// <param name="other">The <see cref="Stress"/> to compare.</param>
-        public bool Equals(Stress other) => ThetaX == other.ThetaX && _sigmaX == other._sigmaX && _sigmaY == other._sigmaY && _tauXY == other._tauXY;
+        /// <param name="other">The <see cref="StressState"/> to compare.</param>
+        public bool Equals(StressState other) => ThetaX == other.ThetaX && _sigmaX == other._sigmaX && _sigmaY == other._sigmaY && _tauXY == other._tauXY;
 
         /// <summary>
-        /// Compare a <see cref="Stress"/> to a <see cref="PrincipalStress"/> object.
+        /// Compare a <see cref="StressState"/> to a <see cref="PrincipalStressState"/> object.
         /// </summary>
-        /// <param name="other">The <see cref="PrincipalStress"/> to compare.</param>
-        public bool Equals(PrincipalStress other) => Equals(FromPrincipal(other));
+        /// <param name="other">The <see cref="PrincipalStressState"/> to compare.</param>
+        public bool Equals(PrincipalStressState other) => Equals(FromPrincipal(other));
 
         public override bool Equals(object obj)
         {
-	        if (obj is Stress other)
+	        if (obj is StressState other)
 		        return Equals(other);
 
-	        if (obj is PrincipalStress principalStress)
+	        if (obj is PrincipalStressState principalStress)
 		        return Equals(principalStress);
 
 	        return false;
@@ -274,129 +269,129 @@ namespace OnPlaneComponents
         /// <summary>
         /// Returns true if components are equal.
         /// </summary>
-        public static bool operator == (Stress left, Stress right) => left.Equals(right);
+        public static bool operator == (StressState left, StressState right) => left.Equals(right);
 
         /// <summary>
         /// Returns true if components are different.
         /// </summary>
-        public static bool operator != (Stress left, Stress right) => !left.Equals(right);
+        public static bool operator != (StressState left, StressState right) => !left.Equals(right);
 
         /// <summary>
         /// Returns true if components are equal.
         /// </summary>
-        public static bool operator == (Stress left, PrincipalStress right) => left.Equals(right);
+        public static bool operator == (StressState left, PrincipalStressState right) => left.Equals(right);
 
         /// <summary>
         /// Returns true if components are different.
         /// </summary>
-        public static bool operator != (Stress left, PrincipalStress right) => !left.Equals(right);
+        public static bool operator != (StressState left, PrincipalStressState right) => !left.Equals(right);
 
         /// <summary>
-        /// Returns a <see cref="Stress"/> object with summed components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
+        /// Returns a <see cref="StressState"/> object with summed components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
         /// </summary>
-        public static Stress operator + (Stress left, Stress right)
+        public static StressState operator + (StressState left, StressState right)
         {
 	        // Transform to horizontal
-	        Stress
+	        StressState
 		        lTrans = ToHorizontal(left),
 		        rTrans = ToHorizontal(right);
 
-            return new Stress(lTrans._sigmaX + rTrans._sigmaX, lTrans._sigmaY + rTrans._sigmaY, lTrans._tauXY + rTrans._tauXY, 0, left.Unit);
+            return new StressState(lTrans._sigmaX + rTrans._sigmaX, lTrans._sigmaY + rTrans._sigmaY, lTrans._tauXY + rTrans._tauXY, 0, left.Unit);
         }
 
         /// <summary>
-        /// Returns a <see cref="Stress"/> object with subtracted components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
+        /// Returns a <see cref="StressState"/> object with subtracted components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
         /// </summary>
-        public static Stress operator - (Stress left, Stress right)
+        public static StressState operator - (StressState left, StressState right)
         {
 	        // Transform to horizontal
-	        Stress
+	        StressState
 		        lTrans = ToHorizontal(left),
 		        rTrans = ToHorizontal(right);
 
-	        return new Stress(lTrans._sigmaX - rTrans._sigmaX, lTrans._sigmaY - rTrans._sigmaY, lTrans._tauXY - rTrans._tauXY, 0, left.Unit);
+	        return new StressState(lTrans._sigmaX - rTrans._sigmaX, lTrans._sigmaY - rTrans._sigmaY, lTrans._tauXY - rTrans._tauXY, 0, left.Unit);
         }
 
         /// <summary>
-        /// Returns a <see cref="Stress"/> object with summed components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
+        /// Returns a <see cref="StressState"/> object with summed components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
         /// </summary>
-        public static Stress operator + (Stress left, PrincipalStress right)
+        public static StressState operator + (StressState left, PrincipalStressState right)
         {
 	        // Transform to horizontal
-	        Stress
-		        lTrans = ToHorizontal(left),
-		        rTrans = FromPrincipal(right);
-
-            return new Stress(lTrans._sigmaX + rTrans._sigmaX, lTrans._sigmaY + rTrans._sigmaY, lTrans._tauXY + rTrans._tauXY, 0, left.Unit);
-        }
-
-        /// <summary>
-        /// Returns a <see cref="Stress"/> object with subtracted components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
-        /// </summary>
-        public static Stress operator - (Stress left, PrincipalStress right)
-        {
-	        // Transform to horizontal
-	        Stress
+	        StressState
 		        lTrans = ToHorizontal(left),
 		        rTrans = FromPrincipal(right);
 
-	        return new Stress(lTrans._sigmaX - rTrans._sigmaX, lTrans._sigmaY - rTrans._sigmaY, lTrans._tauXY - rTrans._tauXY, 0, left.Unit);
+            return new StressState(lTrans._sigmaX + rTrans._sigmaX, lTrans._sigmaY + rTrans._sigmaY, lTrans._tauXY + rTrans._tauXY, 0, left.Unit);
         }
 
         /// <summary>
-        /// Returns a <see cref="Stress"/> object with summed components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
+        /// Returns a <see cref="StressState"/> object with subtracted components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
         /// </summary>
-        public static Stress operator + (PrincipalStress left, Stress right)
+        public static StressState operator - (StressState left, PrincipalStressState right)
         {
 	        // Transform to horizontal
-	        Stress
+	        StressState
+		        lTrans = ToHorizontal(left),
+		        rTrans = FromPrincipal(right);
+
+	        return new StressState(lTrans._sigmaX - rTrans._sigmaX, lTrans._sigmaY - rTrans._sigmaY, lTrans._tauXY - rTrans._tauXY, 0, left.Unit);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="StressState"/> object with summed components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
+        /// </summary>
+        public static StressState operator + (PrincipalStressState left, StressState right)
+        {
+	        // Transform to horizontal
+	        StressState
 		        lTrans = FromPrincipal(left),
 		        rTrans = ToHorizontal(right);
 
-            return new Stress(lTrans._sigmaX + rTrans._sigmaX, lTrans._sigmaY + rTrans._sigmaY, lTrans._tauXY + rTrans._tauXY, 0, left.Unit);
+            return new StressState(lTrans._sigmaX + rTrans._sigmaX, lTrans._sigmaY + rTrans._sigmaY, lTrans._tauXY + rTrans._tauXY, 0, left.Unit);
         }
 
         /// <summary>
-        /// Returns a <see cref="Stress"/> object with subtracted components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
+        /// Returns a <see cref="StressState"/> object with subtracted components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
         /// </summary>
-        public static Stress operator - (PrincipalStress left, Stress right)
+        public static StressState operator - (PrincipalStressState left, StressState right)
         {
 	        // Transform to horizontal
-	        Stress
+	        StressState
 		        lTrans = FromPrincipal(left),
 		        rTrans = ToHorizontal(right);
 
-	        return new Stress(lTrans._sigmaX - rTrans._sigmaX, lTrans._sigmaY - rTrans._sigmaY, lTrans._tauXY - rTrans._tauXY, 0, left.Unit);
+	        return new StressState(lTrans._sigmaX - rTrans._sigmaX, lTrans._sigmaY - rTrans._sigmaY, lTrans._tauXY - rTrans._tauXY, 0, left.Unit);
         }
 
         /// <summary>
-        /// Returns a <see cref="Stress"/> object with multiplied components by a <see cref="double"/>.
+        /// Returns a <see cref="StressState"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
-        public static Stress operator * (Stress stress, double multiplier) => new Stress(multiplier * stress._sigmaX, multiplier * stress._sigmaY, multiplier * stress._tauXY, stress.ThetaX, stress.Unit);
+        public static StressState operator * (StressState stressState, double multiplier) => new StressState(multiplier * stressState._sigmaX, multiplier * stressState._sigmaY, multiplier * stressState._tauXY, stressState.ThetaX, stressState.Unit);
 
         /// <summary>
-        /// Returns a <see cref="Stress"/> object with multiplied components by a <see cref="double"/>.
+        /// Returns a <see cref="StressState"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
-        public static Stress operator * (double multiplier, Stress stress) => stress * multiplier;
+        public static StressState operator * (double multiplier, StressState stressState) => stressState * multiplier;
 
         /// <summary>
-        /// Returns a <see cref="Stress"/> object with multiplied components by an <see cref="int"/>.
+        /// Returns a <see cref="StressState"/> object with multiplied components by an <see cref="int"/>.
         /// </summary>
-        public static Stress operator * (Stress stress, int multiplier) => stress * (double)multiplier;
+        public static StressState operator * (StressState stressState, int multiplier) => stressState * (double)multiplier;
 
         /// <summary>
-        /// Returns a <see cref="Stress"/> object with multiplied components by an <see cref="int"/>.
+        /// Returns a <see cref="StressState"/> object with multiplied components by an <see cref="int"/>.
         /// </summary>
-        public static Stress operator * (int multiplier, Stress stress) => stress * (double)multiplier;
+        public static StressState operator * (int multiplier, StressState stressState) => stressState * (double)multiplier;
 
         /// <summary>
-        /// Returns a <see cref="Stress"/> object with components divided by a <see cref="double"/>.
+        /// Returns a <see cref="StressState"/> object with components divided by a <see cref="double"/>.
         /// </summary>
-        public static Stress operator / (Stress stress, double divider) => new Stress(stress._sigmaX / divider, stress._sigmaY / divider, stress._tauXY / divider, stress.ThetaX, stress.Unit);
+        public static StressState operator / (StressState stressState, double divider) => new StressState(stressState._sigmaX / divider, stressState._sigmaY / divider, stressState._tauXY / divider, stressState.ThetaX, stressState.Unit);
 
         /// <summary>
-        /// Returns a <see cref="Stress"/> object with components divided by an <see cref="int"/>.
+        /// Returns a <see cref="StressState"/> object with components divided by an <see cref="int"/>.
         /// </summary>
-        public static Stress operator / (Stress stress, int divider) => stress / (double)divider;
+        public static StressState operator / (StressState stressState, int divider) => stressState / (double)divider;
 	}
 }

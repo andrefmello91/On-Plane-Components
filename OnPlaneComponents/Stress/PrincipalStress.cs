@@ -1,4 +1,5 @@
-﻿using MathNet.Numerics;
+﻿using System;
+using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using UnitsNet;
@@ -9,7 +10,7 @@ namespace OnPlaneComponents
     /// <summary>
     /// Principal stress struct.
     /// </summary>
-	public struct PrincipalStress
+	public struct PrincipalStressState : IEquatable<PrincipalStressState>
     {
 	    // Auxiliary fields
 	    private Pressure _sigma1, _sigma2;
@@ -83,7 +84,7 @@ namespace OnPlaneComponents
         /// <param name="sigma2">The minimum principal stress (positive for tensile).</param>
         /// <param name="theta1">The angle of <paramref name="sigma1"/>, related to horizontal axis (positive to counterclockwise).</param>
         /// <param name="unit">The <see cref="PressureUnit"/> of stresses (default: <see cref="PressureUnit.Megapascal"/>).</param>
-        public PrincipalStress(double sigma1, double sigma2, double theta1 = Constants.PiOver4, PressureUnit unit = PressureUnit.Megapascal)
+        public PrincipalStressState(double sigma1, double sigma2, double theta1 = Constants.PiOver4, PressureUnit unit = PressureUnit.Megapascal)
         {
 			_sigma1 = Pressure.From(sigma1, unit);
 			_sigma2 = Pressure.From(sigma2, unit);
@@ -97,7 +98,7 @@ namespace OnPlaneComponents
         /// <param name="sigma2">The minimum principal <see cref="Pressure"/> (positive for tensile).</param>
         /// <param name="theta1">The angle of <paramref name="sigma1"/>, related to horizontal axis (positive to counterclockwise).</param>
         /// <param name="unit">The <see cref="PressureUnit"/> of stresses (default: <see cref="PressureUnit.Megapascal"/>).</param>
-        public PrincipalStress(Pressure sigma1, Pressure sigma2, double theta1 = Constants.PiOver4, PressureUnit unit = PressureUnit.Megapascal)
+        public PrincipalStressState(Pressure sigma1, Pressure sigma2, double theta1 = Constants.PiOver4, PressureUnit unit = PressureUnit.Megapascal)
         {
 	        _sigma1 = sigma1.ToUnit(unit);
 			_sigma2 = sigma2.ToUnit(unit);
@@ -114,40 +115,40 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Get a <see cref="PrincipalStress"/> with zero elements.
+        /// Get a <see cref="PrincipalStressState"/> with zero elements.
         /// </summary>
-        public static PrincipalStress Zero => new PrincipalStress(0, 0);
+        public static PrincipalStressState Zero => new PrincipalStressState(0, 0);
 
         /// <summary>
-        /// Get a <see cref="PrincipalStress"/> from a <see cref="Stress"/>.
+        /// Get a <see cref="PrincipalStressState"/> from a <see cref="StressState"/>.
         /// </summary>
-        /// <param name="stress">The <see cref="Stress"/> to transform.</param>
-        public static PrincipalStress FromStress(Stress stress)
+        /// <param name="stressState">The <see cref="StressState"/> to transform.</param>
+        public static PrincipalStressState FromStress(StressState stressState)
         {
-	        var (s1, s2) = StressRelations.CalculatePrincipal(stress.Vector);
-	        var theta1   = StressRelations.CalculatePrincipalAngles(stress.Vector, s2).theta1;
+	        var (s1, s2) = StressRelations.CalculatePrincipal(stressState.Vector);
+	        var theta1   = StressRelations.CalculatePrincipalAngles(stressState.Vector, s2).theta1;
 
-			return new PrincipalStress(s1, s2, stress.ThetaX + theta1);
+			return new PrincipalStressState(s1, s2, stressState.ThetaX + theta1);
         }
 
         /// <summary>
-        /// Compare two <see cref="PrincipalStress"/> objects.
+        /// Compare two <see cref="PrincipalStressState"/> objects.
         /// </summary>
-        /// <param name="other">The other <see cref="PrincipalStress"/> to compare.</param>
-        public bool Equals(PrincipalStress other) => Theta1 == other.Theta1 && Sigma1 == other.Sigma1 && Sigma2 == other.Sigma2;
+        /// <param name="other">The other <see cref="PrincipalStressState"/> to compare.</param>
+        public bool Equals(PrincipalStressState other) => Theta1 == other.Theta1 && Sigma1 == other.Sigma1 && Sigma2 == other.Sigma2;
 
         /// <summary>
-        /// Compare a <see cref="PrincipalStress"/> to a <see cref="Stress"/> object.
+        /// Compare a <see cref="PrincipalStressState"/> to a <see cref="StressState"/> object.
         /// </summary>
-        /// <param name="other">The <see cref="Stress"/> to compare.</param>
-        public bool Equals(Stress other) => Equals(FromStress(other));
+        /// <param name="other">The <see cref="StressState"/> to compare.</param>
+        public bool Equals(StressState other) => Equals(FromStress(other));
 
         public override bool Equals(object obj)
         {
-	        if (obj is PrincipalStress other)
+	        if (obj is PrincipalStressState other)
 		        return Equals(other);
 
-	        if (obj is Stress stress)
+	        if (obj is StressState stress)
 		        return Equals(stress);
 
 	        return false;
@@ -170,62 +171,62 @@ namespace OnPlaneComponents
         /// <summary>
         /// Returns true if components are equal.
         /// </summary>
-        public static bool operator == (PrincipalStress left, PrincipalStress right) => left.Equals(right);
+        public static bool operator == (PrincipalStressState left, PrincipalStressState right) => left.Equals(right);
 
         /// <summary>
         /// Returns true if components are different.
         /// </summary>
-        public static bool operator != (PrincipalStress left, PrincipalStress right) => !left.Equals(right);
+        public static bool operator != (PrincipalStressState left, PrincipalStressState right) => !left.Equals(right);
 
         /// <summary>
         /// Returns true if components are equal.
         /// </summary>
-        public static bool operator == (PrincipalStress left, Stress right) => left.Equals(right);
+        public static bool operator == (PrincipalStressState left, StressState right) => left.Equals(right);
 
         /// <summary>
         /// Returns true if components are different.
         /// </summary>
-        public static bool operator != (PrincipalStress left, Stress right) => !left.Equals(right);
+        public static bool operator != (PrincipalStressState left, StressState right) => !left.Equals(right);
 
         /// <summary>
-        /// Returns a <see cref="Stress"/> object with summed components, in horizontal direction (<see cref="ThetaX"/> = 0).
+        /// Returns a <see cref="StressState"/> object with summed components, in horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
-        public static Stress operator + (PrincipalStress left, PrincipalStress right) => Stress.FromPrincipal(left) + Stress.FromPrincipal(right);
+        public static StressState operator + (PrincipalStressState left, PrincipalStressState right) => StressState.FromPrincipal(left) + StressState.FromPrincipal(right);
 
         /// <summary>
-        /// Returns a <see cref="Stress"/> object with subtracted components, in horizontal direction (<see cref="ThetaX"/> = 0).
+        /// Returns a <see cref="StressState"/> object with subtracted components, in horizontal direction (<see cref="ThetaX"/> = 0).
         /// </summary>
-        public static Stress operator - (PrincipalStress left, PrincipalStress right) => Stress.FromPrincipal(left) - Stress.FromPrincipal(right);
+        public static StressState operator - (PrincipalStressState left, PrincipalStressState right) => StressState.FromPrincipal(left) - StressState.FromPrincipal(right);
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStress"/> object with multiplied components by a <see cref="double"/>.
+        /// Returns a <see cref="PrincipalStressState"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
-        public static PrincipalStress operator * (PrincipalStress principalStrain, double multiplier) => new PrincipalStress(multiplier * principalStrain.Sigma1, multiplier * principalStrain.Sigma2, principalStrain.Theta1);
+        public static PrincipalStressState operator * (PrincipalStressState principalStrain, double multiplier) => new PrincipalStressState(multiplier * principalStrain.Sigma1, multiplier * principalStrain.Sigma2, principalStrain.Theta1);
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStress"/> object with multiplied components by a <see cref="double"/>.
+        /// Returns a <see cref="PrincipalStressState"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
-        public static PrincipalStress operator *(double multiplier, PrincipalStress stress) => stress * multiplier;
+        public static PrincipalStressState operator *(double multiplier, PrincipalStressState stressState) => stressState * multiplier;
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStress"/> object with multiplied components by an <see cref="int"/>.
+        /// Returns a <see cref="PrincipalStressState"/> object with multiplied components by an <see cref="int"/>.
         /// </summary>
-        public static PrincipalStress operator *(PrincipalStress principalStrain, int multiplier) => principalStrain * (double)multiplier;
+        public static PrincipalStressState operator *(PrincipalStressState principalStrain, int multiplier) => principalStrain * (double)multiplier;
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStress"/> object with multiplied components by an <see cref="int"/>.
+        /// Returns a <see cref="PrincipalStressState"/> object with multiplied components by an <see cref="int"/>.
         /// </summary>
-        public static PrincipalStress operator *(int multiplier, PrincipalStress stress) => stress * (double)multiplier;
+        public static PrincipalStressState operator *(int multiplier, PrincipalStressState stressState) => stressState * (double)multiplier;
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStress"/> object with components divided by a <see cref="double"/>.
+        /// Returns a <see cref="PrincipalStressState"/> object with components divided by a <see cref="double"/>.
         /// </summary>
-        public static PrincipalStress operator /(PrincipalStress principalStrain, double divider) => new PrincipalStress(principalStrain.Sigma1 / divider, principalStrain.Sigma2 / divider, principalStrain.Theta1);
+        public static PrincipalStressState operator /(PrincipalStressState principalStrain, double divider) => new PrincipalStressState(principalStrain.Sigma1 / divider, principalStrain.Sigma2 / divider, principalStrain.Theta1);
 
         /// <summary>
-        /// Returns a <see cref="PrincipalStress"/> object with components divided by an <see cref="int"/>.
+        /// Returns a <see cref="PrincipalStressState"/> object with components divided by an <see cref="int"/>.
         /// </summary>
-        public static PrincipalStress operator /(PrincipalStress principalStrain, int divider) => principalStrain / (double)divider;
+        public static PrincipalStressState operator /(PrincipalStressState principalStrain, int divider) => principalStrain / (double)divider;
 
     }
 }
