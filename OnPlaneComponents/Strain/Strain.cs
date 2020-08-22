@@ -91,10 +91,10 @@ namespace OnPlaneComponents
         /// <param name="thetaX">The angle of <paramref name="epsilonX"/> direction, related to horizontal axis (positive counterclockwise).</param>
         public StrainState(double epsilonX, double epsilonY, double gammaXY, double thetaX = 0)
         {
-	        EpsilonX = epsilonX;
-	        EpsilonY = epsilonY;
-	        GammaXY  = gammaXY;
-	        ThetaX   = thetaX;
+	        EpsilonX = !double.IsNaN(epsilonX) ? epsilonX : 0;
+	        EpsilonY = !double.IsNaN(epsilonY) ? epsilonY : 0;
+	        GammaXY  = !double.IsNaN(gammaXY)  ? gammaXY  : 0;
+	        ThetaX   = !double.IsNaN(thetaX)   ? thetaX   : 0;
         }
 
         /// <summary>
@@ -116,8 +116,13 @@ namespace OnPlaneComponents
         /// </summary>
         /// <param name="stressState">The <see cref="StressState"/> to transform.</param>
         /// <param name="stiffnessMatrix">The stiffness <see cref="Matrix"/> (3 x 3), related to <paramref name="stressState"/> direction.</param>
-        public static StrainState FromStresses(StressState stressState, Matrix<double> stiffnessMatrix) =>
-			FromVector(stiffnessMatrix.Solve(stressState.Vector), stressState.ThetaX);
+        public static StrainState FromStresses(StressState stressState, Matrix<double> stiffnessMatrix)
+        {
+	        if (stressState.IsZero)
+		        return Zero;
+
+	        return FromVector(stiffnessMatrix.Solve(stressState.Vector), stressState.ThetaX);
+        }
 
         /// <summary>
         /// Get <see cref="StrainState"/> transformed to horizontal direction (<see cref="ThetaX"/> = 0).

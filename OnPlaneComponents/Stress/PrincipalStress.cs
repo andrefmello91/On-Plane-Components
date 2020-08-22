@@ -92,9 +92,9 @@ namespace OnPlaneComponents
         /// <param name="unit">The <see cref="PressureUnit"/> of stresses (default: <see cref="PressureUnit.Megapascal"/>).</param>
         public PrincipalStressState(double sigma1, double sigma2, double theta1 = Constants.PiOver4, PressureUnit unit = PressureUnit.Megapascal)
         {
-			_sigma1 = Pressure.From(sigma1, unit);
-			_sigma2 = Pressure.From(sigma2, unit);
-			Theta1  = theta1;
+			_sigma1 = Pressure.From(!double.IsNaN(sigma1) ? sigma1 : 0, unit);
+			_sigma2 = Pressure.From(!double.IsNaN(sigma2) ? sigma2 : 0, unit);
+			Theta1  = !double.IsNaN(theta1) ? theta1 : 0;
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace OnPlaneComponents
         {
 	        _sigma1 = sigma1.ToUnit(unit);
 			_sigma2 = sigma2.ToUnit(unit);
-			Theta1  = theta1;
+			Theta1  = !double.IsNaN(theta1) ? theta1 : 0;
         }
 
         /// <summary>

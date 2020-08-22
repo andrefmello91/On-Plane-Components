@@ -114,10 +114,10 @@ namespace OnPlaneComponents
         /// <param name="unit">The <see cref="PressureUnit"/> of stresses (default: <see cref="PressureUnit.Megapascal"/>).</param>
         public StressState(double sigmaX, double sigmaY, double tauXY, double thetaX = 0, PressureUnit unit = PressureUnit.Megapascal)
 		{
-			_sigmaX = Pressure.From(sigmaX, unit);
-			_sigmaY = Pressure.From(sigmaY, unit);
-			_tauXY  = Pressure.From(tauXY,  unit);
-			ThetaX  = thetaX;
+			_sigmaX = Pressure.From(!double.IsNaN(sigmaX) ? sigmaX : 0, unit);
+			_sigmaY = Pressure.From(!double.IsNaN(sigmaY) ? sigmaY : 0, unit);
+			_tauXY  = Pressure.From(!double.IsNaN(tauXY)  ? tauXY  : 0,  unit);
+			ThetaX  = !double.IsNaN(thetaX) ? thetaX : 0;
 		}
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace OnPlaneComponents
 			_sigmaX = sigmaX.ToUnit(unit);
 			_sigmaY = sigmaY.ToUnit(unit);
 			_tauXY  = tauXY.ToUnit(unit);
-			ThetaX  = thetaX;
+			ThetaX  = !double.IsNaN(thetaX) ? thetaX : 0;
 		}
 
         /// <summary>
@@ -165,8 +165,13 @@ namespace OnPlaneComponents
         /// </summary>
         /// <param name="strainState">The <see cref="StrainState"/> to transform.</param>
         /// <param name="stiffnessMatrix">The stiffness <see cref="Matrix"/> (3 x 3), related to <paramref name="strainState"/> direction.</param>
-        public static StressState FromStrains(StrainState strainState, Matrix<double> stiffnessMatrix) =>
-			FromVector(stiffnessMatrix * strainState.Vector, strainState.ThetaX);
+        public static StressState FromStrains(StrainState strainState, Matrix<double> stiffnessMatrix)
+        {
+	        if (strainState.IsZero)
+		        return Zero;
+
+			return FromVector(stiffnessMatrix * strainState.Vector, strainState.ThetaX);
+        }
 
         /// <summary>
         /// Get <see cref="StressState"/> transformed to horizontal direction (<see cref="ThetaX"/> = 0).

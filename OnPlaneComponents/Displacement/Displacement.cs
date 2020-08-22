@@ -82,8 +82,8 @@ namespace OnPlaneComponents
         /// <param name="unit">The <see cref="LengthUnit"/> of displacement (default: <see cref="LengthUnit.Millimeter"/>).</param>
         public Displacement(double componentX, double componentY, LengthUnit unit = LengthUnit.Millimeter)
         {
-            _displacementX = Length.From(componentX, unit);
-            _displacementY = Length.From(componentY, unit);
+            _displacementX = Length.From(!double.IsNaN(componentX) ? componentX : 0, unit);
+            _displacementY = Length.From(!double.IsNaN(componentY) ? componentY : 0, unit);
         }
 
         /// <summary>

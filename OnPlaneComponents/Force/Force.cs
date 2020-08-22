@@ -80,8 +80,8 @@ namespace OnPlaneComponents
         /// <param name="unit">The <see cref="ForceUnit"/> (default: <see cref="ForceUnit.Newton"/>).</param>
         public Force(double componentX, double componentY, ForceUnit unit = ForceUnit.Newton)
 		{
-			_forceX = UnitsNet.Force.From(componentX, unit);
-			_forceY = UnitsNet.Force.From(componentY, unit);
+			_forceX = UnitsNet.Force.From(!double.IsNaN(componentX) ? componentX : 0, unit);
+			_forceY = UnitsNet.Force.From(!double.IsNaN(componentY) ? componentY : 0, unit);
 		}
 
         /// <summary>

@@ -70,9 +70,9 @@ namespace OnPlaneComponents
         /// <param name="theta1">The angle of maximum principal strain (<paramref name="epsilon1"/>), related to horizontal axis (positive to counterclockwise).</param>
         public PrincipalStrainState(double epsilon1, double epsilon2, double theta1 = Constants.PiOver4)
         {
-	        Epsilon1 = epsilon1;
-	        Epsilon2 = epsilon2;
-	        Theta1   = theta1;
+	        Epsilon1 = !double.IsNaN(epsilon1) ? epsilon1 : 0;
+	        Epsilon2 = !double.IsNaN(epsilon2) ? epsilon2 : 0;
+	        Theta1   = !double.IsNaN(theta1)   ? theta1   : 0;
         }
 
         /// <summary>
