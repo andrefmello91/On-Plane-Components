@@ -28,7 +28,7 @@ namespace OnPlaneComponents
 			    e =  eps[2] * cos2Theta;
 
 		    return
-			   Vector.Build.DenseOfVector(new[]
+			   Vector.Build.DenseOfArray(new[]
 			    {
 				    a + b + c,
 				    a - b - c,
