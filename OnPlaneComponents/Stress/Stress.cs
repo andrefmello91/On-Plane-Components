@@ -140,7 +140,7 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Get the stresses as an array, in unit constructed (<see cref="Unit"/>).
+        /// Get the stresses as an <see cref="Array"/>, in unit constructed (<see cref="Unit"/>).
         /// <para>[ SigmaX, SigmaY, TauXY ]</para>
         /// </summary>
         public double[] AsArray() => new[] { SigmaX, SigmaY, TauXY };
@@ -157,7 +157,7 @@ namespace OnPlaneComponents
         public static StressState Zero => new StressState(0, 0, 0);
 
         /// <summary>
-        /// Get a <see cref="StressState"/> from a <see cref="DenseVector"/>.
+        /// Get a <see cref="StressState"/> from a <see cref="Vector"/>.
 		/// </summary>
         /// <param name="stressVector">The vector of stresses, in considered <paramref name="unit"/>.
         ///	<para>{SigmaX, SigmaY, TauXY}</para></param>

@@ -130,7 +130,7 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Get principal stresses as an array, in <see cref="Unit"/> considered.
+        /// Get principal stresses as an <see cref="Array"/>, in <see cref="Unit"/> considered.
         /// <para>[ Sigma1, Sigma2, 0 ]</para>
         /// </summary>
         public double[] AsArray() => new[] { Sigma1, Sigma2, 0 };

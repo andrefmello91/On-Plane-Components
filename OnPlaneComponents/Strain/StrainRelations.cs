@@ -8,9 +8,9 @@ namespace OnPlaneComponents
     public static class StrainRelations
     {
         /// <summary>
-        /// Get a <see cref="DenseVector"/> of strains transformed by a rotation angle.
+        /// Get a <see cref="Vector"/> of strains transformed by a rotation angle.
         /// </summary>
-        /// <param name="strainVector"><see cref="DenseVector"/> of strains.</param>
+        /// <param name="strainVector"><see cref="Vector"/> of strains.</param>
         /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
         public static Vector<double> Transform(Vector<double> strainVector, double theta)
 	    {
@@ -28,7 +28,7 @@ namespace OnPlaneComponents
 			    e =  eps[2] * cos2Theta;
 
 		    return
-			   DenseVector.OfArray(new[]
+			   Vector.Build.DenseOfVector(new[]
 			    {
 				    a + b + c,
 				    a - b - c,
@@ -65,7 +65,7 @@ namespace OnPlaneComponents
         /// Calculate principal strains.
         /// <para>epsilon1 is the maximum strain and epsilon2 is the minimum strain.</para>
         /// </summary>
-        /// <param name="strainVector">The <see cref="DenseVector"/> of strains.
+        /// <param name="strainVector">The <see cref="Vector"/> of strains.
         /// <para>{ EpsilonX, EpsilonY, GammaXY }</para></param>
         public static (double epsilon1, double epsilon2) CalculatePrincipal(Vector<double> strainVector) =>
 	        CalculatePrincipal(strainVector[0], strainVector[1], strainVector[2]);
@@ -128,7 +128,7 @@ namespace OnPlaneComponents
         /// Calculate principal strains angles, in radians.
         /// <para>theta1 is the maximum strain angle and theta2 is the minimum strain angle.</para>
         /// </summary>
-        /// <param name="strainVector">The <see cref="DenseVector"/> of strains.
+        /// <param name="strainVector">The <see cref="Vector"/> of strains.
         /// <para>{ EpsilonX, EpsilonY, GammaXY }</para></param>
         /// <param name="epsilon2">Minimum principal strain, if known.</param>
         public static (double theta1, double theta2) CalculatePrincipalAngles(Vector<double> strainVector, double? epsilon2 = null) =>

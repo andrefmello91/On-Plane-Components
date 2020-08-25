@@ -97,7 +97,7 @@ namespace OnPlaneComponents
         public static StrainState Zero => new StrainState(0, 0, 0);
 
         /// <summary>
-        /// Get strains as an array.
+        /// Get strains as an <see cref="Array"/>.
         /// <para>[ EpsilonX, EpsilonY, GammaXY ]</para>
         /// </summary>
         public double[] AsArray() => new[] { EpsilonX, EpsilonY, GammaXY };
@@ -109,9 +109,9 @@ namespace OnPlaneComponents
         public Vector<double> AsVector() => Vector.Build.DenseOfArray(AsArray());
 
         /// <summary>
-        /// Get a <see cref="StrainState"/> from a <see cref="DenseVector"/> of strains.
+        /// Get a <see cref="StrainState"/> from a <see cref="Vector"/> of strains.
         /// </summary>
-        /// <param name="strainVector">The <see cref="DenseVector"/> of strains.
+        /// <param name="strainVector">The <see cref="Vector"/> of strains.
         ///	<para>{EpsilonX, EpsilonY, GammaXY}</para></param>
         /// <param name="thetaX">The angle of X direction, related to horizontal axis (positive counterclockwise).</param>
         public static StrainState FromVector(Vector<double> strainVector, double thetaX = 0) =>

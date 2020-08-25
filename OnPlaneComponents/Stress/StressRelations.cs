@@ -10,9 +10,9 @@ namespace OnPlaneComponents
     public static class StressRelations
     {
         /// <summary>
-        /// Get a <see cref="DenseVector"/> of stresses transformed by a rotation angle.
+        /// Get a <see cref="Vector"/> of stresses transformed by a rotation angle.
         /// </summary>
-        /// <param name="stresses"><see cref="DenseVector"/> of stresses.</param>
+        /// <param name="stresses"><see cref="Vector"/> of stresses.</param>
         /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
         public static Vector<double> Transform(Vector<double> stresses, double theta)
 		{
@@ -30,7 +30,7 @@ namespace OnPlaneComponents
 				e = f[2] * cos2Theta;
 
             return
-               DenseVector.OfArray(new []
+               Vector.Build.DenseOfArray(new []
 				{
 					a + b + c,
 					a - b - c,
@@ -87,7 +87,7 @@ namespace OnPlaneComponents
         /// Calculate principal stresses.
         /// <para>sigma1 is the maximum stress and sigma2 is the minimum stress.</para>
         /// </summary>
-        /// <param name="stresses"><see cref="DenseVector"/> of stresses.</param>
+        /// <param name="stresses"><see cref="Vector"/> of stresses.</param>
         public static (double sigma1, double sigma2) CalculatePrincipal(Vector<double> stresses) =>
             CalculatePrincipal(stresses[0], stresses[1], stresses[2]);
 
@@ -173,7 +173,7 @@ namespace OnPlaneComponents
             CalculatePrincipalAngles(stresses[0], stresses[1], stresses[2], sigma2);
 
         /// <summary>
-        /// Calculate the <see cref="DenseVector"/> of stresses, in X and Y, from principal stresses.
+        /// Calculate the <see cref="Vector"/> of stresses, in X and Y, from principal stresses.
         /// </summary>
         /// <param name="sigma1">Maximum principal stress.</param>
         /// <param name="sigma2">Minimum principal stress.</param>
@@ -197,7 +197,7 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Calculate the <see cref="DenseVector"/> of stresses, in X and Y, from principal stresses.
+        /// Calculate the <see cref="Vector"/> of stresses, in X and Y, from principal stresses.
         /// </summary>
         /// <param name="sigma1">Maximum principal stress.</param>
         /// <param name="sigma2">Minimum principal stress.</param>
