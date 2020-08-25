@@ -31,12 +31,6 @@ namespace OnPlaneComponents
         public double Theta2 => Theta1 + Constants.PiOver2;
 
         /// <summary>
-        /// Get principal strains as <see cref="DenseVector"/>.
-        /// <para>{ Epsilon1, Epsilon2, 0 }</para>
-        /// </summary>
-        public Vector<double> Vector => DenseVector.OfArray(new[] { Epsilon1, Epsilon2, 0 });
-
-        /// <summary>
         /// Get transformation <see cref="Matrix"/> from principal plane to horizontal plane.
         /// <para>See: <seealso cref="StrainRelations.TransformationMatrix"/></para>
         /// </summary>
@@ -91,6 +85,18 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
+        /// Get principal strains as an <see cref="Array"/>.
+        /// <para>{ Epsilon1, Epsilon2, 0 }</para>
+        /// </summary>
+        public double[] AsArray() => new[] { Epsilon1, Epsilon2, 0 };
+
+        /// <summary>
+        /// Get principal strains as <see cref="Vector"/>.
+        /// <para>{ Epsilon1, Epsilon2, 0 }</para>
+        /// </summary>
+        public Vector<double> AsVector() => Vector.Build.DenseOfArray(AsArray());
+
+        /// <summary>
         /// Get a <see cref="PrincipalStrainState"/> with zero elements.
         /// </summary>
         public static PrincipalStrainState Zero => new PrincipalStrainState(0, 0);
@@ -101,8 +107,8 @@ namespace OnPlaneComponents
         /// <param name="strainState">The <see cref="StrainState"/> to transform.</param>
         public static PrincipalStrainState FromStrain(StrainState strainState)
         {
-	        var (e1, e2) = StrainRelations.CalculatePrincipal(strainState.Vector);
-	        var theta1   = StrainRelations.CalculatePrincipalAngles(strainState.Vector, e2).theta1;
+	        var (e1, e2) = StrainRelations.CalculatePrincipal(strainState.AsVector());
+	        var theta1   = StrainRelations.CalculatePrincipalAngles(strainState.AsVector(), e2).theta1;
 
 			return new PrincipalStrainState(e1, e2, strainState.ThetaX + theta1);
         }

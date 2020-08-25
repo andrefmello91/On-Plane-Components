@@ -32,7 +32,7 @@
                 lTrans = ToHorizontal(left),
 		        rTrans = ToHorizontal(right);
 
-            return FromVector(lTrans.Vector + rTrans.Vector);
+            return FromVector(lTrans.AsVector() + rTrans.AsVector());
         }
 
         /// <summary>
@@ -45,7 +45,7 @@
 		        lTrans = ToHorizontal(left),
 		        rTrans = ToHorizontal(right);
 
-	        return FromVector(lTrans.Vector - rTrans.Vector);
+	        return FromVector(lTrans.AsVector() - rTrans.AsVector());
         }
 
         /// <summary>
@@ -58,7 +58,7 @@
 		        lTrans = ToHorizontal(left),
 		        rTrans = FromPrincipal(right);
 
-            return FromVector(lTrans.Vector + rTrans.Vector);
+            return FromVector(lTrans.AsVector() + rTrans.AsVector());
         }
 
         /// <summary>
@@ -71,7 +71,7 @@
 		        lTrans = ToHorizontal(left),
 		        rTrans = FromPrincipal(right);
 
-	        return FromVector(lTrans.Vector - rTrans.Vector);
+	        return FromVector(lTrans.AsVector() - rTrans.AsVector());
         }
 
         /// <summary>
@@ -84,7 +84,7 @@
 		        lTrans = FromPrincipal(left),
 		        rTrans = ToHorizontal(right);
 
-            return FromVector(lTrans.Vector + rTrans.Vector);
+            return FromVector(lTrans.AsVector() + rTrans.AsVector());
         }
 
         /// <summary>
@@ -97,13 +97,13 @@
 		        lTrans = FromPrincipal(left),
 		        rTrans = ToHorizontal(right);
 
-            return FromVector(lTrans.Vector - rTrans.Vector);
+            return FromVector(lTrans.AsVector() - rTrans.AsVector());
         }
 
         /// <summary>
         /// Returns a <see cref="StrainState"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
-        public static StrainState operator * (StrainState strainState, double multiplier) => FromVector(multiplier * strainState.Vector, strainState.ThetaX);
+        public static StrainState operator * (StrainState strainState, double multiplier) => FromVector(multiplier * strainState.AsVector(), strainState.ThetaX);
 
         /// <summary>
         /// Returns a <see cref="StrainState"/> object with multiplied components by a <see cref="double"/>.
@@ -123,7 +123,7 @@
         /// <summary>
         /// Returns a <see cref="StrainState"/> object with components divided by a <see cref="double"/>.
         /// </summary>
-        public static StrainState operator / (StrainState strainState, double divider) => FromVector(strainState.Vector / divider, strainState.ThetaX);
+        public static StrainState operator / (StrainState strainState, double divider) => FromVector(strainState.AsVector() / divider, strainState.ThetaX);
 
         /// <summary>
         /// Returns a <see cref="StrainState"/> object with components divided by an <see cref="int"/>.

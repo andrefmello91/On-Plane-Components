@@ -58,12 +58,6 @@ namespace OnPlaneComponents
         public double ThetaY => ThetaX + Constants.PiOver2;
 
         /// <summary>
-        /// Get the stress as <see cref="DenseVector"/>, in unit constructed (<see cref="Unit"/>).
-        /// <para>{SigmaX, SigmaY, TauXY}</para>
-        /// </summary>
-        public Vector<double> Vector => DenseVector.OfArray(new []{SigmaX, SigmaY, TauXY});
-
-        /// <summary>
         /// Get transformation matrix from XY plane to horizontal plane.
         /// <para>See: <see cref="StressRelations.TransformationMatrix"/></para>
         /// </summary>
@@ -145,10 +139,22 @@ namespace OnPlaneComponents
 	        Unit = toUnit;
         }
 
-		/// <summary>
+        /// <summary>
+        /// Get the stresses as an array, in unit constructed (<see cref="Unit"/>).
+        /// <para>[ SigmaX, SigmaY, TauXY ]</para>
+        /// </summary>
+        public double[] AsArray() => new[] { SigmaX, SigmaY, TauXY };
+
+        /// <summary>
+        /// Get the stresses as <see cref="Vector"/>, in unit constructed (<see cref="Unit"/>).
+        /// <para>{ SigmaX, SigmaY, TauXY }</para>
+        /// </summary>
+        public Vector<double> AsVector() => Vector.Build.DenseOfArray(AsArray());
+
+        /// <summary>
         /// Get a <see cref="StressState"/> with zero elements.
         /// </summary>
-		public static StressState Zero => new StressState(0, 0, 0);
+        public static StressState Zero => new StressState(0, 0, 0);
 
         /// <summary>
         /// Get a <see cref="StressState"/> from a <see cref="DenseVector"/>.
@@ -170,7 +176,7 @@ namespace OnPlaneComponents
 	        if (strainState.IsZero)
 		        return Zero;
 
-			return FromVector(stiffnessMatrix * strainState.Vector, strainState.ThetaX);
+			return FromVector(stiffnessMatrix * strainState.AsVector(), strainState.ThetaX);
         }
 
         /// <summary>
@@ -183,7 +189,7 @@ namespace OnPlaneComponents
 				return stressState;
 
 			// Get the strain vector transformed
-			var sVec = StressRelations.Transform(stressState.Vector, -stressState.ThetaX);
+			var sVec = StressRelations.Transform(stressState.AsVector(), -stressState.ThetaX);
 
 			// Return with corrected angle
 			return FromVector(sVec);
@@ -200,7 +206,7 @@ namespace OnPlaneComponents
 		        return stressState;
 
 	        // Get the strain vector transformed
-	        var sVec = StressRelations.Transform(stressState.Vector, theta);
+	        var sVec = StressRelations.Transform(stressState.AsVector(), theta);
 
 	        // Return with corrected angle
 	        return FromVector(sVec, stressState.ThetaX + theta, stressState.Unit);
@@ -214,10 +220,10 @@ namespace OnPlaneComponents
         public static StressState Transform(PrincipalStressState principalStressState, double theta)
         {
 	        if (theta == 0)
-		        return FromVector(principalStressState.Vector, principalStressState.Theta1, principalStressState.Unit);
+		        return FromVector(principalStressState.AsVector(), principalStressState.Theta1, principalStressState.Unit);
 
 	        // Get the strain vector transformed
-	        var sVec = StressRelations.Transform(principalStressState.Vector, theta);
+	        var sVec = StressRelations.Transform(principalStressState.AsVector(), theta);
 
 	        // Return with corrected angle
 	        return FromVector(sVec, principalStressState.Theta1 + theta, principalStressState.Unit);
@@ -231,7 +237,7 @@ namespace OnPlaneComponents
         public static StressState FromPrincipal(PrincipalStressState principalStressState)
         {
 	        if (principalStressState.Theta1 == 0)
-		        return FromVector(principalStressState.Vector);
+		        return FromVector(principalStressState.AsVector());
 
 	        // Get the strain vector transformed
 	        var sVec = StressRelations.StressesFromPrincipal(principalStressState.Sigma1, principalStressState.Sigma2, principalStressState.Theta1);

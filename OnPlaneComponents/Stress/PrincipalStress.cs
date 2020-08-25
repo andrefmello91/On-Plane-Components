@@ -52,12 +52,6 @@ namespace OnPlaneComponents
         public double Theta2 => Theta1 + Constants.PiOver2;
 
         /// <summary>
-        /// Get principal stresses as vector, in <see cref="Unit"/> considered..
-        /// <para>{ Sigma1, Sigma2, 0 }</para>
-        /// </summary>
-        public Vector<double> Vector => DenseVector.OfArray(new[] { Sigma1, Sigma2, 0 });
-
-        /// <summary>
         /// Get transformation <see cref="Matrix"/> from principal plane to horizontal plane.
         /// <para>See: <seealso cref="StressRelations.TransformationMatrix"/></para>
         /// </summary>
@@ -136,6 +130,18 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
+        /// Get principal stresses as an array, in <see cref="Unit"/> considered.
+        /// <para>[ Sigma1, Sigma2, 0 ]</para>
+        /// </summary>
+        public double[] AsArray() => new[] { Sigma1, Sigma2, 0 };
+
+        /// <summary>
+        /// Get principal stresses as a <see cref="Vector"/>, in <see cref="Unit"/> considered.
+        /// <para>{ Sigma1, Sigma2, 0 }</para>
+        /// </summary>
+        public Vector<double> AsVector() => Vector.Build.DenseOfArray(AsArray());
+
+        /// <summary>
         /// Get a <see cref="PrincipalStressState"/> with zero elements.
         /// </summary>
         public static PrincipalStressState Zero => new PrincipalStressState(0, 0);
@@ -146,8 +152,8 @@ namespace OnPlaneComponents
         /// <param name="stressState">The <see cref="StressState"/> to transform.</param>
         public static PrincipalStressState FromStress(StressState stressState)
         {
-	        var (s1, s2) = StressRelations.CalculatePrincipal(stressState.Vector);
-	        var theta1   = StressRelations.CalculatePrincipalAngles(stressState.Vector, s2).theta1;
+	        var (s1, s2) = StressRelations.CalculatePrincipal(stressState.AsVector());
+	        var theta1   = StressRelations.CalculatePrincipalAngles(stressState.AsVector(), s2).theta1;
 
 			return new PrincipalStressState(s1, s2, stressState.ThetaX + theta1);
         }
