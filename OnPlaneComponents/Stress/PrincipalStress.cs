@@ -76,12 +76,12 @@ namespace OnPlaneComponents
         /// <summary>
         /// Returns true if <see cref="Sigma1"/> and <see cref="Sigma2"/> are compressive stresses.
         /// </summary>
-        public bool PureCompression => Sigma1 < 0 && Sigma2 < 0;
+        public bool PureCompression => Sigma1 <= 0 && Sigma2 < 0;
 
         /// <summary>
         /// Returns true if <see cref="Sigma1"/> and <see cref="Sigma2"/> are tensile stresses.
         /// </summary>
-        public bool PureTension => Sigma1 > 0 && Sigma2 > 0;
+        public bool PureTension => Sigma1 > 0 && Sigma2 >= 0;
 
         /// <summary>
         /// Returns true if <see cref="Sigma1"/> is a tensile stress and <see cref="Sigma2"/> is a compressive stress.

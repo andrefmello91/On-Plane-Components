@@ -55,12 +55,12 @@ namespace OnPlaneComponents
         /// <summary>
         /// Returns true if <see cref="Epsilon1"/> and <see cref="Epsilon2"/> are compressive strains.
         /// </summary>
-        public bool PureCompression => Epsilon1 < 0 && Epsilon2 < 0;
+        public bool PureCompression => Epsilon1 <= 0 && Epsilon2 < 0;
 
         /// <summary>
         /// Returns true if <see cref="Epsilon1"/> and <see cref="Epsilon2"/> are tensile strains.
         /// </summary>
-        public bool PureTension => Epsilon1 > 0 && Epsilon2 > 0;
+        public bool PureTension => Epsilon1 > 0 && Epsilon2 >= 0;
 
         /// <summary>
         /// Returns true if <see cref="Epsilon1"/> is a tensile strain and <see cref="Epsilon2"/> is a compressive strain.
