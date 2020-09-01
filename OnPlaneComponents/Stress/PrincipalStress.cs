@@ -58,6 +58,26 @@ namespace OnPlaneComponents
         public Matrix<double> TransformationMatrix => StressRelations.TransformationMatrix(Theta1);
 
         /// <summary>
+        /// Get the <see cref="PrincipalCase"/> of <seealso cref="PrincipalStressState"/>.
+        /// </summary>
+        public PrincipalCase Case
+        {
+	        get
+	        {
+		        if (IsZero)
+			        return PrincipalCase.Zero;
+
+		        if (Sigma1 > 0 && Sigma2 >= 0)
+			        return PrincipalCase.PureTension;
+
+		        if (Sigma1 <= 0 && Sigma2 < 0)
+			        return PrincipalCase.PureCompression;
+
+		        return PrincipalCase.TensionCompression;
+	        }
+        }
+
+        /// <summary>
         /// Returns true if <see cref="Sigma1"/> is zero.
         /// </summary>
         public bool IsSigma1Zero => Sigma1 == 0;
@@ -66,21 +86,6 @@ namespace OnPlaneComponents
         /// Returns true if <see cref="Sigma2"/> is zero.
         /// </summary>
         public bool IsSigma2Zero => Sigma2 == 0;
-
-        /// <summary>
-        /// Returns true if <see cref="Sigma1"/> and <see cref="Sigma2"/> are compressive stresses.
-        /// </summary>
-        public bool PureCompression => Sigma1 <= 0 && Sigma2 < 0;
-
-        /// <summary>
-        /// Returns true if <see cref="Sigma1"/> and <see cref="Sigma2"/> are tensile stresses.
-        /// </summary>
-        public bool PureTension => Sigma1 > 0 && Sigma2 >= 0;
-
-        /// <summary>
-        /// Returns true if <see cref="Sigma1"/> is a tensile stress and <see cref="Sigma2"/> is a compressive stress.
-        /// </summary>
-        public bool TensionCompression => Sigma1 > 0 && Sigma2 < 0;
 
         /// <summary>
         /// Returns true if <see cref="Sigma1"/> and <see cref="Sigma2"/> are zero.

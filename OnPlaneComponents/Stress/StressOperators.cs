@@ -49,6 +49,17 @@
         }
 
         /// <summary>
+        /// Returns a <see cref="StressState"/> object with components multiplied by -1, in horizontal axis (<see cref="ThetaX"/> = 0).
+        /// </summary>
+        public static StressState operator - (StressState right)
+        {
+	        // Transform to horizontal
+	        var rTrans = ToHorizontal(right);
+
+	        return FromVector(-rTrans.AsVector(), 0, right.Unit);
+        }
+
+        /// <summary>
         /// Returns a <see cref="StressState"/> object with summed components, in left argument's <see cref="Unit"/> and horizontal axis (<see cref="ThetaX"/> = 0).
         /// </summary>
         public static StressState operator + (StressState left, PrincipalStressState right)

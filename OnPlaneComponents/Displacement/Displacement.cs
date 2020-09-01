@@ -21,11 +21,8 @@ namespace OnPlaneComponents
 	        get => _displacementX.Unit;
 	        set
 	        {
-		        if (value != Unit)
-		        {
-			        _displacementX.ToUnit(value);
-			        _displacementY.ToUnit(value);
-		        }
+		        _displacementX.ToUnit(value);
+		        _displacementY.ToUnit(value);
 	        }
         }
 
@@ -104,7 +101,8 @@ namespace OnPlaneComponents
         /// <param name="toUnit">The unit to convert.</param>
         public void ChangeUnit(LengthUnit toUnit)
         {
-	        Unit = toUnit;
+			if (Unit != toUnit)
+				Unit = toUnit;
         }
 
         /// <summary>

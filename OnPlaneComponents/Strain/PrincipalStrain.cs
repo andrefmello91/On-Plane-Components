@@ -5,7 +5,7 @@ using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace OnPlaneComponents
 {
-    /// <summary>
+	/// <summary>
     /// Principal strain struct.
     /// </summary>
 	public partial struct PrincipalStrainState : IEquatable<PrincipalStrainState>
@@ -36,6 +36,26 @@ namespace OnPlaneComponents
         /// </summary>
         public Matrix<double> TransformationMatrix => StrainRelations.TransformationMatrix(Theta1);
 
+		/// <summary>
+        /// Get the <see cref="PrincipalCase"/> of <seealso cref="PrincipalStrainState"/>.
+        /// </summary>
+        public PrincipalCase Case
+        {
+	        get
+	        {
+		        if (IsZero)
+			        return PrincipalCase.Zero;
+
+		        if (Epsilon1 > 0 && Epsilon2 >= 0)
+			        return PrincipalCase.PureTension;
+
+		        if (Epsilon1 <= 0 && Epsilon2 < 0)
+			        return PrincipalCase.PureCompression;
+
+		        return PrincipalCase.TensionCompression;
+	        }
+        }
+
         /// <summary>
         /// Returns true if <see cref="Epsilon1"/> is zero.
         /// </summary>
@@ -45,21 +65,6 @@ namespace OnPlaneComponents
         /// Returns true if <see cref="Epsilon2"/> is zero.
         /// </summary>
         public bool IsEpsilon2Zero => Epsilon2 == 0;
-
-        /// <summary>
-        /// Returns true if <see cref="Epsilon1"/> and <see cref="Epsilon2"/> are compressive strains.
-        /// </summary>
-        public bool PureCompression => Epsilon1 <= 0 && Epsilon2 < 0;
-
-        /// <summary>
-        /// Returns true if <see cref="Epsilon1"/> and <see cref="Epsilon2"/> are tensile strains.
-        /// </summary>
-        public bool PureTension => Epsilon1 > 0 && Epsilon2 >= 0;
-
-        /// <summary>
-        /// Returns true if <see cref="Epsilon1"/> is a tensile strain and <see cref="Epsilon2"/> is a compressive strain.
-        /// </summary>
-        public bool TensionCompression => Epsilon1 > 0 && Epsilon2 < 0;
 
         /// <summary>
         /// Returns true if <see cref="Epsilon1"/> and <see cref="Epsilon2"/> are zero.

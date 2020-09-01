@@ -93,25 +93,17 @@ namespace OnPlaneComponents
                         theta1 = Constants.PiOver2;
                 }
 
+                else if (Math.Abs(epsilonX - epsilonY) <= 1E-12 && gammaXY < 0)
+	                theta1 = -Constants.PiOver4;
+
                 else if (epsilon2.HasValue)
                 {
                     var e2 = epsilon2.Value;
-
-                    if (Math.Abs(epsilonX - epsilonY) <= 1E-9 && gammaXY < 0)
-                        theta1 = -Constants.PiOver4;
-
-                    else
-                        theta1 = Constants.PiOver2 - Trig.Atan(2 * (epsilonX - e2) / gammaXY);
+                    theta1 = Constants.PiOver2 - Trig.Atan(2 * (epsilonX - e2) / gammaXY);
                 }
 
                 else
-                {
-                    if (epsilonX - epsilonY <= 1E-9 && gammaXY < 0)
-                        theta1 = -Constants.PiOver4;
-
-                    else
-                        theta1 = Constants.PiOver2 - 0.5 * Trig.Atan(gammaXY / (epsilonY - epsilonX));
-                }
+	                theta1 = Constants.PiOver2 - 0.5 * Trig.Atan(gammaXY / (epsilonY - epsilonX));
 
                 if (double.IsNaN(theta1))
                     theta1 = Constants.PiOver4;
