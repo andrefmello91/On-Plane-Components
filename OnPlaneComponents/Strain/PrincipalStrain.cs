@@ -84,9 +84,9 @@ namespace OnPlaneComponents
         /// <param name="theta1">The angle of maximum principal strain (<paramref name="epsilon1"/>), related to horizontal axis (positive to counterclockwise).</param>
         public PrincipalStrainState(double epsilon1, double epsilon2, double theta1 = Constants.PiOver4)
         {
-	        Epsilon1 = !double.IsNaN(epsilon1) ? epsilon1 : 0;
-	        Epsilon2 = !double.IsNaN(epsilon2) ? epsilon2 : 0;
-	        Theta1   = !double.IsNaN(theta1)   ? theta1   : 0;
+	        Epsilon1 = DoubleToZero(epsilon1);
+	        Epsilon2 = DoubleToZero(epsilon2);
+	        Theta1   = DoubleToZero(theta1);
         }
 
         /// <summary>
@@ -117,6 +117,13 @@ namespace OnPlaneComponents
 
 			return new PrincipalStrainState(e1, e2, strainState.ThetaX + theta1);
         }
+
+        /// <summary>
+        /// Return zero if <paramref name="number"/> is <see cref="double.NaN"/> or <see cref="double.PositiveInfinity"/> or <see cref="double.NegativeInfinity"/>.
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        private static double DoubleToZero(double number) => !double.IsNaN(number) && !double.IsInfinity(number) ? number : 0;
 
         /// <summary>
         /// Compare two <see cref="PrincipalStrainState"/> objects.

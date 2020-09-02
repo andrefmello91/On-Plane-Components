@@ -80,8 +80,8 @@ namespace OnPlaneComponents
         /// <param name="unit">The <see cref="ForceUnit"/> (default: <see cref="ForceUnit.Newton"/>).</param>
         public Force(double componentX, double componentY, ForceUnit unit = ForceUnit.Newton)
 		{
-			_forceX = UnitsNet.Force.From(!double.IsNaN(componentX) ? componentX : 0, unit);
-			_forceY = UnitsNet.Force.From(!double.IsNaN(componentY) ? componentY : 0, unit);
+			_forceX = UnitsNet.Force.From(DoubleToZero(componentX), unit);
+			_forceY = UnitsNet.Force.From(DoubleToZero(componentY), unit);
 		}
 
         /// <summary>
@@ -162,6 +162,12 @@ namespace OnPlaneComponents
 				new Force(x, y, resultantForce.Unit);
         }
 
+        /// <summary>
+        /// Return zero if <paramref name="number"/> is <see cref="double.NaN"/> or <see cref="double.PositiveInfinity"/> or <see cref="double.NegativeInfinity"/>.
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        private static double DoubleToZero(double number) => !double.IsNaN(number) && !double.IsInfinity(number) ? number : 0;
 
         /// <summary>
         /// Compare two <see cref="Force"/> objects.

@@ -106,9 +106,9 @@ namespace OnPlaneComponents
         /// <param name="unit">The <see cref="PressureUnit"/> of stresses (default: <see cref="PressureUnit.Megapascal"/>).</param>
         public PrincipalStressState(double sigma1, double sigma2, double theta1 = Constants.PiOver4, PressureUnit unit = PressureUnit.Megapascal)
         {
-			_sigma1 = Pressure.From(!double.IsNaN(sigma1) ? sigma1 : 0, unit);
-			_sigma2 = Pressure.From(!double.IsNaN(sigma2) ? sigma2 : 0, unit);
-			Theta1  = !double.IsNaN(theta1) ? theta1 : 0;
+			_sigma1 = Pressure.From(DoubleToZero(sigma1), unit);
+			_sigma2 = Pressure.From(DoubleToZero(sigma2), unit);
+			Theta1  = DoubleToZero(theta1);
         }
 
         /// <summary>
@@ -162,6 +162,13 @@ namespace OnPlaneComponents
 
 			return new PrincipalStressState(s1, s2, stressState.ThetaX + theta1);
         }
+
+        /// <summary>
+        /// Return zero if <paramref name="number"/> is <see cref="double.NaN"/> or <see cref="double.PositiveInfinity"/> or <see cref="double.NegativeInfinity"/>.
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        private static double DoubleToZero(double number) => !double.IsNaN(number) && !double.IsInfinity(number) ? number : 0;
 
         /// <summary>
         /// Compare two <see cref="PrincipalStressState"/> objects.

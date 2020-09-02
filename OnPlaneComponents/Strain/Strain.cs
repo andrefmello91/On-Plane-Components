@@ -85,10 +85,10 @@ namespace OnPlaneComponents
         /// <param name="thetaX">The angle of <paramref name="epsilonX"/> direction, related to horizontal axis (positive counterclockwise).</param>
         public StrainState(double epsilonX, double epsilonY, double gammaXY, double thetaX = 0)
         {
-	        EpsilonX = !double.IsNaN(epsilonX) ? epsilonX : 0;
-	        EpsilonY = !double.IsNaN(epsilonY) ? epsilonY : 0;
-	        GammaXY  = !double.IsNaN(gammaXY)  ? gammaXY  : 0;
-	        ThetaX   = !double.IsNaN(thetaX)   ? thetaX   : 0;
+	        EpsilonX = DoubleToZero(epsilonX);
+	        EpsilonY = DoubleToZero(epsilonY);
+	        GammaXY  = DoubleToZero(gammaXY);
+	        ThetaX   = DoubleToZero(thetaX);
         }
 
         /// <summary>
@@ -195,8 +195,15 @@ namespace OnPlaneComponents
 			// Return with corrected angle
 			return FromVector(sVec);
         }
-		
-		/// <summary>
+
+        /// <summary>
+        /// Return zero if <paramref name="number"/> is <see cref="double.NaN"/> or <see cref="double.PositiveInfinity"/> or <see cref="double.NegativeInfinity"/>.
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        private static double DoubleToZero(double number) => !double.IsNaN(number) && !double.IsInfinity(number) ? number : 0;
+
+        /// <summary>
         /// Compare two <see cref="StrainState"/> objects.
         /// </summary>
         /// <param name="other">The strain to compare.</param>

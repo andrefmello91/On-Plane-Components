@@ -108,10 +108,10 @@ namespace OnPlaneComponents
         /// <param name="unit">The <see cref="PressureUnit"/> of stresses (default: <see cref="PressureUnit.Megapascal"/>).</param>
         public StressState(double sigmaX, double sigmaY, double tauXY, double thetaX = 0, PressureUnit unit = PressureUnit.Megapascal)
 		{
-			_sigmaX = Pressure.From(!double.IsNaN(sigmaX) ? sigmaX : 0, unit);
-			_sigmaY = Pressure.From(!double.IsNaN(sigmaY) ? sigmaY : 0, unit);
-			_tauXY  = Pressure.From(!double.IsNaN(tauXY)  ? tauXY  : 0,  unit);
-			ThetaX  = !double.IsNaN(thetaX) ? thetaX : 0;
+			_sigmaX = Pressure.From(DoubleToZero(sigmaX), unit);
+			_sigmaY = Pressure.From(DoubleToZero(sigmaY), unit);
+			_tauXY  = Pressure.From(DoubleToZero(tauXY),  unit);
+			ThetaX  = DoubleToZero(thetaX);
 		}
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace OnPlaneComponents
 			_sigmaX = sigmaX.ToUnit(unit);
 			_sigmaY = sigmaY.ToUnit(unit);
 			_tauXY  = tauXY.ToUnit(unit);
-			ThetaX  = !double.IsNaN(thetaX) ? thetaX : 0;
+			ThetaX = DoubleToZero(thetaX);
 		}
 
         /// <summary>
@@ -245,6 +245,13 @@ namespace OnPlaneComponents
 	        // Return with corrected angle
 	        return FromVector(sVec, 0, principalStressState.Unit);
         }
+
+		/// <summary>
+        /// Return zero if <paramref name="number"/> is <see cref="double.NaN"/> or <see cref="double.PositiveInfinity"/> or <see cref="double.NegativeInfinity"/>.
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        private static double DoubleToZero(double number) => !double.IsNaN(number) && !double.IsInfinity(number) ? number : 0;
 
         /// <summary>
         /// Compare two <see cref="StressState"/> objects.

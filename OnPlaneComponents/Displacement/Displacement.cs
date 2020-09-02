@@ -79,8 +79,8 @@ namespace OnPlaneComponents
         /// <param name="unit">The <see cref="LengthUnit"/> of displacement (default: <see cref="LengthUnit.Millimeter"/>).</param>
         public Displacement(double componentX, double componentY, LengthUnit unit = LengthUnit.Millimeter)
         {
-            _displacementX = Length.From(!double.IsNaN(componentX) ? componentX : 0, unit);
-            _displacementY = Length.From(!double.IsNaN(componentY) ? componentY : 0, unit);
+            _displacementX = Length.From(DoubleToZero(componentX), unit);
+            _displacementY = Length.From(DoubleToZero(componentY), unit);
         }
 
         /// <summary>
@@ -162,6 +162,12 @@ namespace OnPlaneComponents
             return new Displacement(x, y, resultantDisplacement.Unit);
         }
 
+        /// <summary>
+        /// Return zero if <paramref name="number"/> is <see cref="double.NaN"/> or <see cref="double.PositiveInfinity"/> or <see cref="double.NegativeInfinity"/>.
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        private static double DoubleToZero(double number) => !double.IsNaN(number) && !double.IsInfinity(number) ? number : 0;
 
         /// <summary>
         /// Compare two <see cref="Displacement"/> objects.
