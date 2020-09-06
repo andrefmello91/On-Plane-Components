@@ -16,15 +16,7 @@ namespace OnPlaneComponents
         /// <summary>
         /// Get/set the displacement unit (<see cref="LengthUnit"/>).
         /// </summary>
-        public LengthUnit Unit
-        {
-	        get => _displacementX.Unit;
-	        set
-	        {
-		        _displacementX.ToUnit(value);
-		        _displacementY.ToUnit(value);
-	        }
-        }
+        public LengthUnit Unit => _displacementX.Unit;
 
         /// <summary>
         /// Get the displacement component in X direction, in the unit constructed (<see cref="Unit"/>).
@@ -96,13 +88,16 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Change the displacement unit (<see cref="LengthUnit"/).
+        /// Change the displacement unit <see cref="LengthUnit"/>.
         /// </summary>
         /// <param name="toUnit">The unit to convert.</param>
         public void ChangeUnit(LengthUnit toUnit)
         {
-			if (Unit != toUnit)
-				Unit = toUnit;
+	        if (Unit == toUnit)
+		        return;
+
+            _displacementX = _displacementX.ToUnit(toUnit);
+	        _displacementY = _displacementY.ToUnit(toUnit);
         }
 
         /// <summary>

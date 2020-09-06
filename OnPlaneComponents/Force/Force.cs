@@ -14,18 +14,7 @@ namespace OnPlaneComponents
 		/// <summary>
         /// Get/set the force unit (<see cref="ForceUnit"/>).
         /// </summary>
-		public ForceUnit Unit
-		{
-			get => _forceX.Unit;
-			set
-			{
-				if (value != Unit)
-				{
-					_forceX.ToUnit(value);
-					_forceY.ToUnit(value);
-				}
-			}
-		}
+		public ForceUnit Unit => _forceX.Unit;
 
 		/// <summary>
 		/// Get the force component value in X direction, in the unit constructed (<see cref="Unit"/>).
@@ -102,7 +91,11 @@ namespace OnPlaneComponents
         /// <param name="toUnit">The <see cref="ForceUnit"/> to convert.</param>
         public void ChangeUnit(ForceUnit toUnit)
 		{
-			Unit = toUnit;
+			if (Unit == toUnit)
+				return;
+
+            _forceX = _forceX.ToUnit(toUnit);
+			_forceY = _forceY.ToUnit(toUnit);
 		}
 
         /// <summary>

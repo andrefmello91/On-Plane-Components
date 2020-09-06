@@ -18,18 +18,7 @@ namespace OnPlaneComponents
 	    /// <summary>
 	    /// Get/set the stress unit (<see cref="PressureUnit"/>).
 	    /// </summary>
-	    public PressureUnit Unit
-	    {
-		    get => _sigma1.Unit;
-		    set
-		    {
-			    if (value != Unit)
-			    {
-				    _sigma1.ToUnit(value);
-				    _sigma2.ToUnit(value);
-			    }
-		    }
-	    }
+	    public PressureUnit Unit => _sigma1.Unit;
 
 	    /// <summary>
 	    /// Get maximum principal stress, in <see cref="Unit"/> considered.
@@ -131,7 +120,11 @@ namespace OnPlaneComponents
         /// <param name="toUnit">The <see cref="PressureUnit"/> to convert.</param>
         public void ChangeUnit(PressureUnit toUnit)
         {
-	        Unit = toUnit;
+			if (Unit == toUnit)
+				return;
+
+	        _sigma1 = _sigma1.ToUnit(toUnit);
+	        _sigma2 = _sigma2.ToUnit(toUnit);
         }
 
         /// <summary>

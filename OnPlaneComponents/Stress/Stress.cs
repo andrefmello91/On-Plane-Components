@@ -18,21 +18,9 @@ namespace OnPlaneComponents
 		/// <summary>
         /// Get/set the stress unit (<see cref="PressureUnit"/>).
         /// </summary>
-		public PressureUnit Unit
-		{
-			get => _sigmaX.Unit;
-			set
-			{
-				if (value != Unit)
-				{
-					_sigmaX.ToUnit(value);
-					_sigmaY.ToUnit(value);
-					_tauXY.ToUnit(value);
-				}
-			}
-		}
+		public PressureUnit Unit => _sigmaX.Unit;
 
-        /// <summary>
+		/// <summary>
         /// Get normal stress in X direction, in unit constructed (<see cref="Unit"/>).
         /// </summary>
         public double SigmaX => _sigmaX.Value;
@@ -136,7 +124,12 @@ namespace OnPlaneComponents
         /// <param name="toUnit">The <see cref="PressureUnit"/> to convert.</param>
         public void ChangeUnit(PressureUnit toUnit)
         {
-	        Unit = toUnit;
+			if (Unit == toUnit)
+				return;
+
+	        _sigmaX = _sigmaX.ToUnit(toUnit);
+	        _sigmaY = _sigmaY.ToUnit(toUnit);
+	        _tauXY  = _tauXY.ToUnit(toUnit);
         }
 
         /// <summary>
