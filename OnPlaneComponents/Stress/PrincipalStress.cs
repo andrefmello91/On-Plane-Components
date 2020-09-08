@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions.LinearAlgebra;
 using Extensions.Number;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
@@ -146,7 +147,7 @@ namespace OnPlaneComponents
         /// Get principal stresses as a <see cref="Vector"/>, in <see cref="Unit"/> considered.
         /// <para>{ Sigma1, Sigma2, 0 }</para>
         /// </summary>
-        public Vector<double> AsVector() => Vector.Build.DenseOfArray(AsArray());
+        public Vector<double> AsVector() => AsArray().ToVector();
 
         /// <summary>
         /// Get a <see cref="PrincipalStressState"/> with zero elements.

@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions.LinearAlgebra;
 using Extensions.Number;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
@@ -113,7 +114,7 @@ namespace OnPlaneComponents
         /// Get principal strains as <see cref="Vector"/>.
         /// <para>{ Epsilon1, Epsilon2, 0 }</para>
         /// </summary>
-        public Vector<double> AsVector() => Vector.Build.DenseOfArray(AsArray());
+        public Vector<double> AsVector() => AsArray().ToVector();
 
         /// <summary>
         /// Get a <see cref="PrincipalStrainState"/> with zero elements.

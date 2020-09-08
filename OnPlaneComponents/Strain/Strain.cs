@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions.LinearAlgebra;
 using Extensions.Number;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
@@ -115,7 +116,7 @@ namespace OnPlaneComponents
         /// Get strains as a <see cref="Vector"/>.
         /// <para>{ EpsilonX, EpsilonY, GammaXY }</para>
         /// </summary>
-        public Vector<double> AsVector() => Vector.Build.DenseOfArray(AsArray());
+        public Vector<double> AsVector() => AsArray().ToVector();
 
         /// <summary>
         /// Get a <see cref="StrainState"/> with zero elements.
