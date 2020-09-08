@@ -49,7 +49,7 @@ namespace OnPlaneComponents
         public double ThetaY => ThetaX + Constants.PiOver2;
 
         /// <summary>
-        /// Get transformation matrix from XY plane to horizontal plane.
+        /// Get transformation matrix from horizontal plane to XY plane.
         /// <para>See: <see cref="StressRelations.TransformationMatrix"/></para>
         /// </summary>
         public Matrix<double> TransformationMatrix => _transMatrix ?? CalculateTransformationMatrix();
@@ -137,7 +137,7 @@ namespace OnPlaneComponents
         /// </summary>
         private Matrix<double> CalculateTransformationMatrix()
         {
-	        _transMatrix = StressRelations.TransformationMatrix(-ThetaX);
+	        _transMatrix = StressRelations.TransformationMatrix(ThetaX);
 	        return _transMatrix;
         }
 

@@ -43,7 +43,7 @@ namespace OnPlaneComponents
         public double Theta2 => Theta1 + Constants.PiOver2;
 
         /// <summary>
-        /// Get transformation <see cref="Matrix"/> from principal plane to horizontal plane.
+        /// Get transformation <see cref="Matrix"/> from horizontal plane to principal plane.
         /// <para>See: <seealso cref="StressRelations.TransformationMatrix"/></para>
         /// </summary>
         public Matrix<double> TransformationMatrix => _transMatrix ?? CalculateTransformationMatrix();
@@ -119,7 +119,7 @@ namespace OnPlaneComponents
         /// </summary>
         private Matrix<double> CalculateTransformationMatrix()
         {
-	        _transMatrix = StressRelations.TransformationMatrix(-Theta1);
+	        _transMatrix = StressRelations.TransformationMatrix(Theta1);
 	        return _transMatrix;
         }
 
