@@ -15,17 +15,17 @@
         /// <summary>
         /// Returns a <see cref="Force"/> object with summed components, in left argument's unit.
         /// </summary>
-        public static Force operator + (Force left, Force right) => new Force(left._forceX + right._forceX, left._forceY + right._forceY, left.Unit);
+        public static Force operator + (Force left, Force right) => new Force(left._forceX + right._forceX.ToUnit(left.Unit), left._forceY + right._forceY.ToUnit(left.Unit));
 
         /// <summary>
         /// Returns a <see cref="Force"/> object with subtracted components, in left argument's unit.
         /// </summary>
-        public static Force operator - (Force left, Force right) => new Force(left._forceX - right._forceX, left._forceY - right._forceY, left.Unit);
+        public static Force operator - (Force left, Force right) => new Force(left._forceX - right._forceX.ToUnit(left.Unit), left._forceY - right._forceY.ToUnit(left.Unit));
 
         /// <summary>
         /// Returns a <see cref="Force"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
-        public static Force operator * (Force force, double multiplier) => new Force(multiplier * force._forceX, multiplier * force._forceY, force.Unit);
+        public static Force operator * (Force force, double multiplier) => new Force(multiplier * force._forceX, multiplier * force._forceY);
 
         /// <summary>
         /// Returns a <see cref="Force"/> object with multiplied components by a <see cref="double"/>.
@@ -45,7 +45,7 @@
         /// <summary>
         /// Returns a <see cref="Force"/> object with components divided by a <see cref="double"/>.
         /// </summary>
-        public static Force operator / (Force force, double divider) => new Force(force._forceX / divider, force._forceY / divider, force.Unit);
+        public static Force operator / (Force force, double divider) => new Force(force._forceX / divider, force._forceY / divider);
 
         /// <summary>
         /// Returns a <see cref="Force"/> object with components divided by an <see cref="int"/>.

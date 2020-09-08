@@ -1,7 +1,8 @@
 ﻿using System;
-using MathNet.Numerics;
 using UnitsNet;
 using UnitsNet.Units;
+using Extensions;
+using Extensions.Number;
 
 namespace OnPlaneComponents
 {
@@ -12,6 +13,7 @@ namespace OnPlaneComponents
     {
         // Auxiliar fields
         private Length _displacementX, _displacementY;
+        private Length? _resultant;
 		
         /// <summary>
         /// Get/set the displacement unit (<see cref="LengthUnit"/>).
@@ -31,12 +33,7 @@ namespace OnPlaneComponents
         /// <summary>
         /// Get the resultant displacement value, in the unit constructed (<see cref="Unit"/>).
         /// </summary>
-        public double Resultant => DisplacementRelations.CalculateResultant(ComponentX, ComponentY);
-
-        /// <summary>
-        /// Get the resultant displacement, in the unit constructed (<see cref="Unit"/>).
-        /// </summary>
-        public Length ResultantDisplacement => DisplacementRelations.CalculateResultant(_displacementX, _displacementY, Unit);
+        public double Resultant => _resultant?.Value ?? CalculateResultant().Value;
 
         /// <summary>
         /// Get the resultant displacement angle, in radians.
@@ -66,13 +63,12 @@ namespace OnPlaneComponents
         /// <summary>
         /// Displacement object.
         /// </summary>
-        /// <param name="componentX">Value of displacement component in X direction (positive to right).</param>
-        /// <param name="componentY">Value of displacement component in Y direction (positive upwards).</param>
+        /// <param name="componentX">Value of displacement component in X direction, in <paramref name="unit"/>. (positive to right).</param>
+        /// <param name="componentY">Value of displacement component in Y direction, in <paramref name="unit"/>. (positive upwards).</param>
         /// <param name="unit">The <see cref="LengthUnit"/> of displacement (default: <see cref="LengthUnit.Millimeter"/>).</param>
         public Displacement(double componentX, double componentY, LengthUnit unit = LengthUnit.Millimeter)
+		: this (Length.From(componentX.ToZero(), unit), Length.From(componentY.ToZero(), unit))
         {
-            _displacementX = Length.From(DoubleToZero(componentX), unit);
-            _displacementY = Length.From(DoubleToZero(componentY), unit);
         }
 
         /// <summary>
@@ -80,11 +76,11 @@ namespace OnPlaneComponents
         /// </summary>
         /// <param name="displacementX">Displacement component in X direction (positive to right) (<see cref="Length"/>).</param>
         /// <param name="displacementY">Displacement component in Y direction (positive upwards) (<see cref="Length"/>).</param>
-        /// <param name="unit">The <see cref="LengthUnit"/> of displacement (default: <see cref="LengthUnit.Millimeter"/>).</param>
-        public Displacement(Length displacementX, Length displacementY, LengthUnit unit = LengthUnit.Millimeter)
+        public Displacement(Length displacementX, Length displacementY)
         {
-            _displacementX = displacementX.ToUnit(unit);
-            _displacementY = displacementY.ToUnit(unit);
+            _displacementX = displacementX;
+            _displacementY = displacementY.Unit == displacementX.Unit ? displacementY : displacementY.ToUnit(displacementX.Unit);
+            _resultant     = null;
         }
 
         /// <summary>
@@ -98,6 +94,17 @@ namespace OnPlaneComponents
 
             _displacementX = _displacementX.ToUnit(toUnit);
 	        _displacementY = _displacementY.ToUnit(toUnit);
+        }
+
+		/// <summary>
+        /// Calculate <see cref="Resultant"/> displacement.
+        /// </summary>
+        private Length CalculateResultant()
+        {
+	        if (!_resultant.HasValue)
+		        _resultant = DisplacementRelations.CalculateResultant(_displacementX, _displacementY, Unit);
+
+	        return _resultant.Value;
         }
 
         /// <summary>
@@ -116,7 +123,7 @@ namespace OnPlaneComponents
         /// Get a <see cref="Displacement"/> in X direction.
         /// </summary>
         /// <param name="displacement">Displacement component in X direction (positive to right).</param>
-        public static Displacement InX(Length displacement) => new Displacement(displacement, Length.Zero, displacement.Unit);
+        public static Displacement InX(Length displacement) => new Displacement(displacement, Length.Zero);
 
         /// <summary>
         /// Get a <see cref="Displacement"/> in X direction.
@@ -129,7 +136,7 @@ namespace OnPlaneComponents
         /// Get a <see cref="Displacement"/> in Y direction.
         /// </summary>
         /// <param name="displacement">Displacement component in Y direction (positive to right).</param>
-        public static Displacement InY(Length displacement) => new Displacement(Length.Zero, displacement, displacement.Unit);
+        public static Displacement InY(Length displacement) => new Displacement(Length.Zero, displacement);
 
         /// <summary>
         /// Get a <see cref="Displacement"/> in from a resultant.
@@ -137,13 +144,7 @@ namespace OnPlaneComponents
         /// <param name="resultant">Absolute value of displacement resultant.</param>
         /// <param name="angle">Angle that displacement resultant is pointing at, in radians.</param>
         /// <param name="unit">The <see cref="LengthUnit"/> of displacement (default: <see cref="LengthUnit.Millimeter"/>).</param>
-        public static Displacement FromResultant(double resultant, double angle, LengthUnit unit = LengthUnit.Millimeter)
-        {
-            var (x, y) = DisplacementRelations.CalculateComponents(resultant, angle);
-
-            return
-	            new Displacement(x, y, unit);
-        }
+        public static Displacement FromResultant(double resultant, double angle, LengthUnit unit = LengthUnit.Millimeter) => FromResultant(Length.From(resultant, unit), angle);
 
         /// <summary>
         /// Get a <see cref="Displacement"/> in from a resultant.
@@ -154,16 +155,9 @@ namespace OnPlaneComponents
         {
             var (x, y) = DisplacementRelations.CalculateComponents(resultantDisplacement, angle);
 
-            return new Displacement(x, y, resultantDisplacement.Unit);
+            return new Displacement(x, y);
         }
-
-        /// <summary>
-        /// Return zero if <paramref name="number"/> is <see cref="double.NaN"/> or <see cref="double.PositiveInfinity"/> or <see cref="double.NegativeInfinity"/>.
-        /// </summary>
-        /// <param name="number"></param>
-        /// <returns></returns>
-        private static double DoubleToZero(double number) => !double.IsNaN(number) && !double.IsInfinity(number) ? number : 0;
-
+		
         /// <summary>
         /// Compare two <see cref="Displacement"/> objects.
         /// </summary>
@@ -182,8 +176,8 @@ namespace OnPlaneComponents
         public override string ToString()
         {
             return
-                "ux = " + _displacementX + "\n" +
-                "uy = " + _displacementY;
+	            $"ux = {_displacementX}\n" +
+	            $"uy = {_displacementY}";
         }
 
         public override int GetHashCode() => (int)(ComponentX * ComponentY);

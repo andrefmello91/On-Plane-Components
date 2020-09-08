@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Extensions.Number;
 using MathNet.Numerics;
 using UnitsNet.Units;
 
@@ -24,7 +21,7 @@ namespace OnPlaneComponents
                 return 0;
 
             return
-                Math.Sqrt(componentX * componentX + componentY * componentY);
+                (componentX * componentX + componentY * componentY).Sqrt();
         }
 
         /// <summary>
@@ -62,7 +59,7 @@ namespace OnPlaneComponents
                 return Constants.Pi3Over2;
 
             return
-                Math.Atan(componentY / componentX);
+	            (componentY / componentX).Atan();
         }
 
         /// <summary>
@@ -96,7 +93,7 @@ namespace OnPlaneComponents
                 return (0, -resultant);
 
             return
-                (resultant * Math.Acos(angle), resultant * Math.Asin(angle));
+                (resultant * angle.Acos(), resultant * angle.Asin());
         }
 
         /// <summary>

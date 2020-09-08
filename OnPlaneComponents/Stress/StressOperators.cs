@@ -32,7 +32,7 @@
 		        lTrans = ToHorizontal(left),
 		        rTrans = ToHorizontal(right);
 
-            return new StressState(lTrans._sigmaX + rTrans._sigmaX, lTrans._sigmaY + rTrans._sigmaY, lTrans._tauXY + rTrans._tauXY, 0, left.Unit);
+            return new StressState(lTrans._sigmaX + rTrans._sigmaX.ToUnit(left.Unit), lTrans._sigmaY + rTrans._sigmaY.ToUnit(left.Unit), lTrans._tauXY + rTrans._tauXY.ToUnit(left.Unit));
         }
 
         /// <summary>
@@ -45,7 +45,7 @@
 		        lTrans = ToHorizontal(left),
 		        rTrans = ToHorizontal(right);
 
-	        return new StressState(lTrans._sigmaX - rTrans._sigmaX, lTrans._sigmaY - rTrans._sigmaY, lTrans._tauXY - rTrans._tauXY, 0, left.Unit);
+	        return new StressState(lTrans._sigmaX - rTrans._sigmaX.ToUnit(left.Unit), lTrans._sigmaY - rTrans._sigmaY.ToUnit(left.Unit), lTrans._tauXY - rTrans._tauXY.ToUnit(left.Unit));
         }
 
         /// <summary>
@@ -69,7 +69,7 @@
 		        lTrans = ToHorizontal(left),
 		        rTrans = FromPrincipal(right);
 
-            return new StressState(lTrans._sigmaX + rTrans._sigmaX, lTrans._sigmaY + rTrans._sigmaY, lTrans._tauXY + rTrans._tauXY, 0, left.Unit);
+            return new StressState(lTrans._sigmaX + rTrans._sigmaX.ToUnit(left.Unit), lTrans._sigmaY + rTrans._sigmaY.ToUnit(left.Unit), lTrans._tauXY + rTrans._tauXY.ToUnit(left.Unit));
         }
 
         /// <summary>
@@ -82,7 +82,7 @@
 		        lTrans = ToHorizontal(left),
 		        rTrans = FromPrincipal(right);
 
-	        return new StressState(lTrans._sigmaX - rTrans._sigmaX, lTrans._sigmaY - rTrans._sigmaY, lTrans._tauXY - rTrans._tauXY, 0, left.Unit);
+	        return new StressState(lTrans._sigmaX - rTrans._sigmaX.ToUnit(left.Unit), lTrans._sigmaY - rTrans._sigmaY.ToUnit(left.Unit), lTrans._tauXY - rTrans._tauXY.ToUnit(left.Unit));
         }
 
         /// <summary>
@@ -95,7 +95,7 @@
 		        lTrans = FromPrincipal(left),
 		        rTrans = ToHorizontal(right);
 
-            return new StressState(lTrans._sigmaX + rTrans._sigmaX, lTrans._sigmaY + rTrans._sigmaY, lTrans._tauXY + rTrans._tauXY, 0, left.Unit);
+            return new StressState(lTrans._sigmaX + rTrans._sigmaX.ToUnit(left.Unit), lTrans._sigmaY + rTrans._sigmaY.ToUnit(left.Unit), lTrans._tauXY + rTrans._tauXY.ToUnit(left.Unit));
         }
 
         /// <summary>
@@ -108,13 +108,13 @@
 		        lTrans = FromPrincipal(left),
 		        rTrans = ToHorizontal(right);
 
-	        return new StressState(lTrans._sigmaX - rTrans._sigmaX, lTrans._sigmaY - rTrans._sigmaY, lTrans._tauXY - rTrans._tauXY, 0, left.Unit);
+	        return new StressState(lTrans._sigmaX - rTrans._sigmaX.ToUnit(left.Unit), lTrans._sigmaY - rTrans._sigmaY.ToUnit(left.Unit), lTrans._tauXY - rTrans._tauXY.ToUnit(left.Unit));
         }
 
         /// <summary>
         /// Returns a <see cref="StressState"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
-        public static StressState operator * (StressState stressState, double multiplier) => new StressState(multiplier * stressState._sigmaX, multiplier * stressState._sigmaY, multiplier * stressState._tauXY, stressState.ThetaX, stressState.Unit);
+        public static StressState operator * (StressState stressState, double multiplier) => new StressState(multiplier * stressState._sigmaX, multiplier * stressState._sigmaY, multiplier * stressState._tauXY, stressState.ThetaX);
 
         /// <summary>
         /// Returns a <see cref="StressState"/> object with multiplied components by a <see cref="double"/>.
@@ -134,7 +134,7 @@
         /// <summary>
         /// Returns a <see cref="StressState"/> object with components divided by a <see cref="double"/>.
         /// </summary>
-        public static StressState operator / (StressState stressState, double divider) => new StressState(stressState._sigmaX / divider, stressState._sigmaY / divider, stressState._tauXY / divider, stressState.ThetaX, stressState.Unit);
+        public static StressState operator / (StressState stressState, double divider) => new StressState(stressState._sigmaX / divider, stressState._sigmaY / divider, stressState._tauXY / divider, stressState.ThetaX);
 
         /// <summary>
         /// Returns a <see cref="StressState"/> object with components divided by an <see cref="int"/>.

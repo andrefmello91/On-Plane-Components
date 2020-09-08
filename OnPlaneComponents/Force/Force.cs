@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions.Number;
 using UnitsNet.Units;
 
 namespace OnPlaneComponents
@@ -10,6 +11,7 @@ namespace OnPlaneComponents
 	{
 		// Auxiliary fields
 		private UnitsNet.Force _forceX, _forceY;
+		private UnitsNet.Force? _resultant;
 
 		/// <summary>
         /// Get/set the force unit (<see cref="ForceUnit"/>).
@@ -29,12 +31,7 @@ namespace OnPlaneComponents
         /// <summary>
         /// Get the resultant force value, in the unit constructed (<see cref="Unit"/>).
         /// </summary>
-        public double Resultant => ForceRelations.CalculateResultant(ComponentX, ComponentY);
-
-        /// <summary>
-        /// Get the resultant force, in the unit constructed (<see cref="Unit"/>).
-        /// </summary>
-        public UnitsNet.Force ResultantForce => ForceRelations.CalculateResultant(_forceX, _forceY, Unit);
+        public double Resultant => _resultant?.Value ?? CalculateResultant().Value;
 
 		/// <summary>
 		/// Get the resultant force angle, in radians.
@@ -64,13 +61,12 @@ namespace OnPlaneComponents
         /// <summary>
         /// Force object.
         /// </summary>
-        /// <param name="componentX">Value of force component in X direction (positive to right).</param>
-        /// <param name="componentY">Value of force component in Y direction (positive upwards).</param>
+        /// <param name="componentX">Value of force component in X direction, in <paramref name="unit"/>. (positive to right).</param>
+        /// <param name="componentY">Value of force component in Y direction, in <paramref name="unit"/>. (positive upwards).</param>
         /// <param name="unit">The <see cref="ForceUnit"/> (default: <see cref="ForceUnit.Newton"/>).</param>
         public Force(double componentX, double componentY, ForceUnit unit = ForceUnit.Newton)
+			: this (UnitsNet.Force.From(componentX.ToZero(), unit), UnitsNet.Force.From(componentY.ToZero(), unit))
 		{
-			_forceX = UnitsNet.Force.From(DoubleToZero(componentX), unit);
-			_forceY = UnitsNet.Force.From(DoubleToZero(componentY), unit);
 		}
 
         /// <summary>
@@ -78,11 +74,11 @@ namespace OnPlaneComponents
         /// </summary>
         /// <param name="forceX"><see cref="UnitsNet.Force"/> component in X direction (positive to right).</param>
         /// <param name="forceY"><see cref="UnitsNet.Force"/> component in Y direction (positive upwards).</param>
-        /// <param name="unit">The <see cref="ForceUnit"/> (default: <see cref="ForceUnit.Newton"/>).</param>
-        public Force(UnitsNet.Force forceX, UnitsNet.Force forceY, ForceUnit unit = ForceUnit.Newton)
+        public Force(UnitsNet.Force forceX, UnitsNet.Force forceY)
 		{
-			_forceX = forceX.ToUnit(unit);
-			_forceY = forceY.ToUnit(unit);
+			_forceX    = forceX;
+			_forceY    = forceY.Unit == forceX.Unit ? forceY : forceY.ToUnit(forceX.Unit);
+			_resultant = null;
 		}
 
         /// <summary>
@@ -97,6 +93,17 @@ namespace OnPlaneComponents
             _forceX = _forceX.ToUnit(toUnit);
 			_forceY = _forceY.ToUnit(toUnit);
 		}
+
+		/// <summary>
+        /// Calculate <see cref="Resultant"/> force.
+        /// </summary>
+        private UnitsNet.Force CalculateResultant()
+        {
+	        if (!_resultant.HasValue)
+		        _resultant = ForceRelations.CalculateResultant(_forceX, _forceY, Unit);
+
+	        return _resultant.Value;
+        }
 
         /// <summary>
         /// Get a <see cref="Force"/> with zero value.
@@ -114,7 +121,7 @@ namespace OnPlaneComponents
         /// Get a <see cref="Force"/> in X direction.
         /// </summary>
         /// <param name="force"><see cref="UnitsNet.Force"/> component in X direction (positive to right).</param>
-        public static Force InX(UnitsNet.Force force) => new Force(force, UnitsNet.Force.Zero, force.Unit);
+        public static Force InX(UnitsNet.Force force) => new Force(force, UnitsNet.Force.Zero);
 
         /// <summary>
         /// Get a <see cref="Force"/> in X direction.
@@ -127,7 +134,7 @@ namespace OnPlaneComponents
         /// Get a <see cref="Force"/> in Y direction.
         /// </summary>
         /// <param name="force"><see cref="UnitsNet.Force"/> component in Y direction (positive upwards).</param>
-        public static Force InY(UnitsNet.Force force) => new Force(UnitsNet.Force.Zero, force, force.Unit);
+        public static Force InY(UnitsNet.Force force) => new Force(UnitsNet.Force.Zero, force);
 
         /// <summary>
         /// Get a <see cref="Force"/> from a resultant.
@@ -152,15 +159,8 @@ namespace OnPlaneComponents
 	        var (x, y) = ForceRelations.CalculateComponents(resultantForce, angle);
 
 			return
-				new Force(x, y, resultantForce.Unit);
+				new Force(x, y);
         }
-
-        /// <summary>
-        /// Return zero if <paramref name="number"/> is <see cref="double.NaN"/> or <see cref="double.PositiveInfinity"/> or <see cref="double.NegativeInfinity"/>.
-        /// </summary>
-        /// <param name="number"></param>
-        /// <returns></returns>
-        private static double DoubleToZero(double number) => !double.IsNaN(number) && !double.IsInfinity(number) ? number : 0;
 
         /// <summary>
         /// Compare two <see cref="Force"/> objects.
@@ -179,8 +179,8 @@ namespace OnPlaneComponents
 		public override string ToString()
 		{
 			return
-				"Fx = " + _forceX + "\n" + 
-				"Fy = " + _forceY;
+				$"Fx = {_forceX}\n" +
+				$"Fy = {_forceY}";
 		}
 
         public override int GetHashCode() => (int) (ComponentX * ComponentY);

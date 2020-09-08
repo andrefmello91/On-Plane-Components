@@ -1,4 +1,7 @@
 ﻿using System;
+using Extensions;
+using Extensions.LinearAlgebra;
+using Extensions.Number;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -17,7 +20,7 @@ namespace OnPlaneComponents
 		    // Get the strains
 		    var eps = strainVector;
 
-		    var (cos2Theta, sin2Theta) = DirectionCosines(2 * theta);
+		    var (cos2Theta, sin2Theta) = (2 * theta).DirectionCosines();
 
 		    // Calculate equation components
 		    double
@@ -28,12 +31,12 @@ namespace OnPlaneComponents
 			    e =  eps[2] * cos2Theta;
 
 		    return
-			   Vector.Build.DenseOfArray(new[]
-			    {
-				    a + b + c,
-				    a - b - c,
-				    e - d
-			    });
+			   new[]
+			   {
+				   a + b + c, 
+				   a - b - c, 
+				   e - d
+			   }.ToVector();
 	    }
 
         /// <summary>
@@ -99,11 +102,11 @@ namespace OnPlaneComponents
                 else if (epsilon2.HasValue)
                 {
                     var e2 = epsilon2.Value;
-                    theta1 = Constants.PiOver2 - Trig.Atan(2 * (epsilonX - e2) / gammaXY);
+                    theta1 = Constants.PiOver2 - (2 * (epsilonX - e2) / gammaXY).Atan();
                 }
 
                 else
-	                theta1 = Constants.PiOver2 - 0.5 * Trig.Atan(gammaXY / (epsilonY - epsilonX));
+	                theta1 = Constants.PiOver2 - 0.5 * (gammaXY / (epsilonY - epsilonX)).Atan();
 
                 if (double.IsNaN(theta1))
                     theta1 = Constants.PiOver4;
@@ -139,7 +142,7 @@ namespace OnPlaneComponents
 	        var theta2 = Constants.PiOver2 - theta1;
 
 	        // Calculate theta2 (fc2 angle)
-	        var (cos, sin) = DirectionCosines(2 * theta2);
+	        var (cos, sin) = (2 * theta2).DirectionCosines();
 
 	        // Calculate straines by Mohr's Circle
 	        double
@@ -150,7 +153,7 @@ namespace OnPlaneComponents
 		        exy  = 2 * rad * sin;
 
 	        return
-		        CreateVector.DenseOfArray(new[] { ex, ey, exy });
+		        new[] { ex, ey, exy }.ToVector();
         }
 
         /// <summary>
@@ -159,25 +162,5 @@ namespace OnPlaneComponents
         /// </summary>
         /// <param name="theta">Angle of rotation, in radians (positive if counterclockwise).</param>
         public static Matrix<double> TransformationMatrix(double theta) => StressRelations.TransformationMatrix(theta);
-
-        /// <summary>
-        /// Verify if a number is zero (true if is not zero).
-        /// </summary>
-        /// <param name="number">The number.</param>
-		private static bool NotZero(double number) => number != 0;
-
-        /// <summary>
-        /// Calculate the direction cosines (cos, sin) of an angle.
-        /// </summary>
-        /// <param name="angle">Angle, in radians.</param>
-        /// <returns></returns>
-		private static (double cos, double sin) DirectionCosines(double angle)
-		{
-			double
-				cos = Trig.Cos(angle).CoerceZero(1E-6),
-				sin = Trig.Sin(angle).CoerceZero(1E-6);
-
-			return (cos, sin);
-		}
     }
 }

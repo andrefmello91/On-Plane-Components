@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions.Number;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -14,11 +15,12 @@ namespace OnPlaneComponents
     {
 	    // Auxiliary fields
 	    private Pressure _sigma1, _sigma2;
+	    private Matrix<double> _transMatrix;
 
-	    /// <summary>
-	    /// Get/set the stress unit (<see cref="PressureUnit"/>).
-	    /// </summary>
-	    public PressureUnit Unit => _sigma1.Unit;
+        /// <summary>
+        /// Get/set the stress unit (<see cref="PressureUnit"/>).
+        /// </summary>
+        public PressureUnit Unit => _sigma1.Unit;
 
 	    /// <summary>
 	    /// Get maximum principal stress, in <see cref="Unit"/> considered.
@@ -44,7 +46,7 @@ namespace OnPlaneComponents
         /// Get transformation <see cref="Matrix"/> from principal plane to horizontal plane.
         /// <para>See: <seealso cref="StressRelations.TransformationMatrix"/></para>
         /// </summary>
-        public Matrix<double> TransformationMatrix => StressRelations.TransformationMatrix(Theta1);
+        public Matrix<double> TransformationMatrix => _transMatrix ?? CalculateTransformationMatrix();
 
         /// <summary>
         /// Get the <see cref="PrincipalCase"/> of <seealso cref="PrincipalStressState"/>.
@@ -94,10 +96,8 @@ namespace OnPlaneComponents
         /// <param name="theta1">The angle of <paramref name="sigma1"/>, related to horizontal axis (positive to counterclockwise).</param>
         /// <param name="unit">The <see cref="PressureUnit"/> of stresses (default: <see cref="PressureUnit.Megapascal"/>).</param>
         public PrincipalStressState(double sigma1, double sigma2, double theta1 = Constants.PiOver4, PressureUnit unit = PressureUnit.Megapascal)
+			: this(Pressure.From(sigma1.ToZero(), unit), Pressure.From(sigma2.ToZero(), unit), theta1)
         {
-			_sigma1 = Pressure.From(DoubleToZero(sigma1), unit);
-			_sigma2 = Pressure.From(DoubleToZero(sigma2), unit);
-			Theta1  = DoubleToZero(theta1);
         }
 
         /// <summary>
@@ -106,12 +106,21 @@ namespace OnPlaneComponents
         /// <param name="sigma1">The maximum principal <see cref="Pressure"/> (positive for tensile).</param>
         /// <param name="sigma2">The minimum principal <see cref="Pressure"/> (positive for tensile).</param>
         /// <param name="theta1">The angle of <paramref name="sigma1"/>, related to horizontal axis (positive to counterclockwise).</param>
-        /// <param name="unit">The <see cref="PressureUnit"/> of stresses (default: <see cref="PressureUnit.Megapascal"/>).</param>
-        public PrincipalStressState(Pressure sigma1, Pressure sigma2, double theta1 = Constants.PiOver4, PressureUnit unit = PressureUnit.Megapascal)
+        public PrincipalStressState(Pressure sigma1, Pressure sigma2, double theta1 = Constants.PiOver4)
         {
-	        _sigma1 = sigma1.ToUnit(unit);
-			_sigma2 = sigma2.ToUnit(unit);
-			Theta1  = !double.IsNaN(theta1) ? theta1 : 0;
+	        _sigma1      = sigma1;
+			_sigma2      = sigma1.Unit == sigma2.Unit ? sigma2 : sigma2.ToUnit(sigma1.Unit);
+			Theta1       = theta1.ToZero();
+			_transMatrix = null;
+        }
+
+        /// <summary>
+        /// Calculate <see cref="TransformationMatrix"/>.
+        /// </summary>
+        private Matrix<double> CalculateTransformationMatrix()
+        {
+	        _transMatrix = StressRelations.TransformationMatrix(-Theta1);
+	        return _transMatrix;
         }
 
         /// <summary>
@@ -157,13 +166,6 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Return zero if <paramref name="number"/> is <see cref="double.NaN"/> or <see cref="double.PositiveInfinity"/> or <see cref="double.NegativeInfinity"/>.
-        /// </summary>
-        /// <param name="number"></param>
-        /// <returns></returns>
-        private static double DoubleToZero(double number) => !double.IsNaN(number) && !double.IsInfinity(number) ? number : 0;
-
-        /// <summary>
         /// Compare two <see cref="PrincipalStressState"/> objects.
         /// </summary>
         /// <param name="other">The other <see cref="PrincipalStressState"/> to compare.</param>
@@ -193,9 +195,9 @@ namespace OnPlaneComponents
 		        theta = (char) Characters.Theta;
 
 	        return
-		        sigma + "1 = " + _sigma1 + "\n" +
-		        sigma + "2 = " + _sigma2 + "\n" +
-		        theta + "1 = "   + $"{Theta1:0.00}" + " rad";
+		        $"{sigma}1 = {_sigma1}\n" +
+		        $"{sigma}2 = {_sigma2}\n" +
+		        $"{theta}1 = {Theta1:0.00} rad";
         }
 
         public override int GetHashCode() => (int)(Sigma1 * Sigma2);

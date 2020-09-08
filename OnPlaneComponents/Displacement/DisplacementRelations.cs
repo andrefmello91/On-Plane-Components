@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Extensions.Number;
 using MathNet.Numerics;
 using UnitsNet;
 using UnitsNet.Units;
+using Extensions;
 
 namespace OnPlaneComponents
 {
@@ -19,13 +21,13 @@ namespace OnPlaneComponents
         /// </summary>
         /// <param name="componentX">Value of displacement component in X direction (positive to right).</param>
         /// <param name="componentY">Value of displacement component in Y direction (positive upwards).</param>
-        public static double CalculateResultant(double componentX, double componentY)
+        public static double CalculateResultant(double componentX, double componentY) 
         {
             if (componentX == 0 && componentY == 0)
                 return 0;
 
             return
-                Math.Sqrt(componentX * componentX + componentY * componentY);
+                (componentX * componentX + componentY * componentY).Sqrt();
         }
 
         /// <summary>
@@ -63,7 +65,7 @@ namespace OnPlaneComponents
                 return Constants.Pi3Over2;
 
             return
-                Math.Atan(componentY / componentX);
+                (componentY / componentX).Atan();
         }
 
         /// <summary>
@@ -71,11 +73,7 @@ namespace OnPlaneComponents
         /// </summary>
         /// <param name="displacementX">Displacement component in X direction (positive to right) (<see cref="Length"/>).</param>
         /// <param name="displacementY">Displacement component in Y direction (positive upwards) (<see cref="Length"/>).</param>
-        public static double CalculateResultantAngle(Length displacementX, Length displacementY)
-        {
-            return
-                CalculateResultantAngle(displacementX.Value, displacementY.ToUnit(displacementX.Unit).Value);
-        }
+        public static double CalculateResultantAngle(Length displacementX, Length displacementY) => CalculateResultantAngle(displacementX.Value, displacementY.ToUnit(displacementX.Unit).Value);
 
         /// <summary>
         /// Calculate components of a resultant displacement.
@@ -97,7 +95,7 @@ namespace OnPlaneComponents
                 return (0, -resultant);
 
             return
-                (resultant * Math.Acos(angle), resultant * Math.Asin(angle));
+                (resultant * angle.Acos(), resultant * angle.Asin());
         }
 
         /// <summary>
@@ -112,6 +110,5 @@ namespace OnPlaneComponents
             return
                 (Length.From(x, resultantDisplacement.Unit), Length.From(y, resultantDisplacement.Unit));
         }
-
     }
 }

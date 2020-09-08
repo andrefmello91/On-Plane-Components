@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions.Number;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -10,6 +11,9 @@ namespace OnPlaneComponents
     /// </summary>
     public partial struct StrainState : IEquatable<StrainState>
     {
+		// Auxiliary fields
+		private Matrix<double> _transMatrix;
+
 		/// <summary>
 		/// Get normal strain in X direction.
 		/// </summary>
@@ -39,7 +43,7 @@ namespace OnPlaneComponents
         /// Get transformation matrix from XY plane to horizontal plane.
         /// <para>See: <seealso cref="StrainRelations.TransformationMatrix"/></para>
         /// </summary>
-        public Matrix<double> TransformationMatrix => StrainRelations.TransformationMatrix(ThetaX);
+        public Matrix<double> TransformationMatrix => _transMatrix ?? CalculateTransformationMatrix();
 
 		/// <summary>
 		/// Returns true if <see cref="EpsilonX"/> is zero.
@@ -85,16 +89,21 @@ namespace OnPlaneComponents
         /// <param name="thetaX">The angle of <paramref name="epsilonX"/> direction, related to horizontal axis (positive counterclockwise).</param>
         public StrainState(double epsilonX, double epsilonY, double gammaXY, double thetaX = 0)
         {
-	        EpsilonX = DoubleToZero(epsilonX);
-	        EpsilonY = DoubleToZero(epsilonY);
-	        GammaXY  = DoubleToZero(gammaXY);
-	        ThetaX   = DoubleToZero(thetaX);
+	        EpsilonX     = epsilonX.ToZero();
+	        EpsilonY     = epsilonY.ToZero();
+	        GammaXY      = gammaXY.ToZero();
+	        ThetaX       = thetaX.ToZero();
+	        _transMatrix = null;
         }
 
-        /// <summary>
-        /// Get a <see cref="StrainState"/> with zero elements.
+		/// <summary>
+        /// Calculate <see cref="TransformationMatrix"/>.
         /// </summary>
-        public static StrainState Zero => new StrainState(0, 0, 0);
+        private Matrix<double> CalculateTransformationMatrix()
+        {
+	        _transMatrix = StrainRelations.TransformationMatrix(-ThetaX);
+	        return _transMatrix;
+        }
 
         /// <summary>
         /// Get strains as an <see cref="Array"/>.
@@ -107,6 +116,11 @@ namespace OnPlaneComponents
         /// <para>{ EpsilonX, EpsilonY, GammaXY }</para>
         /// </summary>
         public Vector<double> AsVector() => Vector.Build.DenseOfArray(AsArray());
+
+        /// <summary>
+        /// Get a <see cref="StrainState"/> with zero elements.
+        /// </summary>
+        public static StrainState Zero => new StrainState(0, 0, 0);
 
         /// <summary>
         /// Get a <see cref="StrainState"/> from a <see cref="Vector"/> of strains.
@@ -197,13 +211,6 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Return zero if <paramref name="number"/> is <see cref="double.NaN"/> or <see cref="double.PositiveInfinity"/> or <see cref="double.NegativeInfinity"/>.
-        /// </summary>
-        /// <param name="number"></param>
-        /// <returns></returns>
-        private static double DoubleToZero(double number) => !double.IsNaN(number) && !double.IsInfinity(number) ? number : 0;
-
-        /// <summary>
         /// Compare two <see cref="StrainState"/> objects.
         /// </summary>
         /// <param name="other">The strain to compare.</param>
@@ -235,10 +242,10 @@ namespace OnPlaneComponents
 
 
             return
-                epsilon + "x = "  + $"{EpsilonX:0.##E+00}" + "\n" +
-		        epsilon + "y = "  + $"{EpsilonY:0.##E+00}" + "\n" +
-		        gamma   + "xy = " + $"{GammaXY:0.##E+00}" + "\n"  +
-                theta + "x = "    + $"{ThetaX:0.00}" + " rad";
+	            $"{epsilon}x = {EpsilonX:0.##E+00}\n" +
+	            $"{epsilon}y = {EpsilonY:0.##E+00}\n" +
+	            $"{gamma}xy = {GammaXY:0.##E+00}\n" +
+	            $"{theta}x = {ThetaX:0.00} rad";
         }
 
         public override int GetHashCode() => (int)(EpsilonX * EpsilonY * GammaXY);

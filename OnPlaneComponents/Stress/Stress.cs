@@ -1,4 +1,6 @@
 ﻿using System;
+using Extensions.LinearAlgebra;
+using Extensions.Number;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -14,11 +16,12 @@ namespace OnPlaneComponents
     {
 		// Auxiliary fields
 		private Pressure _sigmaX, _sigmaY, _tauXY;
+		private Matrix<double> _transMatrix;
 
-		/// <summary>
+        /// <summary>
         /// Get/set the stress unit (<see cref="PressureUnit"/>).
         /// </summary>
-		public PressureUnit Unit => _sigmaX.Unit;
+        public PressureUnit Unit => _sigmaX.Unit;
 
 		/// <summary>
         /// Get normal stress in X direction, in unit constructed (<see cref="Unit"/>).
@@ -49,7 +52,7 @@ namespace OnPlaneComponents
         /// Get transformation matrix from XY plane to horizontal plane.
         /// <para>See: <see cref="StressRelations.TransformationMatrix"/></para>
         /// </summary>
-        public Matrix<double> TransformationMatrix => StressRelations.TransformationMatrix(ThetaX);
+        public Matrix<double> TransformationMatrix => _transMatrix ?? CalculateTransformationMatrix();
 
 		/// <summary>
         /// Returns true if <see cref="SigmaX"/> is zero.
@@ -95,11 +98,8 @@ namespace OnPlaneComponents
         /// <param name="thetaX">The angle of <paramref name="sigmaX"/>, related to horizontal axis (positive to counterclockwise).</param>
         /// <param name="unit">The <see cref="PressureUnit"/> of stresses (default: <see cref="PressureUnit.Megapascal"/>).</param>
         public StressState(double sigmaX, double sigmaY, double tauXY, double thetaX = 0, PressureUnit unit = PressureUnit.Megapascal)
+			: this (Pressure.From(sigmaX.ToZero(), unit), Pressure.From(sigmaY.ToZero(), unit), Pressure.From(tauXY.ToZero(), unit), thetaX)
 		{
-			_sigmaX = Pressure.From(DoubleToZero(sigmaX), unit);
-			_sigmaY = Pressure.From(DoubleToZero(sigmaY), unit);
-			_tauXY  = Pressure.From(DoubleToZero(tauXY),  unit);
-			ThetaX  = DoubleToZero(thetaX);
 		}
 
         /// <summary>
@@ -109,13 +109,13 @@ namespace OnPlaneComponents
         /// <param name="sigmaY">The normal stress in Y direction (positive for tensile).</param>
         /// <param name="tauXY">The shear stress (positive if upwards in right face of element).</param>
         /// <param name="thetaX">The angle of <paramref name="sigmaX"/>, related to horizontal axis (positive to counterclockwise).</param>
-        /// <param name="unit">The <see cref="PressureUnit"/> of stresses (default: <see cref="PressureUnit.Megapascal"/>).</param>
-        public StressState(Pressure sigmaX, Pressure sigmaY, Pressure tauXY, double thetaX = 0, PressureUnit unit = PressureUnit.Megapascal)
+        public StressState(Pressure sigmaX, Pressure sigmaY, Pressure tauXY, double thetaX = 0)
 		{
-			_sigmaX = sigmaX.ToUnit(unit);
-			_sigmaY = sigmaY.ToUnit(unit);
-			_tauXY  = tauXY.ToUnit(unit);
-			ThetaX = DoubleToZero(thetaX);
+			_sigmaX      = sigmaX;
+			_sigmaY      = sigmaX.Unit == sigmaY.Unit ? sigmaY : sigmaY.ToUnit(sigmaX.Unit);
+			_tauXY       = sigmaX.Unit == tauXY.Unit  ? tauXY  : tauXY.ToUnit(sigmaX.Unit);
+            ThetaX       = thetaX.ToZero();
+			_transMatrix = null;
 		}
 
         /// <summary>
@@ -133,6 +133,15 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
+        /// Calculate <see cref="TransformationMatrix"/>.
+        /// </summary>
+        private Matrix<double> CalculateTransformationMatrix()
+        {
+	        _transMatrix = StressRelations.TransformationMatrix(-ThetaX);
+	        return _transMatrix;
+        }
+
+        /// <summary>
         /// Get the stresses as an <see cref="Array"/>, in unit constructed (<see cref="Unit"/>).
         /// <para>[ SigmaX, SigmaY, TauXY ]</para>
         /// </summary>
@@ -142,7 +151,7 @@ namespace OnPlaneComponents
         /// Get the stresses as <see cref="Vector"/>, in unit constructed (<see cref="Unit"/>).
         /// <para>{ SigmaX, SigmaY, TauXY }</para>
         /// </summary>
-        public Vector<double> AsVector() => Vector.Build.DenseOfArray(AsArray());
+        public Vector<double> AsVector() => AsArray().ToVector();
 
         /// <summary>
         /// Get a <see cref="StressState"/> with zero elements.
@@ -185,7 +194,7 @@ namespace OnPlaneComponents
 			var sVec = StressRelations.Transform(stressState.AsVector(), -stressState.ThetaX);
 
 			// Return with corrected angle
-			return FromVector(sVec);
+			return FromVector(sVec, 0, stressState.Unit);
 		}
 
         /// <summary>
@@ -277,10 +286,10 @@ namespace OnPlaneComponents
 		        theta = (char)Characters.Theta;
 
             return
-                sigma + "x = "  + _sigmaX + "\n" +
-		        sigma + "y = "  + _sigmaY + "\n" +
-		        tau   + "xy = " + _tauXY  + "\n" +
-                theta + "x = "  + $"{ThetaX:0.00}" + " rad";
+	            $"{sigma}x = {_sigmaX}\n" +
+	            $"{sigma}y = {_sigmaY}\n" +
+	            $"{tau}xy = {_tauXY}\n" +
+	            $"{theta}x = {ThetaX:0.00} rad";
         }
 
         public override int GetHashCode() => (int)(SigmaX * SigmaY * TauXY);

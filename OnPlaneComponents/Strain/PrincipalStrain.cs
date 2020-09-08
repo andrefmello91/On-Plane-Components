@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions.Number;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -10,10 +11,13 @@ namespace OnPlaneComponents
     /// </summary>
 	public partial struct PrincipalStrainState : IEquatable<PrincipalStrainState>
     {
-	    /// <summary>
-	    /// Get maximum principal strain.
-	    /// </summary>
-	    public double Epsilon1 { get; }
+	    // Auxiliary fields
+	    private Matrix<double> _transMatrix;
+
+        /// <summary>
+        /// Get maximum principal strain.
+        /// </summary>
+        public double Epsilon1 { get; }
 
         /// <summary>
         /// Get minimum principal strain.
@@ -34,7 +38,7 @@ namespace OnPlaneComponents
         /// Get transformation <see cref="Matrix"/> from principal plane to horizontal plane.
         /// <para>See: <seealso cref="StrainRelations.TransformationMatrix"/></para>
         /// </summary>
-        public Matrix<double> TransformationMatrix => StrainRelations.TransformationMatrix(Theta1);
+        public Matrix<double> TransformationMatrix => _transMatrix ?? CalculateTransformationMatrix();
 
 		/// <summary>
         /// Get the <see cref="PrincipalCase"/> of <seealso cref="PrincipalStrainState"/>.
@@ -84,11 +88,21 @@ namespace OnPlaneComponents
         /// <param name="theta1">The angle of maximum principal strain (<paramref name="epsilon1"/>), related to horizontal axis (positive to counterclockwise).</param>
         public PrincipalStrainState(double epsilon1, double epsilon2, double theta1 = Constants.PiOver4)
         {
-	        Epsilon1 = DoubleToZero(epsilon1);
-	        Epsilon2 = DoubleToZero(epsilon2);
-	        Theta1   = DoubleToZero(theta1);
+	        Epsilon1     = epsilon1.ToZero();
+	        Epsilon2     = epsilon2.ToZero();
+	        Theta1       = theta1.ToZero();
+	        _transMatrix = null;
         }
 
+        /// <summary>
+        /// Calculate <see cref="TransformationMatrix"/>.
+        /// </summary>
+        private Matrix<double> CalculateTransformationMatrix()
+        {
+	        _transMatrix = StrainRelations.TransformationMatrix(-Theta1);
+	        return _transMatrix;
+        }
+		
         /// <summary>
         /// Get principal strains as an <see cref="Array"/>.
         /// <para>{ Epsilon1, Epsilon2, 0 }</para>
@@ -155,9 +169,9 @@ namespace OnPlaneComponents
 		        theta   = (char) Characters.Theta;
 
 	        return
-		        epsilon + "1 = " + $"{Epsilon1:0.##E+00}" + "\n" +
-		        epsilon + "2 = " + $"{Epsilon2:0.##E+00}" + "\n" +
-		        theta + "1 = "   + $"{Theta1:0.00}" + " rad";
+		        $"{epsilon}1 = {Epsilon1:0.##E+00}\n" +
+		        $"{epsilon}2 = {Epsilon2:0.##E+00}\n" +
+		        $"{theta}1 = {Theta1:0.00} rad";
         }
 
         public override int GetHashCode() => (int)(Epsilon1 * Epsilon2);
