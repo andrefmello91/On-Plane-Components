@@ -238,7 +238,7 @@ namespace OnPlaneComponents
         /// <param name="principalStressState">The <see cref="PrincipalStressState"/> to horizontal <see cref="StressState"/>.</param>
         public static StressState FromPrincipal(PrincipalStressState principalStressState)
         {
-	        if (principalStressState.Theta1 == 0)
+	        if (principalStressState.Theta1.ApproxZero())
 		        return FromVector(principalStressState.AsVector());
 
 	        // Get the strain vector transformed
@@ -247,13 +247,6 @@ namespace OnPlaneComponents
 	        // Return with corrected angle
 	        return FromVector(sVec, 0, principalStressState.Unit);
         }
-
-		/// <summary>
-        /// Return zero if <paramref name="number"/> is <see cref="double.NaN"/> or <see cref="double.PositiveInfinity"/> or <see cref="double.NegativeInfinity"/>.
-        /// </summary>
-        /// <param name="number"></param>
-        /// <returns></returns>
-        private static double DoubleToZero(double number) => !double.IsNaN(number) && !double.IsInfinity(number) ? number : 0;
 
         /// <summary>
         /// Compare two <see cref="StressState"/> objects.
