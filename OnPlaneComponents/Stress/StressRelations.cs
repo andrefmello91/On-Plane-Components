@@ -50,10 +50,10 @@ namespace OnPlaneComponents
         /// <param name="tauXY">The shear stress (positive if upwards in right face of element).</param>
         public static (double sigma1, double sigma2) CalculatePrincipal(double sigmaX, double sigmaY, double tauXY)
         {
-            if (sigmaX == 0 && sigmaY == 0 && tauXY == 0)
+            if (sigmaX.ApproxZero() && sigmaY.ApproxZero() && tauXY.ApproxZero())
                 return (0, 0);
 
-            if (tauXY == 0)
+            if (tauXY.ApproxZero())
                 return (Math.Max(sigmaX, sigmaY), Math.Min(sigmaX, sigmaY));
 
             // Calculate radius and center of Mohr's Circle
@@ -106,10 +106,10 @@ namespace OnPlaneComponents
         {
             double theta1 = Constants.PiOver4;
 
-            if (sigmaX != 0 || sigmaY != 0 || tauXY != 0)
+            if (!sigmaX.ApproxZero() || !sigmaY.ApproxZero() || !tauXY.ApproxZero())
             {
                 // Calculate the strain slope
-                if (tauXY == 0)
+                if (tauXY.ApproxZero())
                 {
                     if (sigmaX >= sigmaY)
                         theta1 = 0;
@@ -117,7 +117,7 @@ namespace OnPlaneComponents
                         theta1 = Constants.PiOver2;
                 }
 
-                else if ((sigmaX - sigmaY).Abs() <= 1E-9 && tauXY < 0)
+                else if (sigmaX.Approx(sigmaY) && tauXY < 0)
 	                theta1 = -Constants.PiOver4;
 
                 else if (sigma2.HasValue)

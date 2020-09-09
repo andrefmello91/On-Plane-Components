@@ -48,10 +48,10 @@ namespace OnPlaneComponents
         /// <param name="gammaXY">The shear strain (positive if right face of element displaces upwards).</param>
         public static (double epsilon1, double epsilon2) CalculatePrincipal(double epsilonX, double epsilonY, double gammaXY)
         {
-	        if (epsilonX == 0 && epsilonY == 0 && gammaXY == 0)
+	        if (epsilonX.ApproxZero(1E-9) && epsilonY.ApproxZero(1E-9) && gammaXY.ApproxZero(1E-9))
 		        return (0, 0);
 
-	        if (gammaXY == 0)
+	        if (gammaXY.ApproxZero(1E-9))
 		        return (Math.Max(epsilonX, epsilonY), Math.Min(epsilonX, epsilonY));
 
             // Calculate radius and center of Mohr's Circle
@@ -85,10 +85,10 @@ namespace OnPlaneComponents
         {
             double theta1 = Constants.PiOver4;
 
-            if (epsilonX != 0 || epsilonY != 0 || gammaXY != 0)
+            if (!epsilonX.ApproxZero(1E-9) || !epsilonY.ApproxZero(1E-9) || !gammaXY.ApproxZero(1E-9))
             {
                 // Calculate the strain slope
-                if (gammaXY == 0)
+                if (gammaXY.ApproxZero(1E-9))
                 {
                     if (epsilonX >= epsilonY)
                         theta1 = 0;
@@ -96,7 +96,7 @@ namespace OnPlaneComponents
                         theta1 = Constants.PiOver2;
                 }
 
-                else if (Math.Abs(epsilonX - epsilonY) <= 1E-12 && gammaXY < 0)
+                else if (epsilonX.Approx(epsilonY, 1E-9) && gammaXY < 0)
 	                theta1 = -Constants.PiOver4;
 
                 else if (epsilon2.HasValue)
