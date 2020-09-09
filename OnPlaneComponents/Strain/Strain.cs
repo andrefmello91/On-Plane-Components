@@ -97,15 +97,6 @@ namespace OnPlaneComponents
 	        _transMatrix = null;
         }
 
-		/// <summary>
-        /// Calculate <see cref="TransformationMatrix"/>.
-        /// </summary>
-        private Matrix<double> CalculateTransformationMatrix()
-        {
-	        _transMatrix = StrainRelations.TransformationMatrix(ThetaX);
-	        return _transMatrix;
-        }
-
         /// <summary>
         /// Get strains as an <see cref="Array"/>.
         /// <para>[ EpsilonX, EpsilonY, GammaXY ]</para>
@@ -117,6 +108,20 @@ namespace OnPlaneComponents
         /// <para>{ EpsilonX, EpsilonY, GammaXY }</para>
         /// </summary>
         public Vector<double> AsVector() => AsArray().ToVector();
+
+        /// <summary>
+        /// Return a copy of this <see cref="StrainState"/>.
+        /// </summary>
+        public StrainState Copy() => new StrainState(EpsilonX, EpsilonY, GammaXY, ThetaX);
+
+        /// <summary>
+        /// Calculate <see cref="TransformationMatrix"/>.
+        /// </summary>
+        private Matrix<double> CalculateTransformationMatrix()
+        {
+	        _transMatrix = StrainRelations.TransformationMatrix(ThetaX);
+	        return _transMatrix;
+        }
 
         /// <summary>
         /// Get a <see cref="StrainState"/> with zero elements.

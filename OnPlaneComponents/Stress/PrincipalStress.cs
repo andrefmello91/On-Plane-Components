@@ -116,15 +116,6 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Calculate <see cref="TransformationMatrix"/>.
-        /// </summary>
-        private Matrix<double> CalculateTransformationMatrix()
-        {
-	        _transMatrix = StressRelations.TransformationMatrix(Theta1);
-	        return _transMatrix;
-        }
-
-        /// <summary>
         /// Change the unit of stresses.
         /// </summary>
         /// <param name="toUnit">The <see cref="PressureUnit"/> to convert.</param>
@@ -148,6 +139,20 @@ namespace OnPlaneComponents
         /// <para>{ Sigma1, Sigma2, 0 }</para>
         /// </summary>
         public Vector<double> AsVector() => AsArray().ToVector();
+
+        /// <summary>
+        /// Return a copy of this <see cref="PrincipalStressState"/>.
+        /// </summary>
+        public PrincipalStressState Copy() => new PrincipalStressState(Sigma1, Sigma2, Theta1, Unit);
+
+		/// <summary>
+        /// Calculate <see cref="TransformationMatrix"/>.
+        /// </summary>
+        private Matrix<double> CalculateTransformationMatrix()
+        {
+	        _transMatrix = StressRelations.TransformationMatrix(Theta1);
+	        return _transMatrix;
+        }
 
         /// <summary>
         /// Get a <see cref="PrincipalStressState"/> with zero elements.

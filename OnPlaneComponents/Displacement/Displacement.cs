@@ -97,6 +97,11 @@ namespace OnPlaneComponents
         }
 
 		/// <summary>
+        /// Return a copy of this <see cref="Displacement"/>.
+        /// </summary>
+        public Displacement Copy() => new Displacement(ComponentX, ComponentY, Unit);
+
+        /// <summary>
         /// Calculate <see cref="Resultant"/> displacement.
         /// </summary>
         private Length CalculateResultant()

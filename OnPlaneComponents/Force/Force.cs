@@ -94,7 +94,12 @@ namespace OnPlaneComponents
 			_forceY = _forceY.ToUnit(toUnit);
 		}
 
-		/// <summary>
+        /// <summary>
+        /// Return a copy of this <see cref="Force"/>.
+        /// </summary>
+        public Force Copy() => new Force(ComponentX, ComponentY, Unit);
+
+        /// <summary>
         /// Calculate <see cref="Resultant"/> force.
         /// </summary>
         private UnitsNet.Force CalculateResultant()

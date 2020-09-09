@@ -133,15 +133,6 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Calculate <see cref="TransformationMatrix"/>.
-        /// </summary>
-        private Matrix<double> CalculateTransformationMatrix()
-        {
-	        _transMatrix = StressRelations.TransformationMatrix(ThetaX);
-	        return _transMatrix;
-        }
-
-        /// <summary>
         /// Get the stresses as an <see cref="Array"/>, in unit constructed (<see cref="Unit"/>).
         /// <para>[ SigmaX, SigmaY, TauXY ]</para>
         /// </summary>
@@ -152,6 +143,20 @@ namespace OnPlaneComponents
         /// <para>{ SigmaX, SigmaY, TauXY }</para>
         /// </summary>
         public Vector<double> AsVector() => AsArray().ToVector();
+
+        /// <summary>
+        /// Return a copy of this <see cref="StressState"/>.
+        /// </summary>
+        public StressState Copy() => new StressState(SigmaX, SigmaY, TauXY, ThetaX, Unit);
+
+        /// <summary>
+        /// Calculate <see cref="TransformationMatrix"/>.
+        /// </summary>
+        private Matrix<double> CalculateTransformationMatrix()
+        {
+	        _transMatrix = StressRelations.TransformationMatrix(ThetaX);
+	        return _transMatrix;
+        }
 
         /// <summary>
         /// Get a <see cref="StressState"/> with zero elements.
