@@ -4,6 +4,7 @@ using Extensions.Number;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using static OnPlaneComponents.StrainRelations;
 
 namespace OnPlaneComponents
 {
@@ -210,7 +211,7 @@ namespace OnPlaneComponents
 		        return FromVector(principalStrainState.AsVector());
 
 			// Get the strain vector transformed
-			var sVec = StrainRelations.StrainsFromPrincipal(principalStrainState.Epsilon1, principalStrainState.Epsilon2, principalStrainState.Theta1);
+			var sVec = StrainsFromPrincipal(principalStrainState.Epsilon1, principalStrainState.Epsilon2, principalStrainState.Theta1);
 
 			// Return with corrected angle
 			return FromVector(sVec);

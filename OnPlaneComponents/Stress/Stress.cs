@@ -6,6 +6,7 @@ using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using UnitsNet;
 using UnitsNet.Units;
+using static OnPlaneComponents.StressRelations;
 
 namespace OnPlaneComponents
 {
@@ -247,7 +248,7 @@ namespace OnPlaneComponents
 		        return FromVector(principalStressState.AsVector());
 
 	        // Get the strain vector transformed
-	        var sVec = StressRelations.StressesFromPrincipal(principalStressState.Sigma1, principalStressState.Sigma2, principalStressState.Theta1);
+	        var sVec = StressesFromPrincipal(principalStressState.Sigma1, principalStressState.Sigma2, principalStressState.Theta1);
 
 	        // Return with corrected angle
 	        return FromVector(sVec, 0, principalStressState.Unit);

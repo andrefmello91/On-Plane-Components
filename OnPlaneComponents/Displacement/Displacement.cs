@@ -3,6 +3,7 @@ using UnitsNet;
 using UnitsNet.Units;
 using Extensions;
 using Extensions.Number;
+using static OnPlaneComponents.DisplacementRelations;
 
 namespace OnPlaneComponents
 {
@@ -38,7 +39,7 @@ namespace OnPlaneComponents
         /// <summary>
         /// Get the resultant displacement angle, in radians.
         /// </summary>
-        public double ResultantAngle => DisplacementRelations.CalculateResultantAngle(ComponentX, ComponentY);
+        public double ResultantAngle => CalculateResultantAngle(ComponentX, ComponentY);
 
         /// <summary>
         /// Verify if X component is zero.
@@ -158,7 +159,7 @@ namespace OnPlaneComponents
         /// <param name="angle">Angle that displacement resultant is pointing at, in radians.</param>
         public static Displacement FromResultant(Length resultantDisplacement, double angle)
         {
-            var (x, y) = DisplacementRelations.CalculateComponents(resultantDisplacement, angle);
+            var (x, y) = CalculateComponents(resultantDisplacement, angle);
 
             return new Displacement(x, y);
         }

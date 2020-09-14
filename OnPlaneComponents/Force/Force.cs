@@ -1,6 +1,7 @@
 ﻿using System;
 using Extensions.Number;
 using UnitsNet.Units;
+using static OnPlaneComponents.ForceRelations;
 
 namespace OnPlaneComponents
 {
@@ -36,7 +37,7 @@ namespace OnPlaneComponents
 		/// <summary>
 		/// Get the resultant force angle, in radians.
 		/// </summary>
-		public double ResultantAngle => ForceRelations.CalculateResultantAngle(ComponentX, ComponentY);
+		public double ResultantAngle => CalculateResultantAngle(ComponentX, ComponentY);
 
 		/// <summary>
 		/// Verify if X component is zero.
@@ -149,7 +150,7 @@ namespace OnPlaneComponents
         /// <param name="unit">The <see cref="ForceUnit"/> (default: <see cref="ForceUnit.Newton"/>).</param>
         public static Force FromResultant(double resultant, double angle, ForceUnit unit = ForceUnit.Newton)
         {
-	        var (x, y) = ForceRelations.CalculateComponents(resultant, angle);
+	        var (x, y) = CalculateComponents(resultant, angle);
 
 			return new Force(x, y, unit);
         }
@@ -161,7 +162,7 @@ namespace OnPlaneComponents
         /// <param name="angle">Angle that force resultant is pointing at, in radians.</param>
         public static Force FromResultant(UnitsNet.Force resultantForce, double angle)
         {
-	        var (x, y) = ForceRelations.CalculateComponents(resultantForce, angle);
+	        var (x, y) = CalculateComponents(resultantForce, angle);
 
 			return
 				new Force(x, y);

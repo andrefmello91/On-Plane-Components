@@ -6,6 +6,7 @@ using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using UnitsNet;
 using UnitsNet.Units;
+using static OnPlaneComponents.StressRelations;
 
 namespace OnPlaneComponents
 {
@@ -165,8 +166,8 @@ namespace OnPlaneComponents
         /// <param name="stressState">The <see cref="StressState"/> to transform.</param>
         public static PrincipalStressState FromStress(StressState stressState)
         {
-	        var (s1, s2) = StressRelations.CalculatePrincipal(stressState.AsVector());
-	        var theta1   = StressRelations.CalculatePrincipalAngles(stressState.AsVector(), s2).theta1;
+	        var (s1, s2) = CalculatePrincipal(stressState.AsVector());
+	        var theta1   = CalculatePrincipalAngles(stressState.AsVector(), s2).theta1;
 
 			return new PrincipalStressState(s1, s2, stressState.ThetaX + theta1);
         }
