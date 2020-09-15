@@ -23,7 +23,7 @@ namespace OnPlaneComponents
         /// <param name="componentY">Value of displacement component in Y direction (positive upwards).</param>
         public static double CalculateResultant(double componentX, double componentY) 
         {
-            if (componentX == 0 && componentY == 0)
+            if (componentX.ApproxZero() && componentY.ApproxZero())
                 return 0;
 
             return
@@ -52,16 +52,16 @@ namespace OnPlaneComponents
         /// <param name="componentY">Value of displacement component in Y direction (positive upwards).</param>
         public static double CalculateResultantAngle(double componentX, double componentY)
         {
-            if (componentX > 0 && componentY == 0)
+            if (componentX > 0 && componentY.ApproxZero())
                 return 0;
 
-            if (componentX < 0 && componentY == 0)
+            if (componentX < 0 && componentY.ApproxZero())
                 return Constants.Pi;
 
-            if (componentX == 0 && componentY > 0)
+            if (componentX.ApproxZero() && componentY > 0)
                 return Constants.PiOver2;
 
-            if (componentX == 0 && componentY < 0)
+            if (componentX.ApproxZero() && componentY < 0)
                 return Constants.Pi3Over2;
 
             return
@@ -82,7 +82,7 @@ namespace OnPlaneComponents
         /// <param name="angle">Angle that displacement resultant is pointing at, in radians.</param>
         public static (double X, double Y) CalculateComponents(double resultant, double angle)
         {
-            if (angle == 0)
+            if (angle.ApproxZero())
                 return (resultant, 0);
 
             if (angle == Constants.PiOver2)

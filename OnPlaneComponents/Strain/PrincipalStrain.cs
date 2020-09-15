@@ -65,12 +65,12 @@ namespace OnPlaneComponents
         /// <summary>
         /// Returns true if <see cref="Epsilon1"/> is zero.
         /// </summary>
-        public bool IsEpsilon1Zero => Epsilon1 == 0;
+        public bool IsEpsilon1Zero => Epsilon1.ApproxZero();
 
         /// <summary>
         /// Returns true if <see cref="Epsilon2"/> is zero.
         /// </summary>
-        public bool IsEpsilon2Zero => Epsilon2 == 0;
+        public bool IsEpsilon2Zero => Epsilon2.ApproxZero();
 
         /// <summary>
         /// Returns true if <see cref="Epsilon1"/> and <see cref="Epsilon2"/> are zero.
@@ -80,7 +80,7 @@ namespace OnPlaneComponents
         /// <summary>
         /// Returns true if <see cref="Epsilon1"/> direction coincides to horizontal axis.
         /// </summary>
-        public bool IsHorizontal => Theta1 == 0;
+        public bool IsHorizontal => Theta1.ApproxZero();
 
         /// <summary>
         /// Principal Strain object.

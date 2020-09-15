@@ -50,17 +50,17 @@ namespace OnPlaneComponents
 		/// <summary>
 		/// Returns true if <see cref="EpsilonX"/> is zero.
 		/// </summary>
-		public bool IsEpsilonXZero => EpsilonX == 0;
+		public bool IsEpsilonXZero => EpsilonX.ApproxZero();
 
 		/// <summary>
 		/// Returns true if <see cref="EpsilonY"/> is zero.
 		/// </summary>
-		public bool IsEpsilonYZero => EpsilonY == 0;
+		public bool IsEpsilonYZero => EpsilonY.ApproxZero();
 
 		/// <summary>
 		/// Returns true if <see cref="GammaXY"/> is zero.
 		/// </summary>
-		public bool IsGammaXYZero => GammaXY == 0;
+		public bool IsGammaXYZero => GammaXY.ApproxZero();
 
         /// <summary>
         /// Returns true if all components are zero.
@@ -80,7 +80,7 @@ namespace OnPlaneComponents
 		/// <summary>
 		/// Returns true if <see cref="EpsilonX"/> direction coincides to horizontal axis.
 		/// </summary>
-		public bool IsHorizontal => ThetaX == 0;
+		public bool IsHorizontal => ThetaX.ApproxZero();
 
         /// <summary>
         /// Strain object for XY components.
@@ -174,7 +174,7 @@ namespace OnPlaneComponents
         /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
         public static StrainState Transform(StrainState strainState, double theta)
         {
-	        if (theta == 0)
+	        if (theta.ApproxZero())
 		        return strainState;
 
 			// Get the strain vector transformed
@@ -191,7 +191,7 @@ namespace OnPlaneComponents
         /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
         public static StrainState Transform(PrincipalStrainState principalStrainState, double theta)
         {
-	        if (theta == 0)
+	        if (theta.ApproxZero())
 		        return FromVector(principalStrainState.AsVector(), principalStrainState.Theta1);
 
 			// Get the strain vector transformed
@@ -207,7 +207,7 @@ namespace OnPlaneComponents
         /// <param name="principalStrainState">The <see cref="PrincipalStrainState"/> to horizontal <see cref="StrainState"/>.</param>
         public static StrainState FromPrincipal(PrincipalStrainState principalStrainState)
         {
-	        if (principalStrainState.Theta1 == 0)
+	        if (principalStrainState.Theta1.ApproxZero())
 		        return FromVector(principalStrainState.AsVector());
 
 			// Get the strain vector transformed

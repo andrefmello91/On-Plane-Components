@@ -58,17 +58,17 @@ namespace OnPlaneComponents
 		/// <summary>
         /// Returns true if <see cref="SigmaX"/> is zero.
         /// </summary>
-		public bool IsSigmaXZero => SigmaX == 0;
+		public bool IsSigmaXZero => SigmaX.ApproxZero();
 
 		/// <summary>
         /// Returns true if <see cref="SigmaY"/> is zero.
         /// </summary>
-		public bool IsSigmaYZero => SigmaY == 0;
+		public bool IsSigmaYZero => SigmaY.ApproxZero();
 
 		/// <summary>
         /// Returns true if <see cref="TauXY"/> is zero.
         /// </summary>
-		public bool IsTauXYZero => TauXY == 0;
+		public bool IsTauXYZero => TauXY.ApproxZero();
 
 		/// <summary>
         /// Returns true if all components are zero.
@@ -88,7 +88,7 @@ namespace OnPlaneComponents
 		/// <summary>
 		/// Returns true if <see cref="SigmaX"/> direction coincides to horizontal axis.
 		/// </summary>
-		public bool IsHorizontal => ThetaX == 0;
+		public bool IsHorizontal => ThetaX.ApproxZero();
 
         /// <summary>
         /// Stress object for XY components.
@@ -210,7 +210,7 @@ namespace OnPlaneComponents
         /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
         public static StressState Transform(StressState stressState, double theta)
         {
-	        if (theta == 0)
+	        if (theta.ApproxZero())
 		        return stressState;
 
 	        // Get the strain vector transformed
@@ -227,7 +227,7 @@ namespace OnPlaneComponents
         /// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
         public static StressState Transform(PrincipalStressState principalStressState, double theta)
         {
-	        if (theta == 0)
+	        if (theta.ApproxZero())
 		        return FromVector(principalStressState.AsVector(), principalStressState.Theta1, principalStressState.Unit);
 
 	        // Get the strain vector transformed

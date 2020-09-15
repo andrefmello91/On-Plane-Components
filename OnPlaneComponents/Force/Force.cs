@@ -42,12 +42,12 @@ namespace OnPlaneComponents
 		/// <summary>
 		/// Verify if X component is zero.
 		/// </summary>
-		public bool IsComponentXZero => ComponentX == 0;
+		public bool IsComponentXZero => ComponentX.ApproxZero();
 
 		/// <summary>
 		/// Verify if Y component is zero.
 		/// </summary>
-		public bool IsComponentYZero => ComponentY == 0;
+		public bool IsComponentYZero => ComponentY.ApproxZero();
 
 		/// <summary>
 		/// Verify if force components are zero.
@@ -57,7 +57,7 @@ namespace OnPlaneComponents
 		/// <summary>
 		/// Verify if force resultant is zero.
 		/// </summary>
-		public bool IsResultantZero => Resultant == 0;
+		public bool IsResultantZero => Resultant.ApproxZero();
 
         /// <summary>
         /// Force object.

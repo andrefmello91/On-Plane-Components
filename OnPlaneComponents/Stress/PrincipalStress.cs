@@ -73,12 +73,12 @@ namespace OnPlaneComponents
         /// <summary>
         /// Returns true if <see cref="Sigma1"/> is zero.
         /// </summary>
-        public bool IsSigma1Zero => Sigma1 == 0;
+        public bool IsSigma1Zero => Sigma1.ApproxZero();
 
         /// <summary>
         /// Returns true if <see cref="Sigma2"/> is zero.
         /// </summary>
-        public bool IsSigma2Zero => Sigma2 == 0;
+        public bool IsSigma2Zero => Sigma2.ApproxZero();
 
         /// <summary>
         /// Returns true if <see cref="Sigma1"/> and <see cref="Sigma2"/> are zero.
@@ -88,7 +88,7 @@ namespace OnPlaneComponents
         /// <summary>
         /// Returns true if <see cref="Sigma1"/> direction coincides to horizontal axis.
         /// </summary>
-        public bool IsHorizontal => Theta1 == 0;
+        public bool IsHorizontal => Theta1.ApproxZero();
 
         /// <summary>
         /// Principal Stress object.
