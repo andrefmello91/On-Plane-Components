@@ -108,7 +108,7 @@ namespace OnPlaneComponents
                 else
 	                theta1 = Constants.PiOver2 - 0.5 * (gammaXY / (epsilonY - epsilonX)).Atan();
 
-                if (double.IsNaN(theta1))
+                if (theta1.IsNaN())
                     theta1 = Constants.PiOver4;
             }
 
