@@ -17,9 +17,14 @@ namespace OnPlaneComponents
 		private Matrix<double> _transMatrix;
 
 		/// <summary>
-		/// Get normal strain in X direction.
+		/// Get a <see cref="StrainState"/> with zero elements.
 		/// </summary>
-		public double EpsilonX { get; }
+		public static readonly StrainState Zero = new StrainState(0, 0, 0);
+
+        /// <summary>
+        /// Get normal strain in X direction.
+        /// </summary>
+        public double EpsilonX { get; }
 
         /// <summary>
         /// Get normal strain in Y direction.
@@ -123,11 +128,6 @@ namespace OnPlaneComponents
 	        _transMatrix = StrainRelations.TransformationMatrix(ThetaX);
 	        return _transMatrix;
         }
-
-        /// <summary>
-        /// Get a <see cref="StrainState"/> with zero elements.
-        /// </summary>
-        public static StrainState Zero => new StrainState(0, 0, 0);
 
         /// <summary>
         /// Get a <see cref="StrainState"/> from a <see cref="Vector"/> of strains.

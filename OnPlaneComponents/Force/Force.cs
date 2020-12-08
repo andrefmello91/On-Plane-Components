@@ -15,9 +15,14 @@ namespace OnPlaneComponents
 		private UnitsNet.Force? _resultant;
 
 		/// <summary>
+		/// Get a <see cref="Force"/> with zero value.
+		/// </summary>
+		public static readonly Force Zero = new Force(0, 0);
+
+        /// <summary>
         /// Get/set the force unit (<see cref="ForceUnit"/>).
         /// </summary>
-		public ForceUnit Unit => _forceX.Unit;
+        public ForceUnit Unit => _forceX.Unit;
 
 		/// <summary>
 		/// Get the force component value in X direction, in the unit constructed (<see cref="Unit"/>).
@@ -110,11 +115,6 @@ namespace OnPlaneComponents
 
 	        return _resultant.Value;
         }
-
-        /// <summary>
-        /// Get a <see cref="Force"/> with zero value.
-        /// </summary>
-        public static Force Zero => new Force(0, 0);
 
         /// <summary>
         /// Get a <see cref="Force"/> in X direction.

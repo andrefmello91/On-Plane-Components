@@ -15,7 +15,12 @@ namespace OnPlaneComponents
         // Auxiliar fields
         private Length _displacementX, _displacementY;
         private Length? _resultant;
-		
+
+        /// <summary>
+        /// Get a <see cref="Displacement"/> with zero value.
+        /// </summary>
+        public static readonly Displacement Zero = new Displacement(0, 0);
+
         /// <summary>
         /// Get/set the displacement unit (<see cref="LengthUnit"/>).
         /// </summary>
@@ -112,11 +117,6 @@ namespace OnPlaneComponents
 
 	        return _resultant.Value;
         }
-
-        /// <summary>
-        /// Get a <see cref="Displacement"/> with zero value.
-        /// </summary>
-        public static Displacement Zero => new Displacement(0, 0);
 
         /// <summary>
         /// Get a <see cref="Displacement"/> in X direction.

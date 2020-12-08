@@ -19,6 +19,11 @@ namespace OnPlaneComponents
 	    private Pressure _sigma1, _sigma2;
 	    private Matrix<double> _transMatrix;
 
+	    /// <summary>
+	    /// Get a <see cref="PrincipalStressState"/> with zero elements.
+	    /// </summary>
+	    public static readonly  PrincipalStressState Zero = new PrincipalStressState(0, 0);
+
         /// <summary>
         /// Get/set the stress unit (<see cref="PressureUnit"/>).
         /// </summary>
@@ -154,11 +159,6 @@ namespace OnPlaneComponents
 	        _transMatrix = StressRelations.TransformationMatrix(Theta1);
 	        return _transMatrix;
         }
-
-        /// <summary>
-        /// Get a <see cref="PrincipalStressState"/> with zero elements.
-        /// </summary>
-        public static PrincipalStressState Zero => new PrincipalStressState(0, 0);
 
         /// <summary>
         /// Get a <see cref="PrincipalStressState"/> from a <see cref="StressState"/>.

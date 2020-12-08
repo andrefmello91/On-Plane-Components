@@ -16,6 +16,11 @@ namespace OnPlaneComponents
 	    // Auxiliary fields
 	    private Matrix<double> _transMatrix;
 
+	    /// <summary>
+	    /// Get a <see cref="PrincipalStrainState"/> with zero elements.
+	    /// </summary>
+	    public static readonly PrincipalStrainState Zero = new PrincipalStrainState(0, 0);
+
         /// <summary>
         /// Get maximum principal strain.
         /// </summary>
@@ -121,11 +126,6 @@ namespace OnPlaneComponents
 	        _transMatrix = StrainRelations.TransformationMatrix(Theta1);
 	        return _transMatrix;
         }
-
-        /// <summary>
-        /// Get a <see cref="PrincipalStrainState"/> with zero elements.
-        /// </summary>
-        public static PrincipalStrainState Zero => new PrincipalStrainState(0, 0);
 
         /// <summary>
         /// Get a <see cref="PrincipalStrainState"/> from a <see cref="StrainState"/>.
