@@ -36,7 +36,7 @@ namespace OnPlaneComponents
                 return UnitsNet.Force.Zero;
 
             return
-                UnitsNet.Force.From(CalculateResultant(forceX.Value, forceY.ToUnit(forceX.Unit).Value), unit);
+                UnitsNet.Force.From(CalculateResultant(forceX.ToUnit(unit).Value, forceY.ToUnit(unit).Value), unit);
         }
 
         /// <summary>

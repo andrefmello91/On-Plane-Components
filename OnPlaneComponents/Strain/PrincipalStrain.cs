@@ -4,6 +4,7 @@ using Extensions.Number;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using UnitsNet.Units;
 using static OnPlaneComponents.StrainRelations;
 
 namespace OnPlaneComponents
@@ -11,7 +12,7 @@ namespace OnPlaneComponents
 	/// <summary>
     /// Principal strain struct.
     /// </summary>
-	public partial struct PrincipalStrainState : IEquatable<PrincipalStrainState>
+	public partial struct PrincipalStrainState : IPlaneComponent<PrincipalStrainState, ScalarUnit>, IEquatable<PrincipalStrainState>
     {
 	    // Auxiliary fields
 	    private Matrix<double> _transMatrix;
@@ -20,6 +21,8 @@ namespace OnPlaneComponents
 	    /// Get a <see cref="PrincipalStrainState"/> with zero elements.
 	    /// </summary>
 	    public static readonly PrincipalStrainState Zero = new PrincipalStrainState(0, 0);
+
+	    public ScalarUnit Unit { get; set; }
 
         /// <summary>
         /// Get maximum principal strain.
@@ -99,7 +102,16 @@ namespace OnPlaneComponents
 	        Epsilon2     = epsilon2.ToZero();
 	        Theta1       = theta1.ToZero();
 	        _transMatrix = null;
+	        Unit         = ScalarUnit.Undefined;
         }
+
+        /// <inheritdoc cref="StrainState.ChangeUnit"/>
+        public void ChangeUnit(ScalarUnit unit)
+        {
+        }
+
+        /// <inheritdoc cref="StrainState.Convert"/>
+        public PrincipalStrainState Convert(ScalarUnit unit) => this;
 
         /// <summary>
         /// Return a copy of this <see cref="PrincipalStrainState"/>.
@@ -168,6 +180,8 @@ namespace OnPlaneComponents
 
 	        return false;
         }
+
+        public bool Equals(IPlaneComponent<PrincipalStrainState, ScalarUnit> other) => other is PrincipalStrainState strain && Equals(strain);
 
         public override string ToString()
         {

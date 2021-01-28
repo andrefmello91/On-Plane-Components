@@ -13,7 +13,7 @@ namespace OnPlaneComponents
 	/// <summary>
 	/// On plane Point struct.
 	/// </summary>
-	public struct Point : IEquatable<Point>, IComparable<Point>
+	public struct Point : IPlaneComponent<Point, LengthUnit>, IEquatable<Point>, IComparable<Point>
 	{
 		private Length _x, _y;
 
@@ -28,12 +28,8 @@ namespace OnPlaneComponents
 	    public LengthUnit Unit
 	    {
 		    get => _x.Unit;
-		    set
-		    {
-			    _x = _x.ToUnit(value);
-			    _y = _y.ToUnit(value);
-		    }
-	    }
+		    set => ChangeUnit(value);
+		}
 
 		/// <summary>
 		/// Get the X coordinate of this <see cref="Point"/> object, in current <see cref="Unit"/>.
@@ -64,10 +60,29 @@ namespace OnPlaneComponents
 	    }
 
 		/// <summary>
-		/// Create a new <see cref="Point"/> with converted <see cref="LengthUnit"/>.
+		/// Change the <see cref="LengthUnit"/> of this <see cref="Point"/>.
 		/// </summary>
 		/// <param name="unit">The desired <see cref="LengthUnit"/>.</param>
+		public void ChangeUnit(LengthUnit unit)
+		{
+			if (unit == Unit)
+				return;
+
+			// Update values
+			_x = _x.ToUnit(unit);
+			_y = _y.ToUnit(unit);
+		}
+
+		/// <summary>
+		/// Create a new <see cref="Point"/> with converted <see cref="LengthUnit"/>.
+		/// </summary>
+		/// <inheritdoc cref="ChangeUnit"/>
 		public Point Convert(LengthUnit unit) => Unit == unit ? this : new Point(_x.ToUnit(unit), _y.ToUnit(unit));
+
+		/// <summary>
+		/// Create a copy of this <see cref="Point"/> object.
+		/// </summary>
+		public Point Copy() => new Point(_x, _y);
 
 		/// <summary>
 		/// Get the horizontal distance, in <see cref="Unit"/>, between this <see cref="Point"/> and <paramref name="other"/>.
@@ -189,6 +204,8 @@ namespace OnPlaneComponents
 		}
 
 		public override bool Equals(object obj) => obj is Point other && Equals(other);
+
+		public bool Equals(IPlaneComponent<Point, LengthUnit> other) => other is Point point && Equals(point);
 
 		public override int GetHashCode() => (int)X * (int)Y;
 

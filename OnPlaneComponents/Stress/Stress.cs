@@ -13,7 +13,7 @@ namespace OnPlaneComponents
     /// <summary>
     /// Stress object for XY components.
     /// </summary>
-    public partial struct StressState : IEquatable<StressState>
+    public partial struct StressState : IPlaneComponent<StressState, PressureUnit>, IEquatable<StressState>
     {
 		// Auxiliary fields
 		private Pressure _sigmaX, _sigmaY, _tauXY;
@@ -27,9 +27,13 @@ namespace OnPlaneComponents
         /// <summary>
         /// Get/set the stress unit (<see cref="PressureUnit"/>).
         /// </summary>
-        public PressureUnit Unit => _sigmaX.Unit;
+        public PressureUnit Unit
+        {
+	        get => _sigmaX.Unit;
+	        set => ChangeUnit(value);
+        }
 
-		/// <summary>
+        /// <summary>
         /// Get normal stress in X direction, in unit constructed (<see cref="Unit"/>).
         /// </summary>
         public double SigmaX => _sigmaX.Value;
@@ -125,18 +129,26 @@ namespace OnPlaneComponents
 		}
 
         /// <summary>
-        /// Change the unit of stresses.
+        /// Change the <see cref="PressureUnit"/> of this <see cref="StressState"/>.
         /// </summary>
-        /// <param name="toUnit">The <see cref="PressureUnit"/> to convert.</param>
-        public void ChangeUnit(PressureUnit toUnit)
+        /// <param name="unit">The <see cref="PressureUnit"/> to convert.</param>
+        public void ChangeUnit(PressureUnit unit)
         {
-			if (Unit == toUnit)
+			if (Unit == unit)
 				return;
 
-	        _sigmaX = _sigmaX.ToUnit(toUnit);
-	        _sigmaY = _sigmaY.ToUnit(toUnit);
-	        _tauXY  = _tauXY.ToUnit(toUnit);
+	        _sigmaX = _sigmaX.ToUnit(unit);
+	        _sigmaY = _sigmaY.ToUnit(unit);
+	        _tauXY  = _tauXY.ToUnit(unit);
         }
+
+        /// <summary>
+        /// Convert this <see cref="StressState"/> to another <see cref="PressureUnit"/>.
+        /// </summary>
+        /// <inheritdoc cref="ChangeUnit"/>
+        public StressState Convert(PressureUnit unit) => unit == Unit
+	        ? this
+	        : new StressState(_sigmaX.ToUnit(unit), _sigmaY.ToUnit(unit), _tauXY.ToUnit(unit), ThetaX);
 
         /// <summary>
         /// Get the stresses as an <see cref="Array"/>, in unit constructed (<see cref="Unit"/>).
@@ -276,6 +288,8 @@ namespace OnPlaneComponents
 
 	        return false;
         }
+
+        public bool Equals(IPlaneComponent<StressState, PressureUnit> other) => other is StressState stress && Equals(stress);
 
         public override string ToString()
         {

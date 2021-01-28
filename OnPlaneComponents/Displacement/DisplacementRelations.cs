@@ -42,7 +42,7 @@ namespace OnPlaneComponents
                 return Length.Zero;
 
             return
-                Length.From(CalculateResultant(displacementX.Value, displacementY.ToUnit(displacementX.Unit).Value), unit);
+                Length.From(CalculateResultant(displacementX.ToUnit(unit).Value, displacementY.ToUnit(unit).Value), unit);
         }
 
         /// <summary>

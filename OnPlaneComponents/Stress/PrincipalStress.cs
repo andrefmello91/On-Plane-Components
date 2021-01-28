@@ -13,7 +13,7 @@ namespace OnPlaneComponents
     /// <summary>
     /// Principal stress struct.
     /// </summary>
-	public partial struct PrincipalStressState : IEquatable<PrincipalStressState>
+	public partial struct PrincipalStressState : IPlaneComponent<PrincipalStressState, PressureUnit>, IEquatable<PrincipalStressState>
     {
 	    // Auxiliary fields
 	    private Pressure _sigma1, _sigma2;
@@ -27,9 +27,13 @@ namespace OnPlaneComponents
         /// <summary>
         /// Get/set the stress unit (<see cref="PressureUnit"/>).
         /// </summary>
-        public PressureUnit Unit => _sigma1.Unit;
+        public PressureUnit Unit
+        {
+	        get => _sigma1.Unit;
+	        set => ChangeUnit(value);
+        }
 
-	    /// <summary>
+        /// <summary>
 	    /// Get maximum principal stress, in <see cref="Unit"/> considered.
 	    /// </summary>
 	    public double Sigma1 => _sigma1.Value;
@@ -112,7 +116,7 @@ namespace OnPlaneComponents
         /// </summary>
         /// <param name="sigma1">The maximum principal <see cref="Pressure"/> (positive for tensile).</param>
         /// <param name="sigma2">The minimum principal <see cref="Pressure"/> (positive for tensile).</param>
-        /// <param name="theta1">The angle of <paramref name="sigma1"/>, related to horizontal axis (positive to counterclockwise).</param>
+        /// <inheritdoc cref="PrincipalStressState(double, double, double, PressureUnit)"/>
         public PrincipalStressState(Pressure sigma1, Pressure sigma2, double theta1 = Constants.PiOver4)
         {
 	        _sigma1      = sigma1;
@@ -122,17 +126,25 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        /// Change the unit of stresses.
+        /// Change the <see cref="PressureUnit"/> of this <see cref="PrincipalStressState"/>.
         /// </summary>
-        /// <param name="toUnit">The <see cref="PressureUnit"/> to convert.</param>
-        public void ChangeUnit(PressureUnit toUnit)
+        /// <param name="unit">The <see cref="PressureUnit"/> to convert.</param>
+        public void ChangeUnit(PressureUnit unit)
         {
-			if (Unit == toUnit)
+			if (Unit == unit)
 				return;
 
-	        _sigma1 = _sigma1.ToUnit(toUnit);
-	        _sigma2 = _sigma2.ToUnit(toUnit);
+	        _sigma1 = _sigma1.ToUnit(unit);
+	        _sigma2 = _sigma2.ToUnit(unit);
         }
+
+        /// <summary>
+        /// Convert this <see cref="PrincipalStressState"/> to another <see cref="PressureUnit"/>.
+        /// </summary>
+        /// <inheritdoc cref="ChangeUnit"/>
+        public PrincipalStressState Convert(PressureUnit unit) => unit == Unit
+	        ? this
+	        : new PrincipalStressState(_sigma1.ToUnit(unit), _sigma2.ToUnit(unit), Theta1);
 
         /// <summary>
         /// Get principal stresses as an <see cref="Array"/>, in <see cref="Unit"/> considered.
@@ -194,6 +206,8 @@ namespace OnPlaneComponents
 
 	        return false;
         }
+
+        public bool Equals(IPlaneComponent<PrincipalStressState, PressureUnit> other) => other is PrincipalStressState stress && Equals(stress);
 
         public override string ToString()
         {

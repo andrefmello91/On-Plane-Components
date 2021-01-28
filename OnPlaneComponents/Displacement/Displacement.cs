@@ -10,11 +10,10 @@ namespace OnPlaneComponents
     /// <summary>
     /// Displacement struct.
     /// </summary>
-    public partial struct Displacement : IEquatable<Displacement>
+    public partial struct Displacement : IPlaneComponent<Displacement, LengthUnit>, IEquatable<Displacement>
     {
         // Auxiliar fields
-        private Length _displacementX, _displacementY;
-        private Length? _resultant;
+        private Length _displacementX, _displacementY, _resultant;
 
         /// <summary>
         /// Get a <see cref="Displacement"/> with zero value.
@@ -24,7 +23,11 @@ namespace OnPlaneComponents
         /// <summary>
         /// Get/set the displacement unit (<see cref="LengthUnit"/>).
         /// </summary>
-        public LengthUnit Unit => _displacementX.Unit;
+        public LengthUnit Unit
+        {
+	        get => _displacementX.Unit;
+	        set => ChangeUnit(value);
+        }
 
         /// <summary>
         /// Get the displacement component in X direction, in the unit constructed (<see cref="Unit"/>).
@@ -39,7 +42,7 @@ namespace OnPlaneComponents
         /// <summary>
         /// Get the resultant displacement value, in the unit constructed (<see cref="Unit"/>).
         /// </summary>
-        public double Resultant => _resultant?.Value ?? CalculateResultant().Value;
+        public double Resultant => _resultant.Value;
 
         /// <summary>
         /// Get the resultant displacement angle, in radians.
@@ -85,38 +88,37 @@ namespace OnPlaneComponents
         public Displacement(Length displacementX, Length displacementY)
         {
             _displacementX = displacementX;
-            _displacementY = displacementY.Unit == displacementX.Unit ? displacementY : displacementY.ToUnit(displacementX.Unit);
-            _resultant     = null;
-        }
-
-        /// <summary>
-        /// Change the displacement unit <see cref="LengthUnit"/>.
-        /// </summary>
-        /// <param name="toUnit">The unit to convert.</param>
-        public void ChangeUnit(LengthUnit toUnit)
-        {
-	        if (Unit == toUnit)
-		        return;
-
-            _displacementX = _displacementX.ToUnit(toUnit);
-	        _displacementY = _displacementY.ToUnit(toUnit);
+            _displacementY = displacementY.ToUnit(displacementX.Unit);
+            _resultant     = CalculateResultant(_displacementX, _displacementY, _displacementX.Unit);
         }
 
 		/// <summary>
         /// Return a copy of this <see cref="Displacement"/>.
         /// </summary>
-        public Displacement Copy() => new Displacement(ComponentX, ComponentY, Unit);
+        public Displacement Copy() => new Displacement(_displacementX, _displacementY);
 
         /// <summary>
-        /// Calculate <see cref="Resultant"/> displacement.
+        /// Change the <see cref="LengthUnit"/> of this object.
         /// </summary>
-        private Length CalculateResultant()
-        {
-	        if (!_resultant.HasValue)
-		        _resultant = DisplacementRelations.CalculateResultant(_displacementX, _displacementY, Unit);
+        /// <param name="unit">The <see cref="LengthUnit"/> to convert.</param>
+        public void ChangeUnit(LengthUnit unit)
+		{
+			if (unit == Unit)
+				return;
 
-	        return _resultant.Value;
-        }
+            // Update values
+            _displacementX = _displacementX.ToUnit(unit);
+            _displacementY = _displacementY.ToUnit(unit);
+            _resultant     = CalculateResultant(_displacementX, _displacementY, unit);
+		}
+
+        /// <summary>
+        /// Convert this <see cref="Displacement"/> to another <see cref="LengthUnit"/>.
+        /// </summary>
+        /// <param name="unit">The <see cref="LengthUnit"/> to convert.</param>
+		public Displacement Convert(LengthUnit unit) => unit == Unit
+			? this
+			: new Displacement(_displacementX.ToUnit(unit), _displacementY.ToUnit(unit));
 
         /// <summary>
         /// Get a <see cref="Displacement"/> in X direction.
@@ -168,7 +170,6 @@ namespace OnPlaneComponents
         /// Compare two <see cref="Displacement"/> objects.
         /// </summary>
         /// <param name="other">The <see cref="Displacement"/> to compare.</param>
-        /// <returns></returns>
         public bool Equals(Displacement other) => _displacementX == other._displacementX && _displacementY == other._displacementY;
 
         public override bool Equals(object obj)
@@ -178,6 +179,8 @@ namespace OnPlaneComponents
 
             return false;
         }
+
+        public bool Equals(IPlaneComponent<Displacement, LengthUnit> other) => other is Displacement displacement && Equals(displacement);
 
         public override string ToString()
         {

@@ -8,11 +8,10 @@ namespace OnPlaneComponents
 	/// <summary>
 	/// Force struct.
 	/// </summary>
-	public partial struct Force : IEquatable<Force>
+	public partial struct Force : IPlaneComponent<Force,ForceUnit>, IEquatable<Force>
 	{
 		// Auxiliary fields
-		private UnitsNet.Force _forceX, _forceY;
-		private UnitsNet.Force? _resultant;
+		private UnitsNet.Force _forceX, _forceY, _resultant;
 
 		/// <summary>
 		/// Get a <see cref="Force"/> with zero value.
@@ -22,9 +21,13 @@ namespace OnPlaneComponents
         /// <summary>
         /// Get/set the force unit (<see cref="ForceUnit"/>).
         /// </summary>
-        public ForceUnit Unit => _forceX.Unit;
+        public ForceUnit Unit
+        {
+	        get => _forceX.Unit;
+	        set => ChangeUnit(value);
+        }
 
-		/// <summary>
+        /// <summary>
 		/// Get the force component value in X direction, in the unit constructed (<see cref="Unit"/>).
 		/// </summary>
 		public double ComponentX => _forceX.Value;
@@ -37,7 +40,7 @@ namespace OnPlaneComponents
         /// <summary>
         /// Get the resultant force value, in the unit constructed (<see cref="Unit"/>).
         /// </summary>
-        public double Resultant => _resultant?.Value ?? CalculateResultant().Value;
+        public double Resultant => _resultant.Value;
 
 		/// <summary>
 		/// Get the resultant force angle, in radians.
@@ -83,38 +86,37 @@ namespace OnPlaneComponents
         public Force(UnitsNet.Force forceX, UnitsNet.Force forceY)
 		{
 			_forceX    = forceX;
-			_forceY    = forceY.Unit == forceX.Unit ? forceY : forceY.ToUnit(forceX.Unit);
-			_resultant = null;
+			_forceY    = forceY.ToUnit(forceX.Unit);
+			_resultant = CalculateResultant(_forceX, _forceY, _forceX.Unit);
 		}
 
         /// <summary>
-        /// Change the force unit.
+        /// Change the <see cref="ForceUnit"/> of this object.
         /// </summary>
-        /// <param name="toUnit">The <see cref="ForceUnit"/> to convert.</param>
-        public void ChangeUnit(ForceUnit toUnit)
-		{
-			if (Unit == toUnit)
-				return;
+        /// <param name="unit">The <see cref="ForceUnit"/> to convert.</param>
+        public void ChangeUnit(ForceUnit unit)
+        {
+            if (unit == Unit)
+                return;
 
-            _forceX = _forceX.ToUnit(toUnit);
-			_forceY = _forceY.ToUnit(toUnit);
-		}
+            // Update values
+            _forceX    = _forceX.ToUnit(unit);
+            _forceY    = _forceY.ToUnit(unit);
+            _resultant = CalculateResultant(_forceX, _forceY, unit);
+        }
+
+        /// <summary>
+        /// Convert this <see cref="Force"/> to another <see cref="ForceUnit"/>.
+        /// </summary>
+        /// <inheritdoc cref="ChangeUnit"/>
+        public Force Convert(ForceUnit unit) => unit == Unit 
+	        ? this 
+	        : new Force(_forceX.ToUnit(unit), _forceY.ToUnit(unit));
 
         /// <summary>
         /// Return a copy of this <see cref="Force"/>.
         /// </summary>
-        public Force Copy() => new Force(ComponentX, ComponentY, Unit);
-
-        /// <summary>
-        /// Calculate <see cref="Resultant"/> force.
-        /// </summary>
-        private UnitsNet.Force CalculateResultant()
-        {
-	        if (!_resultant.HasValue)
-		        _resultant = ForceRelations.CalculateResultant(_forceX, _forceY, Unit);
-
-	        return _resultant.Value;
-        }
+        public Force Copy() => new Force(ComponentX, ComponentY);
 
         /// <summary>
         /// Get a <see cref="Force"/> in X direction.
@@ -174,7 +176,9 @@ namespace OnPlaneComponents
         /// <param name="other">The <see cref="Force"/> to compare.</param>
         public bool Equals(Force other) => _forceX == other._forceX && _forceY == other._forceY;
 
-		public override bool Equals(object obj)
+        public bool Equals(IPlaneComponent<Force, ForceUnit> other) => other is Force force && Equals(force);
+
+        public override bool Equals(object obj)
 		{
 			if (obj is Force other)
 				return Equals(other);

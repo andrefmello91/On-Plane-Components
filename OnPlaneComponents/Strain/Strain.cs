@@ -4,6 +4,7 @@ using Extensions.Number;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using UnitsNet.Units;
 using static OnPlaneComponents.StrainRelations;
 
 namespace OnPlaneComponents
@@ -11,7 +12,7 @@ namespace OnPlaneComponents
 	/// <summary>
     /// Strain struct for XY components.
     /// </summary>
-    public partial struct StrainState : IEquatable<StrainState>
+    public partial struct StrainState : IPlaneComponent<StrainState, ScalarUnit>, IEquatable<StrainState>
     {
 		// Auxiliary fields
 		private Matrix<double> _transMatrix;
@@ -20,6 +21,8 @@ namespace OnPlaneComponents
 		/// Get a <see cref="StrainState"/> with zero elements.
 		/// </summary>
 		public static readonly StrainState Zero = new StrainState(0, 0, 0);
+
+		public ScalarUnit Unit { get; set; }
 
         /// <summary>
         /// Get normal strain in X direction.
@@ -87,7 +90,7 @@ namespace OnPlaneComponents
 		/// </summary>
 		public bool IsHorizontal => ThetaX.ApproxZero();
 
-        /// <summary>
+		/// <summary>
         /// Strain object for XY components.
         /// </summary>
         /// <param name="epsilonX">The normal strain in X direction (positive for tensile).</param>
@@ -101,6 +104,7 @@ namespace OnPlaneComponents
 	        GammaXY      = gammaXY.ToZero();
 	        ThetaX       = thetaX.ToZero();
 	        _transMatrix = null;
+	        Unit = ScalarUnit.Undefined;
         }
 
         /// <summary>
@@ -114,6 +118,18 @@ namespace OnPlaneComponents
         /// <para>{ EpsilonX, EpsilonY, GammaXY }</para>
         /// </summary>
         public Vector<double> AsVector() => AsArray().ToVector();
+
+        /// <summary>
+        /// Nothing is done.
+        /// </summary>
+        public void ChangeUnit(ScalarUnit unit)
+        {
+        }
+
+        /// <summary>
+        /// Return this object.
+        /// </summary>
+        public StrainState Convert(ScalarUnit unit) => this;
 
         /// <summary>
         /// Return a copy of this <see cref="StrainState"/>.
@@ -239,6 +255,8 @@ namespace OnPlaneComponents
 
 	        return false;
         }
+
+        public bool Equals(IPlaneComponent<StrainState, ScalarUnit> other) => other is StrainState strain && Equals(strain);
 
         public override string ToString()
         {
