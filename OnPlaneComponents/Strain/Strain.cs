@@ -247,16 +247,18 @@ namespace OnPlaneComponents
 
         public override bool Equals(object obj)
         {
-	        if (obj is StrainState other)
-		        return Equals(other);
+	        switch (obj)
+	        {
+		        case StrainState other:
+			        return Equals(other);
 
-	        if (obj is PrincipalStrainState principalStrain)
-		        return Equals(principalStrain);
+		        case PrincipalStrainState principalStrain:
+			        return Equals(principalStrain);
 
-	        return false;
+		        default:
+			        return false;
+	        }
         }
-
-        public bool Equals(IPlaneComponent<StrainState, ScalarUnit> other) => other is StrainState strain && Equals(strain);
 
         public override string ToString()
         {

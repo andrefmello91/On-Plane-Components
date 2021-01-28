@@ -176,17 +176,9 @@ namespace OnPlaneComponents
         /// <param name="other">The <see cref="Force"/> to compare.</param>
         public bool Equals(Force other) => _forceX == other._forceX && _forceY == other._forceY;
 
-        public bool Equals(IPlaneComponent<Force, ForceUnit> other) => other is Force force && Equals(force);
+        public override bool Equals(object obj) => obj is Force other && Equals(other);
 
-        public override bool Equals(object obj)
-		{
-			if (obj is Force other)
-				return Equals(other);
-
-			return false;
-		}
-
-		public override string ToString()
+        public override string ToString()
 		{
 			return
 				$"Fx = {_forceX}\n" +

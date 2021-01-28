@@ -205,8 +205,6 @@ namespace OnPlaneComponents
 
 		public override bool Equals(object obj) => obj is Point other && Equals(other);
 
-		public bool Equals(IPlaneComponent<Point, LengthUnit> other) => other is Point point && Equals(point);
-
 		public override int GetHashCode() => (int)X * (int)Y;
 
 		public override string ToString() => $"({X:0.00}, {Y:0.00})";

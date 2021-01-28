@@ -280,16 +280,18 @@ namespace OnPlaneComponents
 
         public override bool Equals(object obj)
         {
-	        if (obj is StressState other)
-		        return Equals(other);
+	        switch (obj)
+	        {
+		        case StressState other:
+			        return Equals(other);
 
-	        if (obj is PrincipalStressState principalStress)
-		        return Equals(principalStress);
+		        case PrincipalStressState principalStress:
+			        return Equals(principalStress);
 
-	        return false;
+		        default:
+			        return false;
+	        }
         }
-
-        public bool Equals(IPlaneComponent<StressState, PressureUnit> other) => other is StressState stress && Equals(stress);
 
         public override string ToString()
         {

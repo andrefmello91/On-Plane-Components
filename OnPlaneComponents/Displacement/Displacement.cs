@@ -180,8 +180,6 @@ namespace OnPlaneComponents
             return false;
         }
 
-        public bool Equals(IPlaneComponent<Displacement, LengthUnit> other) => other is Displacement displacement && Equals(displacement);
-
         public override string ToString()
         {
             return
