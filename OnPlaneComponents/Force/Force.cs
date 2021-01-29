@@ -1,5 +1,6 @@
 ﻿using System;
 using Extensions.Number;
+using UnitsNet;
 using UnitsNet.Units;
 using static OnPlaneComponents.ForceRelations;
 
@@ -8,7 +9,7 @@ namespace OnPlaneComponents
 	/// <summary>
 	///     Force struct.
 	/// </summary>
-	public partial struct Force : IUnitConvertible<Force, ForceUnit>, IEquatable<Force>
+	public partial struct Force : IUnitConvertible<Force, UnitsNet.Force, ForceUnit>, ICopyable<Force>, IEquatable<Force>
 	{
 		#region Fields
 
@@ -17,8 +18,10 @@ namespace OnPlaneComponents
 		/// </summary>
 		public static readonly Force Zero = new Force(0, 0);
 
-		// Auxiliary fields
-		private UnitsNet.Force _forceX, _forceY, _resultant;
+		/// <summary>
+		///     The tolerance to consider forces equal.
+		/// </summary>
+		public static readonly UnitsNet.Force Tolerance = UnitsNet.Force.FromNewtons(1E-6);
 
 		#endregion
 
@@ -29,7 +32,7 @@ namespace OnPlaneComponents
 		/// </summary>
 		public ForceUnit Unit
 		{
-			get => _forceX.Unit;
+			get => X.Unit;
 			set => ChangeUnit(value);
 		}
 
@@ -39,39 +42,39 @@ namespace OnPlaneComponents
 		public bool AreComponentsZero => IsComponentXZero && IsComponentYZero;
 
 		/// <summary>
-		///     Get the force component value in X direction, in the unit constructed (<see cref="Unit" />).
+		///     Verify if X component is approximately zero.
 		/// </summary>
-		public double ComponentX => _forceX.Value;
+		public bool IsComponentXZero => X.Abs() <= Tolerance;
 
 		/// <summary>
-		///     Get the force component value in Y direction, in the unit constructed (<see cref="Unit" />).
+		///     Verify if Y component is approximately zero.
 		/// </summary>
-		public double ComponentY => _forceY.Value;
+		public bool IsComponentYZero => Y.Abs() <= Tolerance;
 
 		/// <summary>
-		///     Verify if X component is zero.
+		///     Verify if force resultant is approximately zero.
 		/// </summary>
-		public bool IsComponentXZero => ComponentX.ApproxZero();
+		public bool IsResultantZero => Resultant.Abs() <= Tolerance;
 
 		/// <summary>
-		///     Verify if Y component is zero.
+		///     Get the resultant force value.
 		/// </summary>
-		public bool IsComponentYZero => ComponentY.ApproxZero();
-
-		/// <summary>
-		///     Verify if force resultant is zero.
-		/// </summary>
-		public bool IsResultantZero => Resultant.ApproxZero();
-
-		/// <summary>
-		///     Get the resultant force value, in the unit constructed (<see cref="Unit" />).
-		/// </summary>
-		public double Resultant => _resultant.Value;
+		public UnitsNet.Force Resultant { get; private set; }
 
 		/// <summary>
 		///     Get the resultant force angle, in radians.
 		/// </summary>
-		public double ResultantAngle => CalculateResultantAngle(ComponentX, ComponentY);
+		public double ResultantAngle => CalculateResultantAngle(X, Y);
+
+		/// <summary>
+		///     Get the force component in X direction.
+		/// </summary>
+		public UnitsNet.Force X { get; private set; }
+
+		/// <summary>
+		///     Get the force component in Y direction.
+		/// </summary>
+		public UnitsNet.Force Y { get; private set; }
 
 		#endregion
 
@@ -95,14 +98,14 @@ namespace OnPlaneComponents
 		/// <param name="forceY"><see cref="UnitsNet.Force" /> component in Y direction (positive upwards).</param>
 		public Force(UnitsNet.Force forceX, UnitsNet.Force forceY)
 		{
-			_forceX    = forceX;
-			_forceY    = forceY.ToUnit(forceX.Unit);
-			_resultant = CalculateResultant(_forceX, _forceY, _forceX.Unit);
+			X         = forceX;
+			Y         = forceY.ToUnit(forceX.Unit);
+			Resultant = CalculateResultant(X, Y).ToUnit(forceX.Unit);
 		}
 
 		#endregion
 
-		#region  Methods
+		#region
 
 		/// <summary>
 		///     Get a <see cref="Force" /> in X direction.
@@ -166,9 +169,9 @@ namespace OnPlaneComponents
 				return;
 
 			// Update values
-			_forceX    = _forceX.ToUnit(unit);
-			_forceY    = _forceY.ToUnit(unit);
-			_resultant = CalculateResultant(_forceX, _forceY, unit);
+			X         = X.ToUnit(unit);
+			Y         = Y.ToUnit(unit);
+			Resultant = CalculateResultant(X, Y).ToUnit(unit);
 		}
 
 		/// <summary>
@@ -177,26 +180,29 @@ namespace OnPlaneComponents
 		/// <inheritdoc cref="ChangeUnit" />
 		public Force Convert(ForceUnit unit) => unit == Unit
 			? this
-			: new Force(_forceX.ToUnit(unit), _forceY.ToUnit(unit));
+			: new Force(X.ToUnit(unit), Y.ToUnit(unit));
 
 		/// <summary>
 		///     Return a copy of this <see cref="Force" />.
 		/// </summary>
-		public Force Copy() => new Force(ComponentX, ComponentY);
+		public Force Copy() => new Force(X, Y);
 
-		/// <summary>
-		///     Compare two <see cref="Force" /> objects.
-		/// </summary>
-		/// <param name="other">The <see cref="Force" /> to compare.</param>
-		public bool Equals(Force other) => _forceX == other._forceX && _forceY == other._forceY;
+		/// <inheritdoc cref="Approx"/>
+		/// <remarks>
+		///		Default <see cref="Tolerance"/> is considered.
+		/// </remarks>
+		public bool Equals(Force other) => Approx(other, Tolerance);
+
+		/// <inheritdoc/>
+		public bool Approx(Force other, UnitsNet.Force tolerance) => (X - other.X).Abs() <= tolerance && (Y - other.Y).Abs() <= tolerance;
 
 		public override bool Equals(object obj) => obj is Force other && Equals(other);
 
 		public override string ToString() =>
-			$"Fx = {_forceX}\n" +
-			$"Fy = {_forceY}";
+			$"Fx = {X}\n" +
+			$"Fy = {Y}";
 
-		public override int GetHashCode() => (int) (ComponentX * ComponentY);
+		public override int GetHashCode() => (int) (X.Value * Y.Value);
 
 		#endregion
 	}

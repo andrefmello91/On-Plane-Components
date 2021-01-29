@@ -15,17 +15,17 @@
         /// <summary>
         /// Returns a <see cref="Displacement"/> object with summed components, in left argument's unit.
         /// </summary>
-        public static Displacement operator + (Displacement left, Displacement right) => new Displacement(left._displacementX + right._displacementX.ToUnit(left.Unit), left._displacementY + right._displacementY.ToUnit(left.Unit));
+        public static Displacement operator + (Displacement left, Displacement right) => new Displacement(left.X + right.X.ToUnit(left.Unit), left.Y + right.Y.ToUnit(left.Unit));
 
         /// <summary>
         /// Returns a <see cref="Displacement"/> object with subtracted components, in left argument's unit.
         /// </summary>
-        public static Displacement operator - (Displacement left, Displacement right) => new Displacement(left._displacementX - right._displacementX.ToUnit(left.Unit), left._displacementY - right._displacementY.ToUnit(left.Unit));
+        public static Displacement operator - (Displacement left, Displacement right) => new Displacement(left.X - right.X.ToUnit(left.Unit), left.Y - right.Y.ToUnit(left.Unit));
 
         /// <summary>
         /// Returns a <see cref="Displacement"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
-        public static Displacement operator *(Displacement displacement, double multiplier) => new Displacement(multiplier * displacement._displacementX, multiplier * displacement._displacementY);
+        public static Displacement operator *(Displacement displacement, double multiplier) => new Displacement(multiplier * displacement.X, multiplier * displacement.Y);
 
         /// <summary>
         /// Returns a <see cref="Displacement"/> object with multiplied components by a <see cref="double"/>.
@@ -45,7 +45,7 @@
         /// <summary>
         /// Returns a <see cref="Displacement"/> object with components divided by a <see cref="double"/>.
         /// </summary>
-        public static Displacement operator /(Displacement displacement, double divider) => new Displacement(displacement._displacementX / divider, displacement._displacementY / divider);
+        public static Displacement operator /(Displacement displacement, double divider) => new Displacement(displacement.X / divider, displacement.Y / divider);
 
         /// <summary>
         /// Returns a <see cref="Displacement"/> object with components divided by an <see cref="int"/>.

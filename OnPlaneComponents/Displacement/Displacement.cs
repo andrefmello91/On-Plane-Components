@@ -9,17 +9,19 @@ namespace OnPlaneComponents
 	/// <summary>
 	///     Displacement struct.
 	/// </summary>
-	public partial struct Displacement : IUnitConvertible<Displacement, LengthUnit>, IEquatable<Displacement>
+	public partial struct Displacement : IUnitConvertible<Displacement, Length, LengthUnit>, ICopyable<Displacement>, IEquatable<Displacement>
 	{
 		#region Fields
+
+		/// <summary>
+		///     The tolerance to consider displacements equal.
+		/// </summary>
+		public static readonly Length Tolerance = Length.FromMillimeters(1E-6);
 
 		/// <summary>
 		///     Get a <see cref="Displacement" /> with zero value.
 		/// </summary>
 		public static readonly Displacement Zero = new Displacement(0, 0);
-
-		// Auxiliar fields
-		private Length _displacementX, _displacementY, _resultant;
 
 		#endregion
 
@@ -30,7 +32,7 @@ namespace OnPlaneComponents
 		/// </summary>
 		public LengthUnit Unit
 		{
-			get => _displacementX.Unit;
+			get => X.Unit;
 			set => ChangeUnit(value);
 		}
 
@@ -40,39 +42,39 @@ namespace OnPlaneComponents
 		public bool AreComponentsZero => IsComponentXZero && IsComponentYZero;
 
 		/// <summary>
-		///     Get the displacement component in X direction, in the unit constructed (<see cref="Unit" />).
+		///     Get the displacement component in X direction.
 		/// </summary>
-		public double ComponentX => _displacementX.Value;
+		public Length X { get; private set; }
 
 		/// <summary>
-		///     Get the displacement component in Y direction, in the unit constructed (<see cref="Unit" />).
+		///     Get the displacement component in Y direction.
 		/// </summary>
-		public double ComponentY => _displacementY.Value;
+		public Length Y { get; private set; }
 
 		/// <summary>
-		///     Verify if X component is zero.
+		///     Get the resultant displacement value.
 		/// </summary>
-		public bool IsComponentXZero => ComponentX.ApproxZero();
+		public Length Resultant { get; private set; }
 
 		/// <summary>
-		///     Verify if Y component is zero.
+		///     Verify if X component is approximately zero.
 		/// </summary>
-		public bool IsComponentYZero => ComponentY.ApproxZero();
+		public bool IsComponentXZero => X.Abs() <= Tolerance;
 
 		/// <summary>
-		///     Verify if displacement resultant is zero.
+		///     Verify if Y component is approximately zero.
 		/// </summary>
-		public bool IsResultantZero => Resultant.ApproxZero();
+		public bool IsComponentYZero => Y.Abs() <= Tolerance;
 
 		/// <summary>
-		///     Get the resultant displacement value, in the unit constructed (<see cref="Unit" />).
+		///     Verify if displacement resultant is approximately zero.
 		/// </summary>
-		public double Resultant => _resultant.Value;
+		public bool IsResultantZero => Resultant.Abs() <= Tolerance;
 
 		/// <summary>
 		///     Get the resultant displacement angle, in radians.
 		/// </summary>
-		public double ResultantAngle => CalculateResultantAngle(ComponentX, ComponentY);
+		public double ResultantAngle => CalculateResultantAngle(X, Y);
 
 		#endregion
 
@@ -102,9 +104,9 @@ namespace OnPlaneComponents
 		/// <param name="displacementY">Displacement component in Y direction (positive upwards) (<see cref="Length" />).</param>
 		public Displacement(Length displacementX, Length displacementY)
 		{
-			_displacementX = displacementX;
-			_displacementY = displacementY.ToUnit(displacementX.Unit);
-			_resultant     = CalculateResultant(_displacementX, _displacementY, _displacementX.Unit);
+			X          = displacementX;
+			Y          = displacementY.ToUnit(displacementX.Unit);
+			Resultant  = CalculateResultant(X, Y, X.Unit).ToUnit(displacementX.Unit);
 		}
 
 		#endregion
@@ -160,7 +162,7 @@ namespace OnPlaneComponents
 		/// <summary>
 		///     Return a copy of this <see cref="Displacement" />.
 		/// </summary>
-		public Displacement Copy() => new Displacement(_displacementX, _displacementY);
+		public Displacement Copy() => new Displacement(X, Y);
 
 		/// <summary>
 		///     Change the <see cref="LengthUnit" /> of this object.
@@ -172,9 +174,9 @@ namespace OnPlaneComponents
 				return;
 
 			// Update values
-			_displacementX = _displacementX.ToUnit(unit);
-			_displacementY = _displacementY.ToUnit(unit);
-			_resultant     = CalculateResultant(_displacementX, _displacementY, unit);
+			X = X.ToUnit(unit);
+			Y = Y.ToUnit(unit);
+			Resultant  = CalculateResultant(X, Y).ToUnit(unit);
 		}
 
 		/// <summary>
@@ -183,13 +185,17 @@ namespace OnPlaneComponents
 		/// <param name="unit">The <see cref="LengthUnit" /> to convert.</param>
 		public Displacement Convert(LengthUnit unit) => unit == Unit
 			? this
-			: new Displacement(_displacementX.ToUnit(unit), _displacementY.ToUnit(unit));
+			: new Displacement(X.ToUnit(unit), Y.ToUnit(unit));
 
-		/// <summary>
-		///     Compare two <see cref="Displacement" /> objects.
-		/// </summary>
-		/// <param name="other">The <see cref="Displacement" /> to compare.</param>
-		public bool Equals(Displacement other) => _displacementX == other._displacementX && _displacementY == other._displacementY;
+
+		/// <inheritdoc cref="Approx"/>
+		/// <remarks>
+		///		Default <see cref="Tolerance"/> is considered.
+		/// </remarks>
+		public bool Equals(Displacement other) => Equals(Tolerance);
+
+		/// <inheritdoc/>
+		public bool Approx(Displacement other, Length tolerance) => (X - other.X).Abs() <= tolerance && (Y - other.Y).Abs() <= tolerance;
 
 		public override bool Equals(object obj)
 		{
@@ -200,10 +206,10 @@ namespace OnPlaneComponents
 		}
 
 		public override string ToString() =>
-			$"ux = {_displacementX}\n" +
-			$"uy = {_displacementY}";
+			$"ux = {X}\n" +
+			$"uy = {Y}";
 
-		public override int GetHashCode() => (int) (ComponentX * ComponentY);
+		public override int GetHashCode() => (int) (X.Value * Y.Value);
 
 		#endregion
 	}
