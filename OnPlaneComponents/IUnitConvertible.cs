@@ -1,8 +1,17 @@
 ﻿using System;
+using UnitsNet.Units;
 
 namespace OnPlaneComponents
 {
-    public interface IPlaneComponent<T1,T2>
+    /// <summary>
+    /// UnitConvertible interface.
+    /// </summary>
+    /// <typeparam name="T1">The struct that represents the value of the object.</typeparam>
+    /// <typeparam name="T2">
+    /// The enum of unit that represents the object.
+    /// <para><see cref="LengthUnit"/>, <see cref="ForceUnit"/>, <see cref="PressureUnit"/>, etc.</para>
+    /// </typeparam>
+    public interface IUnitConvertible<out T1,T2>
 		where T1 : struct
 		where T2 : Enum
     {
@@ -14,7 +23,7 @@ namespace OnPlaneComponents
         /// <summary>
         /// Change the unit of this object.
         /// </summary>
-        /// <param name="unit">The <seealso cref="T2"/> to convert.</param>
+        /// <param name="unit">The unit to convert.</param>
         void ChangeUnit(T2 unit);
 
         /// <summary>

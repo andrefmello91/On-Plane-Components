@@ -59,7 +59,7 @@
     <Compile Include="Force\ForceOperators.cs" />
     <Compile Include="Force\Force.cs" />
     <Compile Include="Force\ForceRelations.cs" />
-    <Compile Include="IPlaneComponent.cs" />
+    <Compile Include="IUnitConvertible.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Strain\PrincipalCase.cs" />
