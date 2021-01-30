@@ -59,6 +59,26 @@ namespace OnPlaneComponents
 
 		Pressure IPrincipalState<Pressure>.T2 => Sigma2;
 
+		bool IState<Pressure>.IsPrincipal => true;
+
+		bool IState<Pressure>.IsPureShear => false;
+
+		double IState<Pressure>.ThetaX => Theta1;
+
+		double IState<Pressure>.ThetaY => Theta2;
+
+		Pressure IState<Pressure>.X => Sigma1;
+
+		Pressure IState<Pressure>.Y => Sigma1;
+
+		Pressure IState<Pressure>.XY => Pressure.Zero;
+
+		bool IState<Pressure>.IsXZero => Is1Zero;
+
+		bool IState<Pressure>.IsYZero => Is2Zero;
+
+		bool IState<Pressure>.IsXYZero => true;
+
 		public bool IsHorizontal => Theta1.ApproxZero() || Theta1.Approx(Constants.Pi);
 
 		public bool IsVertical => Theta1.Approx(Constants.PiOver2) || Theta1.Approx(Constants.Pi3Over2);
@@ -133,7 +153,7 @@ namespace OnPlaneComponents
 
 		#endregion
 
-		#region
+		#region Methods
 
 		/// <summary>
 		///     Get a <see cref="PrincipalStressState" /> from a <see cref="StressState" />.
@@ -146,6 +166,8 @@ namespace OnPlaneComponents
 
 			return new PrincipalStressState(s1, s2, stressState.ThetaX + theta1);
 		}
+
+		public IPrincipalState<Pressure> ToPrincipal() => this;
 
 		/// <summary>
 		///     Change the <see cref="PressureUnit" /> of this <see cref="PrincipalStressState" />.
@@ -169,16 +191,45 @@ namespace OnPlaneComponents
 			: new PrincipalStressState(Sigma1.ToUnit(unit), Sigma2.ToUnit(unit), Theta1);
 
 		/// <summary>
-		///     Get principal stresses as an <see cref="Array" />, in <see cref="Unit" /> considered.
-		///     <para>[ Sigma1, Sigma2, 0 ]</para>
+		///     Get principal stresses as an <see cref="Array" />.
 		/// </summary>
+		/// <remarks>
+		///		{ Sigma1, Sigma2, 0 }
+		/// </remarks>
 		public Pressure[] AsArray() => new[] { Sigma1, Sigma2, Pressure.Zero };
 
 		/// <summary>
 		///     Get principal stresses as a <see cref="Vector" />, in <see cref="Unit" /> considered.
-		///     <para>{ Sigma1, Sigma2, 0 }</para>
 		/// </summary>
+		/// <remarks>
+		///		{ Sigma1, Sigma2, 0 }
+		/// </remarks>
 		public Vector<double> AsVector() => AsArray().Select(s => s.Value).ToVector();
+
+		/// <summary>
+		///     Get this <see cref="PrincipalStressState" /> as a <see cref="StressState" />.
+		/// </summary>
+		/// <remarks>
+		///		{ Sigma1, Sigma2, 0 }
+		/// </remarks>
+		public StressState AsStressState() => new StressState(Sigma1, Sigma2, Pressure.Zero, Theta1);
+
+		/// <summary>
+		///     Get this <see cref="PrincipalStressState" /> transformed to horizontal direction (<see cref="StressState.ThetaX" /> = 0).
+		/// </summary>
+		public StressState ToHorizontal() => AsStressState().ToHorizontal();
+
+		/// <summary>
+		///     Get this <see cref="PrincipalStressState" /> transformed by a rotation angle.
+		/// </summary>
+		/// <inheritdoc cref="IState{T}.Transform" />
+		public StressState Transform(double rotationAngle) => AsStressState().Transform(rotationAngle);
+
+		IState<Pressure> IPrincipalState<Pressure>.AsState() => AsStressState();
+
+		IState<Pressure> IState<Pressure>.ToHorizontal() => ToHorizontal();
+
+		IState<Pressure> IState<Pressure>.Transform(double rotationAngle) => Transform(rotationAngle);
 
 		/// <summary>
 		///     Return a copy of this <see cref="PrincipalStressState" />.

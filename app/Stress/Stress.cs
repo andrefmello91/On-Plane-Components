@@ -249,15 +249,19 @@ namespace OnPlaneComponents
 
 		/// <summary>
 		///     Get the stresses as an <see cref="Array" />.
-		///     <para>[ SigmaX, SigmaY, TauXY ]</para>
 		/// </summary>
+		/// <remarks>
+		///		{ SigmaX, SigmaY, TauXY }
+		/// </remarks>
 		public Pressure[] AsArray() => new[] { SigmaX, SigmaY, TauXY };
 
 		/// <summary>
 		///     Get the stresses as <see cref="Vector" />, in current (<see cref="Unit" />).
-		///     <para>{ SigmaX, SigmaY, TauXY }</para>
 		/// </summary>
-		public Vector<double> AsVector() => AsArray().Select(s => s.Value).ToArray().ToVector();
+		/// <remarks>
+		///		{ SigmaX, SigmaY, TauXY }
+		/// </remarks>
+		public Vector<double> AsVector() => AsArray().Select(s => s.Value).ToVector();
 
 		public StressState Clone() => new StressState(SigmaX, SigmaY, TauXY, ThetaX);
 
@@ -266,6 +270,8 @@ namespace OnPlaneComponents
 			SigmaY.Approx(other.SigmaY, tolerance) &&  TauXY.Approx(other.TauXY,  tolerance);
 
 		public bool Approaches(PrincipalStressState other, Pressure tolerance) => Approaches(FromPrincipal(other), tolerance);
+
+		IPrincipalState<Pressure> IState<Pressure>.ToPrincipal() => ToPrincipal();
 
 		/// <summary>
 		///     Compare a <see cref="StressState" /> to a <see cref="PrincipalStressState" /> object.

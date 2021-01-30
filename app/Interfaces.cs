@@ -180,13 +180,42 @@ namespace OnPlaneComponents
         ///     See: <seealso cref="StrainRelations.TransformationMatrix"/>.
         /// </remarks>
         Matrix<double> TransformationMatrix { get; }
+
+        /// <summary>
+        ///     Get this state as an array.
+        /// </summary>
+        T[] AsArray();
+
+        /// <summary>
+        ///     Get this state as a <see cref="Vector"/>.
+        /// </summary>
+        Vector<double> AsVector();
+
+        /// <summary>
+        ///     Get this state transformed to horizontal direction (<see cref="ThetaX" /> = 0).
+        /// </summary>
+        IState<T> ToHorizontal();
+
+        /// <summary>
+        ///     Rotate this state by a <paramref name="rotationAngle"/>.
+        /// </summary>
+        /// <remarks>
+        ///     <paramref name="rotationAngle"/> is positive if counterclockwise.
+        /// </remarks>
+        /// <param name="rotationAngle">The rotation angle in radians.</param>
+        IState<T> Transform(double rotationAngle);
+
+        /// <summary>
+        ///     Transform this state into a principal state.
+        /// </summary>
+        IPrincipalState<T> ToPrincipal();
     }
 
     /// <summary>
     /// Interface to principal strain/stress states.
     /// </summary>
     /// <typeparam name="T">The struct that represents the values of the object's components.</typeparam>
-    public interface IPrincipalState<T>
+    public interface IPrincipalState<T> : IState<T>
 	    where T : struct
     {
 	    /// <summary>
@@ -215,21 +244,6 @@ namespace OnPlaneComponents
         bool Is2Zero { get; }
 
         /// <summary>
-        ///     Returns true if this is nearly zero.
-        /// </summary>
-        bool IsZero { get; }
-
-        /// <summary>
-        ///     Returns true if maximum component direction coincides to horizontal axis.
-        /// </summary>
-        bool IsHorizontal { get; }
-
-        /// <summary>
-        ///     Returns true if maximum component direction coincides to vertical axis.
-        /// </summary>
-        bool IsVertical { get; }
-
-        /// <summary>
         ///     Returns true if maximum component direction is at an angle of 45 degrees, related to horizontal axis.
         /// </summary>
         bool IsAt45Degrees { get; }
@@ -245,11 +259,8 @@ namespace OnPlaneComponents
         double Theta2 { get; }
 
         /// <summary>
-        ///     Get transformation <see cref="Matrix"/> to transform this state from horizontal plane to principal plane.
+        ///     Get this principal state as a state.
         /// </summary>
-        /// <remarks>
-        ///     See: <seealso cref="StrainRelations.TransformationMatrix"/>.
-        /// </remarks>
-        Matrix<double> TransformationMatrix { get; }
+        IState<T> AsState();
     }
 }

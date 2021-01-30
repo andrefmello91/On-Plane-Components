@@ -11,7 +11,7 @@ namespace OnPlaneComponents
 	/// <summary>
 	///     Strain struct for XY components.
 	/// </summary>
-	public partial struct StrainState : IState<double>, IApproachable<StrainState, double>, IApproachable<PrincipalStrainState, double>, IEquatable<PrincipalStrainState>, IEquatable<StrainState>, ICloneable<StrainState>
+	public readonly partial struct StrainState : IState<double>, IApproachable<StrainState, double>, IApproachable<PrincipalStrainState, double>, IEquatable<PrincipalStrainState>, IEquatable<StrainState>, ICloneable<StrainState>
 	{
 		#region Fields
 
@@ -130,11 +130,6 @@ namespace OnPlaneComponents
 		public static StrainState FromStresses(StressState stressState, Matrix<double> stiffnessMatrix) => stressState.IsZero ? Zero : FromVector(stiffnessMatrix.Solve(stressState.AsVector()), stressState.ThetaX);
 
 		/// <summary>
-		///     Get this <see cref="StrainState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
-		/// </summary>
-		public StrainState ToHorizontal() => ToHorizontal(this);
-
-		/// <summary>
 		///     Get <see cref="StrainState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
 		/// </summary>
 		/// <param name="strainState">The <see cref="StrainState" /> to transform.</param>
@@ -151,16 +146,10 @@ namespace OnPlaneComponents
 		}
 
 		/// <summary>
-		///     Get this <see cref="StrainState" /> transformed by a rotation angle.
-		/// </summary>
-		/// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
-		public StrainState Transform(double theta) => Transform(this, theta);
-
-		/// <summary>
 		///     Get <see cref="StrainState" /> transformed by a rotation angle.
 		/// </summary>
 		/// <param name="strainState">The <see cref="StrainState" /> to transform.</param>
-		/// <inheritdoc cref="Transform(double)"/>
+		/// <inheritdoc cref="Transform(double)" />
 		public static StrainState Transform(StrainState strainState, double theta)
 		{
 			if (theta.ApproxZero())
@@ -208,15 +197,30 @@ namespace OnPlaneComponents
 		}
 
 		/// <summary>
-		///     Get strains as an <see cref="Array" />.
-		///     <para>[ EpsilonX, EpsilonY, GammaXY ]</para>
+		///     Get this <see cref="StrainState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
 		/// </summary>
+		public StrainState ToHorizontal() => ToHorizontal(this);
+
+		/// <summary>
+		///     Get this <see cref="StrainState" /> transformed by a rotation angle.
+		/// </summary>
+		/// <inheritdoc cref="IState{T}.Transform" />
+		public StrainState Transform(double rotationAngle) => Transform(this, rotationAngle);
+
+		/// <summary>
+		///     Get strains as an <see cref="Array" />.
+		/// </summary>
+		/// <remarks>
+		///		{ EpsilonX, EpsilonY, GammaXY }
+		/// </remarks>
 		public double[] AsArray() => new[] { EpsilonX, EpsilonY, GammaXY };
 
 		/// <summary>
 		///     Get strains as a <see cref="Vector" />.
-		///     <para>{ EpsilonX, EpsilonY, GammaXY }</para>
 		/// </summary>
+		/// <remarks>
+		///		{ EpsilonX, EpsilonY, GammaXY }
+		/// </remarks>
 		public Vector<double> AsVector() => AsArray().ToVector();
 
 		/// <summary>
@@ -232,6 +236,12 @@ namespace OnPlaneComponents
 		public bool Approaches(PrincipalStrainState other, double tolerance) => Approaches(FromPrincipal(other), tolerance);
 
 		public StrainState Clone() => new StrainState(EpsilonX, EpsilonY, GammaXY, ThetaX);
+
+		IState<double> IState<double>.ToHorizontal() => ToHorizontal();
+
+		IState<double> IState<double>.Transform(double rotationAngle) => Transform(rotationAngle);
+
+		IPrincipalState<double> IState<double>.ToPrincipal() => ToPrincipal();
 
 		/// <summary>
 		///     Compare a <see cref="StrainState" /> to a <see cref="PrincipalStrainState" /> object.
