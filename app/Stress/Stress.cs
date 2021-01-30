@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
 using Extensions;
-using Extensions.LinearAlgebra;
-using Extensions.Number;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -251,7 +249,7 @@ namespace OnPlaneComponents
 		///     Get the stresses as an <see cref="Array" />.
 		/// </summary>
 		/// <remarks>
-		///		{ SigmaX, SigmaY, TauXY }
+		///     { SigmaX, SigmaY, TauXY }
 		/// </remarks>
 		public Pressure[] AsArray() => new[] { SigmaX, SigmaY, TauXY };
 
@@ -259,7 +257,7 @@ namespace OnPlaneComponents
 		///     Get the stresses as <see cref="Vector" />, in current (<see cref="Unit" />).
 		/// </summary>
 		/// <remarks>
-		///		{ SigmaX, SigmaY, TauXY }
+		///     { SigmaX, SigmaY, TauXY }
 		/// </remarks>
 		public Vector<double> AsVector() => AsArray().Select(s => s.Value).ToVector();
 
@@ -272,6 +270,10 @@ namespace OnPlaneComponents
 		public bool Approaches(PrincipalStressState other, Pressure tolerance) => Approaches(FromPrincipal(other), tolerance);
 
 		IPrincipalState<Pressure> IState<Pressure>.ToPrincipal() => ToPrincipal();
+
+		IState<Pressure> IState<Pressure>.ToHorizontal() => ToHorizontal();
+
+		IState<Pressure> IState<Pressure>.Transform(double rotationAngle) => Transform(rotationAngle);
 
 		/// <summary>
 		///     Compare a <see cref="StressState" /> to a <see cref="PrincipalStressState" /> object.

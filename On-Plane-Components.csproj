@@ -11,4 +11,8 @@
     <PackageReference Include="UnitsNet" Version="4.83.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Extensions\Extensions.csproj" />
+  </ItemGroup>
+
 </Project>
