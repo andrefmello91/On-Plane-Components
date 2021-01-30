@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions;
 using Extensions.Number;
 using UnitsNet;
 using UnitsNet.Units;
@@ -9,7 +10,7 @@ namespace OnPlaneComponents
 	/// <summary>
 	///     Force struct.
 	/// </summary>
-	public partial struct Force : IUnitConvertible<Force, UnitsNet.Force, ForceUnit>, ICopyable<Force>, IEquatable<Force>
+	public partial struct Force : IPlaneComponent<UnitsNet.Force>, IUnitConvertible<Force, ForceUnit>, IApproachable<Force, UnitsNet.Force>, ICloneable<Force>, IEquatable<Force>
 	{
 		#region Fields
 
@@ -36,20 +37,21 @@ namespace OnPlaneComponents
 			set => ChangeUnit(value);
 		}
 
-		/// <summary>
-		///     Verify if force components are zero.
-		/// </summary>
-		public bool AreComponentsZero => IsComponentXZero && IsComponentYZero;
+		public bool IsZero => IsXZero && IsYZero;
+
+		public bool IsXZero => X.ApproxZero(Tolerance);
+
+		public bool IsYZero => Y.ApproxZero(Tolerance);
 
 		/// <summary>
-		///     Verify if X component is approximately zero.
+		///     Get the force component in X direction.
 		/// </summary>
-		public bool IsComponentXZero => X.Abs() <= Tolerance;
+		public UnitsNet.Force X { get; private set; }
 
 		/// <summary>
-		///     Verify if Y component is approximately zero.
+		///     Get the force component in Y direction.
 		/// </summary>
-		public bool IsComponentYZero => Y.Abs() <= Tolerance;
+		public UnitsNet.Force Y { get; private set; }
 
 		/// <summary>
 		///     Verify if force resultant is approximately zero.
@@ -65,16 +67,6 @@ namespace OnPlaneComponents
 		///     Get the resultant force angle, in radians.
 		/// </summary>
 		public double ResultantAngle => CalculateResultantAngle(X, Y);
-
-		/// <summary>
-		///     Get the force component in X direction.
-		/// </summary>
-		public UnitsNet.Force X { get; private set; }
-
-		/// <summary>
-		///     Get the force component in Y direction.
-		/// </summary>
-		public UnitsNet.Force Y { get; private set; }
 
 		#endregion
 
@@ -182,19 +174,15 @@ namespace OnPlaneComponents
 			? this
 			: new Force(X.ToUnit(unit), Y.ToUnit(unit));
 
-		/// <summary>
-		///     Return a copy of this <see cref="Force" />.
-		/// </summary>
-		public Force Copy() => new Force(X, Y);
+		public Force Clone() => new Force(X, Y);
 
-		/// <inheritdoc cref="Approx"/>
+		public bool Approaches(Force other, UnitsNet.Force tolerance) => X.Approx(other.X, tolerance) && Y.Approx(other.X, tolerance);
+
+		/// <inheritdoc cref="Approaches" />
 		/// <remarks>
-		///		Default <see cref="Tolerance"/> is considered.
+		///     Default <see cref="Tolerance" /> is considered.
 		/// </remarks>
-		public bool Equals(Force other) => Approx(other, Tolerance);
-
-		/// <inheritdoc/>
-		public bool Approx(Force other, UnitsNet.Force tolerance) => (X - other.X).Abs() <= tolerance && (Y - other.Y).Abs() <= tolerance;
+		public bool Equals(Force other) => Approaches(other, Tolerance);
 
 		public override bool Equals(object obj) => obj is Force other && Equals(other);
 

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using Extensions;
 using Extensions.LinearAlgebra;
 using Extensions.Number;
 using MathNet.Numerics;
@@ -13,7 +15,7 @@ namespace OnPlaneComponents
 	/// <summary>
 	///     Stress object for XY components.
 	/// </summary>
-	public partial struct StressState : IUnitConvertible<StressState, PressureUnit>, IEquatable<StressState>
+	public partial struct StressState : IState<Pressure>, IApproachable<StressState, Pressure>, IApproachable<PrincipalStressState, Pressure>, IUnitConvertible<StressState, PressureUnit>, IEquatable<StressState>, IEquatable<PrincipalStressState>, ICloneable<StressState>
 	{
 		#region Fields
 
@@ -22,9 +24,10 @@ namespace OnPlaneComponents
 		/// </summary>
 		public static readonly StressState Zero = new StressState(0, 0, 0);
 
-		// Auxiliary fields
-		private Pressure _sigmaX, _sigmaY, _tauXY;
-		private Matrix<double> _transMatrix;
+		/// <summary>
+		///     The default tolerance for stresses.
+		/// </summary>
+		public static readonly Pressure Tolerance = Pressure.FromPascals(1E-3);
 
 		#endregion
 
@@ -35,75 +38,52 @@ namespace OnPlaneComponents
 		/// </summary>
 		public PressureUnit Unit
 		{
-			get => _sigmaX.Unit;
+			get => SigmaX.Unit;
 			set => ChangeUnit(value);
 		}
 
-		/// <summary>
-		///     Returns true if <see cref="SigmaX" /> direction coincides to horizontal axis.
-		/// </summary>
-		public bool IsHorizontal => ThetaX.ApproxZero();
+		public bool IsHorizontal => ThetaX.ApproxZero() || ThetaX.Approx(Constants.Pi);
 
-		/// <summary>
-		///     Returns true if principal state of stresses.
-		/// </summary>
-		public bool IsPrincipal => !IsSigmaXZero && !IsSigmaYZero && IsTauXYZero;
+		public bool IsVertical => ThetaX.Approx(Constants.PiOver2) || ThetaX.Approx(Constants.Pi3Over2);
 
-		/// <summary>
-		///     Returns true if pure shear state of stresses.
-		/// </summary>
-		public bool IsPureShear => IsSigmaXZero && IsSigmaYZero && !IsTauXYZero;
+		public bool IsPrincipal => !IsXZero && !IsYZero && IsXYZero;
 
-		/// <summary>
-		///     Returns true if <see cref="SigmaX" /> is zero.
-		/// </summary>
-		public bool IsSigmaXZero => SigmaX.ApproxZero();
+		public bool IsPureShear => IsXZero && IsYZero && !IsXYZero;
 
-		/// <summary>
-		///     Returns true if <see cref="SigmaY" /> is zero.
-		/// </summary>
-		public bool IsSigmaYZero => SigmaY.ApproxZero();
+		public bool IsXZero => SigmaX.ApproxZero(Tolerance);
 
-		/// <summary>
-		///     Returns true if <see cref="TauXY" /> is zero.
-		/// </summary>
-		public bool IsTauXYZero => TauXY.ApproxZero();
+		public bool IsYZero => SigmaY.ApproxZero(Tolerance);
 
-		/// <summary>
-		///     Returns true if all components are zero.
-		/// </summary>
-		public bool IsZero => IsSigmaXZero && IsSigmaYZero && IsTauXYZero;
+		public bool IsXYZero => TauXY.ApproxZero(Tolerance);
 
-		/// <summary>
-		///     Get normal stress in X direction, in unit constructed (<see cref="Unit" />).
-		/// </summary>
-		public double SigmaX => _sigmaX.Value;
+		Pressure IState<Pressure>.X => SigmaX;
 
-		/// <summary>
-		///     Get normal stress in Y direction, in unit constructed (<see cref="Unit" />).
-		/// </summary>
-		public double SigmaY => _sigmaY.Value;
+		Pressure IState<Pressure>.Y => SigmaY;
 
-		/// <summary>
-		///     Get shear stress, in unit constructed (<see cref="Unit" />).
-		/// </summary>
-		public double TauXY => _tauXY.Value;
+		Pressure IState<Pressure>.XY => TauXY;
 
-		/// <summary>
-		///     Get the angle of <see cref="SigmaX" /> direction, related to horizontal axis.
-		/// </summary>
+		public bool IsZero => IsXZero && IsYZero && IsXYZero;
+
 		public double ThetaX { get; }
 
-		/// <summary>
-		///     Get the angle of <see cref="SigmaY" /> direction, related to horizontal axis.
-		/// </summary>
 		public double ThetaY => ThetaX + Constants.PiOver2;
 
+		public Matrix<double> TransformationMatrix { get; }
+
 		/// <summary>
-		///     Get transformation matrix from horizontal plane to XY plane.
-		///     <para>See: <see cref="StressRelations.TransformationMatrix" /></para>
+		///     Get the normal stress in X direction.
 		/// </summary>
-		public Matrix<double> TransformationMatrix => _transMatrix ?? CalculateTransformationMatrix();
+		public Pressure SigmaX { get; private set; }
+
+		/// <summary>
+		///     Get the normal stress in Y direction.
+		/// </summary>
+		public Pressure SigmaY { get; private set; }
+
+		/// <summary>
+		///     Get the shear stress.
+		/// </summary>
+		public Pressure TauXY { get; private set; }
 
 		#endregion
 
@@ -125,28 +105,19 @@ namespace OnPlaneComponents
 		{
 		}
 
-		/// <summary>
-		///     Stress object for XY components.
-		/// </summary>
-		/// <param name="sigmaX">The normal stress in X direction (positive for tensile).</param>
-		/// <param name="sigmaY">The normal stress in Y direction (positive for tensile).</param>
-		/// <param name="tauXY">The shear stress (positive if upwards in right face of element).</param>
-		/// <param name="thetaX">
-		///     The angle of <paramref name="sigmaX" />, related to horizontal axis (positive to
-		///     counterclockwise).
-		/// </param>
+		/// <inheritdoc cref="StressState(double, double, double, double, PressureUnit)" />
 		public StressState(Pressure sigmaX, Pressure sigmaY, Pressure tauXY, double thetaX = 0)
 		{
-			_sigmaX      = sigmaX;
-			_sigmaY      = sigmaX.Unit == sigmaY.Unit ? sigmaY : sigmaY.ToUnit(sigmaX.Unit);
-			_tauXY       = sigmaX.Unit == tauXY.Unit  ? tauXY  : tauXY.ToUnit(sigmaX.Unit);
-			ThetaX       = thetaX.ToZero();
-			_transMatrix = null;
+			SigmaX               = sigmaX;
+			SigmaY               = sigmaY.ToUnit(sigmaX.Unit);
+			TauXY                = tauXY.ToUnit(sigmaX.Unit);
+			ThetaX               = thetaX.ToZero();
+			TransformationMatrix = TransformationMatrix(thetaX);
 		}
 
 		#endregion
 
-		#region  Methods
+		#region
 
 		/// <summary>
 		///     Get a <see cref="StressState" /> from a <see cref="Vector" />.
@@ -168,13 +139,7 @@ namespace OnPlaneComponents
 		///     The stiffness <see cref="Matrix" /> (3 x 3), related to <paramref name="strainState" />
 		///     direction.
 		/// </param>
-		public static StressState FromStrains(StrainState strainState, Matrix<double> stiffnessMatrix)
-		{
-			if (strainState.IsZero)
-				return Zero;
-
-			return FromVector(stiffnessMatrix * strainState.AsVector(), strainState.ThetaX);
-		}
+		public static StressState FromStrains(StrainState strainState, Matrix<double> stiffnessMatrix) => strainState.IsZero ? Zero : FromVector(stiffnessMatrix * strainState.AsVector(), strainState.ThetaX);
 
 		/// <summary>
 		///     Get <see cref="StressState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
@@ -196,7 +161,7 @@ namespace OnPlaneComponents
 		///     Get <see cref="StressState" /> transformed by a rotation angle.
 		/// </summary>
 		/// <param name="stressState">The <see cref="StressState" /> to transform.</param>
-		/// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
+		/// <inheritdoc cref="Transform(double)" />
 		public static StressState Transform(StressState stressState, double theta)
 		{
 			if (theta.ApproxZero())
@@ -245,6 +210,22 @@ namespace OnPlaneComponents
 		}
 
 		/// <summary>
+		///     Get this <see cref="StressState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
+		/// </summary>
+		public StressState ToHorizontal() => ToHorizontal(this);
+
+		/// <summary>
+		///     Get this <see cref="StressState" /> transformed by a rotation angle.
+		/// </summary>
+		/// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
+		public StressState Transform(double theta) => Transform(this, theta);
+
+		/// <summary>
+		///     Get the <see cref="PrincipalStressState" /> related to this <see cref="StressState" />.
+		/// </summary>
+		public PrincipalStressState ToPrincipal() => PrincipalStressState.FromStress(this);
+
+		/// <summary>
 		///     Change the <see cref="PressureUnit" /> of this <see cref="StressState" />.
 		/// </summary>
 		/// <param name="unit">The <see cref="PressureUnit" /> to convert.</param>
@@ -253,9 +234,9 @@ namespace OnPlaneComponents
 			if (Unit == unit)
 				return;
 
-			_sigmaX = _sigmaX.ToUnit(unit);
-			_sigmaY = _sigmaY.ToUnit(unit);
-			_tauXY  = _tauXY.ToUnit(unit);
+			SigmaX = SigmaX.ToUnit(unit);
+			SigmaY = SigmaY.ToUnit(unit);
+			TauXY  = TauXY.ToUnit(unit);
 		}
 
 		/// <summary>
@@ -264,45 +245,39 @@ namespace OnPlaneComponents
 		/// <inheritdoc cref="ChangeUnit" />
 		public StressState Convert(PressureUnit unit) => unit == Unit
 			? this
-			: new StressState(_sigmaX.ToUnit(unit), _sigmaY.ToUnit(unit), _tauXY.ToUnit(unit), ThetaX);
+			: new StressState(SigmaX.ToUnit(unit), SigmaY.ToUnit(unit), TauXY.ToUnit(unit), ThetaX);
 
 		/// <summary>
-		///     Get the stresses as an <see cref="Array" />, in unit constructed (<see cref="Unit" />).
+		///     Get the stresses as an <see cref="Array" />.
 		///     <para>[ SigmaX, SigmaY, TauXY ]</para>
 		/// </summary>
-		public double[] AsArray() => new[] { SigmaX, SigmaY, TauXY };
+		public Pressure[] AsArray() => new[] { SigmaX, SigmaY, TauXY };
 
 		/// <summary>
-		///     Get the stresses as <see cref="Vector" />, in unit constructed (<see cref="Unit" />).
+		///     Get the stresses as <see cref="Vector" />, in current (<see cref="Unit" />).
 		///     <para>{ SigmaX, SigmaY, TauXY }</para>
 		/// </summary>
-		public Vector<double> AsVector() => AsArray().ToVector();
+		public Vector<double> AsVector() => AsArray().Select(s => s.Value).ToArray().ToVector();
 
-		/// <summary>
-		///     Return a copy of this <see cref="StressState" />.
-		/// </summary>
-		public StressState Copy() => new StressState(SigmaX, SigmaY, TauXY, ThetaX, Unit);
+		public StressState Clone() => new StressState(SigmaX, SigmaY, TauXY, ThetaX);
 
-		/// <summary>
-		///     Calculate <see cref="TransformationMatrix" />.
-		/// </summary>
-		private Matrix<double> CalculateTransformationMatrix()
-		{
-			_transMatrix = TransformationMatrix(ThetaX);
-			return _transMatrix;
-		}
+		public bool Approaches(StressState other, Pressure tolerance) =>
+			ThetaX.Approx(other.ThetaX, 1E-3)      && SigmaX.Approx(other.SigmaX, tolerance) &&
+			SigmaY.Approx(other.SigmaY, tolerance) &&  TauXY.Approx(other.TauXY,  tolerance);
 
-		/// <summary>
-		///     Compare two <see cref="StressState" /> objects.
-		/// </summary>
-		/// <param name="other">The <see cref="StressState" /> to compare.</param>
-		public bool Equals(StressState other) => ThetaX == other.ThetaX && _sigmaX == other._sigmaX && _sigmaY == other._sigmaY && _tauXY == other._tauXY;
+		public bool Approaches(PrincipalStressState other, Pressure tolerance) => Approaches(FromPrincipal(other), tolerance);
 
 		/// <summary>
 		///     Compare a <see cref="StressState" /> to a <see cref="PrincipalStressState" /> object.
 		/// </summary>
 		/// <param name="other">The <see cref="PrincipalStressState" /> to compare.</param>
-		public bool Equals(PrincipalStressState other) => Equals(FromPrincipal(other));
+		public bool Equals(PrincipalStressState other) => Approaches(other, Tolerance);
+
+		/// <summary>
+		///     Compare two <see cref="StressState" /> objects.
+		/// </summary>
+		/// <param name="other">The <see cref="StressState" /> to compare.</param>
+		public bool Equals(StressState other) => Approaches(other, Tolerance);
 
 		public override bool Equals(object obj)
 		{
@@ -327,13 +302,13 @@ namespace OnPlaneComponents
 				theta = (char) Characters.Theta;
 
 			return
-				$"{sigma}x = {_sigmaX}\n" +
-				$"{sigma}y = {_sigmaY}\n" +
-				$"{tau}xy = {_tauXY}\n" +
+				$"{sigma}x = {SigmaX}\n" +
+				$"{sigma}y = {SigmaY}\n" +
+				$"{tau}xy = {TauXY}\n" +
 				$"{theta}x = {ThetaX:0.00} rad";
 		}
 
-		public override int GetHashCode() => (int) (SigmaX * SigmaY * TauXY);
+		public override int GetHashCode() => (int) (SigmaX.Value * SigmaY.Value * TauXY.Value);
 
 		#endregion
 	}

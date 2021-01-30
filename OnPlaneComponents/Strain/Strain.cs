@@ -4,7 +4,6 @@ using Extensions.Number;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
-using UnitsNet.Units;
 using static OnPlaneComponents.StrainRelations;
 
 namespace OnPlaneComponents
@@ -12,7 +11,7 @@ namespace OnPlaneComponents
 	/// <summary>
 	///     Strain struct for XY components.
 	/// </summary>
-	public partial struct StrainState : IUnitConvertible<StrainState, ScalarUnit>, IEquatable<StrainState>
+	public partial struct StrainState : IState<double>, IApproachable<StrainState, double>, IApproachable<PrincipalStrainState, double>, IEquatable<PrincipalStrainState>, IEquatable<StrainState>, ICloneable<StrainState>
 	{
 		#region Fields
 
@@ -21,80 +20,66 @@ namespace OnPlaneComponents
 		/// </summary>
 		public static readonly StrainState Zero = new StrainState(0, 0, 0);
 
-		// Auxiliary fields
-		private Matrix<double> _transMatrix;
+		/// <summary>
+		///     The default tolerance for strains.
+		/// </summary>
+		public static readonly double Tolerance = 1E-12;
 
 		#endregion
 
 		#region Properties
 
-		public ScalarUnit Unit { get; set; }
+		double IState<double>.X => EpsilonX;
 
-		/// <summary>
-		///     Get normal strain in X direction.
-		/// </summary>
-		public double EpsilonX { get; }
+		double IState<double>.Y => EpsilonY;
 
-		/// <summary>
-		///     Get normal strain in Y direction.
-		/// </summary>
-		public double EpsilonY { get; }
-
-		/// <summary>
-		///     Get shear strain.
-		/// </summary>
-		public double GammaXY { get; }
+		double IState<double>.XY => GammaXY;
 
 		/// <summary>
 		///     Returns true if <see cref="EpsilonX" /> is zero.
 		/// </summary>
-		public bool IsEpsilonXZero => EpsilonX.ApproxZero();
+		public bool IsXZero => EpsilonX.ApproxZero();
 
 		/// <summary>
 		///     Returns true if <see cref="EpsilonY" /> is zero.
 		/// </summary>
-		public bool IsEpsilonYZero => EpsilonY.ApproxZero();
+		public bool IsYZero => EpsilonY.ApproxZero();
 
 		/// <summary>
 		///     Returns true if <see cref="GammaXY" /> is zero.
 		/// </summary>
-		public bool IsGammaXYZero => GammaXY.ApproxZero();
+		public bool IsXYZero => GammaXY.ApproxZero();
 
-		/// <summary>
-		///     Returns true if <see cref="EpsilonX" /> direction coincides to horizontal axis.
-		/// </summary>
-		public bool IsHorizontal => ThetaX.ApproxZero();
+		public bool IsHorizontal => ThetaX.ApproxZero() || ThetaX.Approx(Constants.Pi);
 
-		/// <summary>
-		///     Returns true if principal state of strains.
-		/// </summary>
-		public bool IsPrincipal => !IsEpsilonXZero && !IsEpsilonYZero && IsGammaXYZero;
+		public bool IsVertical => ThetaX.Approx(Constants.PiOver2) || ThetaX.Approx(Constants.Pi3Over2);
 
-		/// <summary>
-		///     Returns true if pure shear state of strains.
-		/// </summary>
-		public bool IsPureShear => IsEpsilonXZero && IsEpsilonYZero && !IsGammaXYZero;
+		public bool IsPrincipal => !IsXZero && !IsYZero && IsXYZero;
 
-		/// <summary>
-		///     Returns true if all components are zero.
-		/// </summary>
-		public bool IsZero => IsEpsilonXZero && IsEpsilonYZero && IsGammaXYZero;
+		public bool IsPureShear => IsXZero && IsYZero && !IsXYZero;
 
-		/// <summary>
-		///     Get the angle of X direction (<see cref="EpsilonX" />), related to horizontal axis.
-		/// </summary>
+		public bool IsZero => IsXZero && IsYZero && IsXYZero;
+
 		public double ThetaX { get; }
 
-		/// <summary>
-		///     Get the angle of Y direction (<see cref="EpsilonY" />), related to horizontal axis.
-		/// </summary>
 		public double ThetaY => ThetaX + Constants.PiOver2;
 
+		public Matrix<double> TransformationMatrix { get; }
+
 		/// <summary>
-		///     Get transformation matrix from horizontal plane to XY plane.
-		///     <para>See: <seealso cref="StrainRelations.TransformationMatrix" /></para>
+		///     Get the normal strain in X direction.
 		/// </summary>
-		public Matrix<double> TransformationMatrix => _transMatrix ?? CalculateTransformationMatrix();
+		public double EpsilonX { get; }
+
+		/// <summary>
+		///     Get the normal strain in Y direction.
+		/// </summary>
+		public double EpsilonY { get; }
+
+		/// <summary>
+		///     Get the shear strain.
+		/// </summary>
+		public double GammaXY { get; }
 
 		#endregion
 
@@ -112,17 +97,16 @@ namespace OnPlaneComponents
 		/// </param>
 		public StrainState(double epsilonX, double epsilonY, double gammaXY, double thetaX = 0)
 		{
-			EpsilonX     = epsilonX.ToZero();
-			EpsilonY     = epsilonY.ToZero();
-			GammaXY      = gammaXY.ToZero();
-			ThetaX       = thetaX.ToZero();
-			_transMatrix = null;
-			Unit = ScalarUnit.Undefined;
+			EpsilonX             = epsilonX.ToZero();
+			EpsilonY             = epsilonY.ToZero();
+			GammaXY              = gammaXY.ToZero();
+			ThetaX               = thetaX.ToZero();
+			TransformationMatrix = TransformationMatrix(thetaX);
 		}
 
 		#endregion
 
-		#region  Methods
+		#region
 
 		/// <summary>
 		///     Get a <see cref="StrainState" /> from a <see cref="Vector" /> of strains.
@@ -143,13 +127,12 @@ namespace OnPlaneComponents
 		///     The stiffness <see cref="Matrix" /> (3 x 3), related to <paramref name="stressState" />
 		///     direction.
 		/// </param>
-		public static StrainState FromStresses(StressState stressState, Matrix<double> stiffnessMatrix)
-		{
-			if (stressState.IsZero)
-				return Zero;
+		public static StrainState FromStresses(StressState stressState, Matrix<double> stiffnessMatrix) => stressState.IsZero ? Zero : FromVector(stiffnessMatrix.Solve(stressState.AsVector()), stressState.ThetaX);
 
-			return FromVector(stiffnessMatrix.Solve(stressState.AsVector()), stressState.ThetaX);
-		}
+		/// <summary>
+		///     Get this <see cref="StrainState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
+		/// </summary>
+		public StrainState ToHorizontal() => ToHorizontal(this);
 
 		/// <summary>
 		///     Get <see cref="StrainState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
@@ -168,10 +151,16 @@ namespace OnPlaneComponents
 		}
 
 		/// <summary>
+		///     Get this <see cref="StrainState" /> transformed by a rotation angle.
+		/// </summary>
+		/// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
+		public StrainState Transform(double theta) => Transform(this, theta);
+
+		/// <summary>
 		///     Get <see cref="StrainState" /> transformed by a rotation angle.
 		/// </summary>
 		/// <param name="strainState">The <see cref="StrainState" /> to transform.</param>
-		/// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
+		/// <inheritdoc cref="Transform(double)"/>
 		public static StrainState Transform(StrainState strainState, double theta)
 		{
 			if (theta.ApproxZero())
@@ -231,42 +220,30 @@ namespace OnPlaneComponents
 		public Vector<double> AsVector() => AsArray().ToVector();
 
 		/// <summary>
-		///     Nothing is done.
+		///     Get the <see cref="PrincipalStrainState" /> related to this <see cref="StrainState" />.
 		/// </summary>
-		public void ChangeUnit(ScalarUnit unit)
-		{
-		}
+		public PrincipalStrainState ToPrincipal() => PrincipalStrainState.FromStrain(this);
 
-		/// <summary>
-		///     Return this object.
-		/// </summary>
-		public StrainState Convert(ScalarUnit unit) => this;
+		public bool Approaches(StrainState other, double tolerance) =>
+			ThetaX.Approx(other.ThetaX,   tolerance) && EpsilonX.Approx(other.EpsilonX, tolerance) &&
+			EpsilonY.Approx(other.EpsilonY, tolerance) &&  GammaXY.Approx(other.GammaXY,  tolerance);
 
-		/// <summary>
-		///     Return a copy of this <see cref="StrainState" />.
-		/// </summary>
-		public StrainState Copy() => new StrainState(EpsilonX, EpsilonY, GammaXY, ThetaX);
 
-		/// <summary>
-		///     Calculate <see cref="TransformationMatrix" />.
-		/// </summary>
-		private Matrix<double> CalculateTransformationMatrix()
-		{
-			_transMatrix = TransformationMatrix(ThetaX);
-			return _transMatrix;
-		}
+		public bool Approaches(PrincipalStrainState other, double tolerance) => Approaches(FromPrincipal(other), tolerance);
 
-		/// <summary>
-		///     Compare two <see cref="StrainState" /> objects.
-		/// </summary>
-		/// <param name="other">The strain to compare.</param>
-		public bool Equals(StrainState other) => ThetaX == other.ThetaX && EpsilonX == other.EpsilonX && EpsilonY == other.EpsilonY && GammaXY == other.GammaXY;
+		public StrainState Clone() => new StrainState(EpsilonX, EpsilonY, GammaXY, ThetaX);
 
 		/// <summary>
 		///     Compare a <see cref="StrainState" /> to a <see cref="PrincipalStrainState" /> object.
 		/// </summary>
 		/// <param name="other">The <see cref="PrincipalStrainState" /> to compare.</param>
-		public bool Equals(PrincipalStrainState other) => Equals(FromPrincipal(other));
+		public bool Equals(PrincipalStrainState other) => Approaches(other, Tolerance);
+
+		/// <summary>
+		///     Compare two <see cref="StrainState" /> objects.
+		/// </summary>
+		/// <param name="other">The strain to compare.</param>
+		public bool Equals(StrainState other) => Approaches(other, Tolerance);
 
 		public override bool Equals(object obj)
 		{

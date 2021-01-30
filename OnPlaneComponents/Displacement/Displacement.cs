@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions;
 using Extensions.Number;
 using UnitsNet;
 using UnitsNet.Units;
@@ -9,7 +10,7 @@ namespace OnPlaneComponents
 	/// <summary>
 	///     Displacement struct.
 	/// </summary>
-	public partial struct Displacement : IUnitConvertible<Displacement, Length, LengthUnit>, ICopyable<Displacement>, IEquatable<Displacement>
+	public partial struct Displacement : IPlaneComponent<Length>, IUnitConvertible<Displacement, LengthUnit>, IApproachable<Displacement, Length>, ICloneable<Displacement>, IEquatable<Displacement>
 	{
 		#region Fields
 
@@ -28,6 +29,21 @@ namespace OnPlaneComponents
 		#region Properties
 
 		/// <summary>
+		///     Verify if displacement components are zero.
+		/// </summary>
+		public bool IsZero => IsXZero && IsYZero;
+
+		/// <summary>
+		///     Verify if X component is approximately zero.
+		/// </summary>
+		public bool IsXZero => X.ApproxZero(Tolerance);
+
+		/// <summary>
+		///     Verify if Y component is approximately zero.
+		/// </summary>
+		public bool IsYZero => Y.ApproxZero(Tolerance);
+
+		/// <summary>
 		///     Get/set the displacement unit (<see cref="LengthUnit" />).
 		/// </summary>
 		public LengthUnit Unit
@@ -35,11 +51,6 @@ namespace OnPlaneComponents
 			get => X.Unit;
 			set => ChangeUnit(value);
 		}
-
-		/// <summary>
-		///     Verify if displacement components are zero.
-		/// </summary>
-		public bool AreComponentsZero => IsComponentXZero && IsComponentYZero;
 
 		/// <summary>
 		///     Get the displacement component in X direction.
@@ -52,24 +63,14 @@ namespace OnPlaneComponents
 		public Length Y { get; private set; }
 
 		/// <summary>
+		///     Verify if displacement resultant is approximately zero.
+		/// </summary>
+		public bool IsResultantZero => Resultant.ApproxZero(Tolerance);
+
+		/// <summary>
 		///     Get the resultant displacement value.
 		/// </summary>
 		public Length Resultant { get; private set; }
-
-		/// <summary>
-		///     Verify if X component is approximately zero.
-		/// </summary>
-		public bool IsComponentXZero => X.Abs() <= Tolerance;
-
-		/// <summary>
-		///     Verify if Y component is approximately zero.
-		/// </summary>
-		public bool IsComponentYZero => Y.Abs() <= Tolerance;
-
-		/// <summary>
-		///     Verify if displacement resultant is approximately zero.
-		/// </summary>
-		public bool IsResultantZero => Resultant.Abs() <= Tolerance;
 
 		/// <summary>
 		///     Get the resultant displacement angle, in radians.
@@ -111,7 +112,7 @@ namespace OnPlaneComponents
 
 		#endregion
 
-		#region  Methods
+		#region
 
 		/// <summary>
 		///     Get a <see cref="Displacement" /> in X direction.
@@ -160,11 +161,6 @@ namespace OnPlaneComponents
 		}
 
 		/// <summary>
-		///     Return a copy of this <see cref="Displacement" />.
-		/// </summary>
-		public Displacement Copy() => new Displacement(X, Y);
-
-		/// <summary>
 		///     Change the <see cref="LengthUnit" /> of this object.
 		/// </summary>
 		/// <param name="unit">The <see cref="LengthUnit" /> to convert.</param>
@@ -187,23 +183,18 @@ namespace OnPlaneComponents
 			? this
 			: new Displacement(X.ToUnit(unit), Y.ToUnit(unit));
 
+		/// <inheritdoc />
+		public bool Approaches(Displacement other, Length tolerance) => X.Approx(other.X, tolerance) && Y.Approx(other.Y, tolerance);
 
-		/// <inheritdoc cref="Approx"/>
+		public Displacement Clone() => new Displacement(X, Y);
+
+		/// <inheritdoc cref="Approaches" />
 		/// <remarks>
-		///		Default <see cref="Tolerance"/> is considered.
+		///     Default <see cref="Tolerance" /> is considered.
 		/// </remarks>
-		public bool Equals(Displacement other) => Equals(Tolerance);
+		public bool Equals(Displacement other) => Approaches(other, Tolerance);
 
-		/// <inheritdoc/>
-		public bool Approx(Displacement other, Length tolerance) => (X - other.X).Abs() <= tolerance && (Y - other.Y).Abs() <= tolerance;
-
-		public override bool Equals(object obj)
-		{
-			if (obj is Displacement other)
-				return Equals(other);
-
-			return false;
-		}
+		public override bool Equals(object obj) => obj is Displacement other && Equals(other);
 
 		public override string ToString() =>
 			$"ux = {X}\n" +

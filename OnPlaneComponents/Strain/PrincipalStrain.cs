@@ -6,13 +6,14 @@ using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using UnitsNet.Units;
 using static OnPlaneComponents.StrainRelations;
+using static OnPlaneComponents.StrainState;
 
 namespace OnPlaneComponents
 {
 	/// <summary>
 	///     Principal strain struct.
 	/// </summary>
-	public partial struct PrincipalStrainState : IUnitConvertible<PrincipalStrainState, ScalarUnit>, IEquatable<PrincipalStrainState>
+	public partial struct PrincipalStrainState : IPrincipalState<double>, IApproachable<StrainState, double>, IApproachable<PrincipalStrainState, double>, IEquatable<PrincipalStrainState>, IEquatable<StrainState>, ICloneable<PrincipalStrainState>
 	{
 		#region Fields
 
@@ -21,18 +22,10 @@ namespace OnPlaneComponents
 		/// </summary>
 		public static readonly PrincipalStrainState Zero = new PrincipalStrainState(0, 0);
 
-		// Auxiliary fields
-		private Matrix<double> _transMatrix;
-
 		#endregion
 
 		#region Properties
 
-		public ScalarUnit Unit { get; set; }
-
-		/// <summary>
-		///     Get the <see cref="PrincipalCase" /> of <seealso cref="PrincipalStrainState" />.
-		/// </summary>
 		public PrincipalCase Case
 		{
 			get
@@ -50,6 +43,10 @@ namespace OnPlaneComponents
 			}
 		}
 
+		double IPrincipalState<double>.T1 => Epsilon1;
+
+		double IPrincipalState<double>.T2 => Epsilon2;
+
 		/// <summary>
 		///     Get maximum principal strain.
 		/// </summary>
@@ -61,40 +58,28 @@ namespace OnPlaneComponents
 		public double Epsilon2 { get; }
 
 		/// <summary>
-		///     Returns true if <see cref="Epsilon1" /> is zero.
+		///     Returns true if <see cref="Epsilon1" /> is nearly zero.
 		/// </summary>
-		public bool IsEpsilon1Zero => Epsilon1.ApproxZero();
+		public bool Is1Zero => Epsilon1.ApproxZero();
 
 		/// <summary>
-		///     Returns true if <see cref="Epsilon2" /> is zero.
+		///     Returns true if <see cref="Epsilon2" /> is nearly zero.
 		/// </summary>
-		public bool IsEpsilon2Zero => Epsilon2.ApproxZero();
+		public bool Is2Zero => Epsilon2.ApproxZero();
 
-		/// <summary>
-		///     Returns true if <see cref="Epsilon1" /> direction coincides to horizontal axis.
-		/// </summary>
-		public bool IsHorizontal => Theta1.ApproxZero();
+		public bool IsHorizontal => Theta1.ApproxZero() || Theta1.Approx(Constants.Pi);
 
-		/// <summary>
-		///     Returns true if <see cref="Epsilon1" /> and <see cref="Epsilon2" /> are zero.
-		/// </summary>
-		public bool IsZero => IsEpsilon1Zero && IsEpsilon2Zero;
+		public bool IsVertical => Theta1.Approx(Constants.PiOver2) || Theta1.Approx(Constants.Pi3Over2);
 
-		/// <summary>
-		///     Get the angle of maximum principal strain (<see cref="Epsilon1" />), related to horizontal axis.
-		/// </summary>
+		public bool IsAt45Degrees => Theta1.Approx(Constants.PiOver4) || Theta2.Approx(Constants.PiOver4) || Theta1.Approx(-Constants.PiOver4) || Theta2.Approx(-Constants.PiOver4);
+
+		public bool IsZero => Is1Zero && Is2Zero;
+
 		public double Theta1 { get; }
 
-		/// <summary>
-		///     Get the angle of minimum principal strain (<see cref="Epsilon2" />), related to horizontal axis.
-		/// </summary>
 		public double Theta2 => Theta1 + Constants.PiOver2;
 
-		/// <summary>
-		///     Get transformation <see cref="Matrix" /> from horizontal plane to principal plane.
-		///     <para>See: <seealso cref="StrainRelations.TransformationMatrix" /></para>
-		/// </summary>
-		public Matrix<double> TransformationMatrix => _transMatrix ?? CalculateTransformationMatrix();
+		public Matrix<double> TransformationMatrix { get; }
 
 		#endregion
 
@@ -111,11 +96,10 @@ namespace OnPlaneComponents
 		/// </param>
 		public PrincipalStrainState(double epsilon1, double epsilon2, double theta1 = Constants.PiOver4)
 		{
-			Epsilon1     = epsilon1.ToZero();
-			Epsilon2     = epsilon2.ToZero();
-			Theta1       = theta1.ToZero();
-			_transMatrix = null;
-			Unit         = ScalarUnit.Undefined;
+			Epsilon1             = epsilon1.ToZero();
+			Epsilon2             = epsilon2.ToZero();
+			Theta1               = theta1.ToZero();
+			TransformationMatrix = StrainRelations.TransformationMatrix(theta1);
 		}
 
 		#endregion
@@ -134,26 +118,8 @@ namespace OnPlaneComponents
 			return new PrincipalStrainState(e1, e2, strainState.ThetaX + theta1);
 		}
 
-		/// <summary>
-		///     Return zero if <paramref name="number" /> is <see cref="double.NaN" /> or <see cref="double.PositiveInfinity" /> or
-		///     <see cref="double.NegativeInfinity" />.
-		/// </summary>
-		/// <param name="number"></param>
-		/// <returns></returns>
-		private static double DoubleToZero(double number) => !double.IsNaN(number) && !double.IsInfinity(number) ? number : 0;
 
-		/// <inheritdoc cref="StrainState.ChangeUnit" />
-		public void ChangeUnit(ScalarUnit unit)
-		{
-		}
-
-		/// <inheritdoc cref="StrainState.Convert" />
-		public PrincipalStrainState Convert(ScalarUnit unit) => this;
-
-		/// <summary>
-		///     Return a copy of this <see cref="PrincipalStrainState" />.
-		/// </summary>
-		public PrincipalStrainState Copy() => new PrincipalStrainState(Epsilon1, Epsilon2, Theta1);
+		public PrincipalStrainState Clone() => new PrincipalStrainState(Epsilon1, Epsilon2, Theta1);
 
 		/// <summary>
 		///     Get principal strains as an <see cref="Array" />.
@@ -168,25 +134,16 @@ namespace OnPlaneComponents
 		public Vector<double> AsVector() => AsArray().ToVector();
 
 		/// <summary>
-		///     Calculate <see cref="TransformationMatrix" />.
-		/// </summary>
-		private Matrix<double> CalculateTransformationMatrix()
-		{
-			_transMatrix = TransformationMatrix(Theta1);
-			return _transMatrix;
-		}
-
-		/// <summary>
 		///     Compare two <see cref="PrincipalStrainState" /> objects.
 		/// </summary>
 		/// <param name="other">The other <see cref="PrincipalStrainState" /> to compare.</param>
-		public bool Equals(PrincipalStrainState other) => Theta1 == other.Theta1 && Epsilon1 == other.Epsilon1 && Epsilon2 == other.Epsilon2;
+		public bool Equals(PrincipalStrainState other) => Approaches(other, Tolerance);
 
 		/// <summary>
 		///     Compare a <see cref="PrincipalStrainState" /> to a <see cref="StrainState" /> object.
 		/// </summary>
 		/// <param name="other">The <see cref="StrainState" /> to compare.</param>
-		public bool Equals(StrainState other) => Equals(FromStrain(other));
+		public bool Equals(StrainState other) => Approaches(other, Tolerance);
 
 		public override bool Equals(object obj)
 		{
@@ -202,6 +159,12 @@ namespace OnPlaneComponents
 					return false;
 			}
 		}
+
+		public bool Approaches(StrainState other, double tolerance) => Approaches(other.ToPrincipal(), tolerance);
+
+		public bool Approaches(PrincipalStrainState other, double tolerance) =>
+			  Theta1.Approx(other.Theta1,   1E-3)      &&
+			Epsilon1.Approx(other.Epsilon1, tolerance) && Epsilon2.Approx(other.Epsilon2, tolerance);
 
 		public override string ToString()
 		{

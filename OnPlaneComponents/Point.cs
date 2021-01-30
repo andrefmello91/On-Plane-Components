@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions;
 using Extensions.Number;
 using MathNet.Numerics;
 using UnitsNet;
@@ -9,7 +10,7 @@ namespace OnPlaneComponents
 	/// <summary>
 	///     On plane Point struct.
 	/// </summary>
-	public struct Point : IUnitConvertible<Point, Length, LengthUnit>, ICopyable<Point>, IComparable<Point>
+	public struct Point : IUnitConvertible<Point, LengthUnit>, IApproachable<Point, Length>, IEquatable<Point>, IComparable<Point>, ICloneable<Point>
 	{
 		#region Fields
 
@@ -40,6 +41,16 @@ namespace OnPlaneComponents
 		///     Returns true if this point is at <see cref="Origin" />.
 		/// </summary>
 		public bool IsAtOrigin => this == Origin;
+
+		/// <summary>
+		///     Returns true if <see cref="X" /> is nearly zero.
+		/// </summary>
+		public bool IsXZero => X.ApproxZero(Tolerance);
+
+		/// <summary>
+		///     Returns true if <see cref="Y" /> is nearly zero.
+		/// </summary>
+		public bool IsYZero => Y.ApproxZero(Tolerance);
 
 		/// <summary>
 		///     Get the X coordinate of this <see cref="Point" /> object.
@@ -96,11 +107,6 @@ namespace OnPlaneComponents
 		/// </summary>
 		/// <inheritdoc cref="ChangeUnit" />
 		public Point Convert(LengthUnit unit) => Unit == unit ? this : new Point(X.ToUnit(unit), Y.ToUnit(unit));
-
-		/// <summary>
-		///     Create a copy of this <see cref="Point" /> object.
-		/// </summary>
-		public Point Copy() => new Point(X, Y);
 
 		/// <summary>
 		///     Get the horizontal distance, in <see cref="Unit" />, between this <see cref="Point" /> and
@@ -164,21 +170,23 @@ namespace OnPlaneComponents
 		/// <summary>
 		///     Returns true if <paramref name="other" /> X coordinate is approximately equal to this object's X coordinate.
 		/// </summary>
-		/// <inheritdoc cref="Approx" />
-		public bool ApproxX(Point other, Length tolerance) => (X - other.X).Abs() <= tolerance;
+		/// <inheritdoc cref="Approaches" />
+		public bool ApproxX(Point other, Length tolerance) => X.Approx(other.X, tolerance);
 
 		/// <summary>
 		///     Returns true if <paramref name="other" /> Y coordinate is approximately equal to this object's Y coordinate.
 		/// </summary>
-		/// <inheritdoc cref="Approx" />
-		public bool ApproxY(Point other, Length tolerance) => (Y - other.Y).Abs() <= tolerance;
+		/// <inheritdoc cref="Approaches" />
+		public bool ApproxY(Point other, Length tolerance) => Y.Approx(other.Y, tolerance);
 
 		/// <summary>
 		///     Returns true if <paramref name="other" /> coordinates are approximately equal to this object's coordinates.
 		/// </summary>
 		/// <param name="other">The other <see cref="Point" /> to compare.</param>
 		/// <param name="tolerance">The tolerance <see cref="Length" /> to consider coordinates equal.</param>
-		public bool Approx(Point other, Length tolerance) => ApproxX(other, tolerance) && ApproxY(other, tolerance);
+		public bool Approaches(Point other, Length tolerance) => ApproxX(other, tolerance) && ApproxY(other, tolerance);
+
+		public Point Clone() => new Point(X, Y);
 
 		/// <summary>
 		///     Compare this to <paramref name="other" /> <see cref="Point" />.
@@ -205,11 +213,11 @@ namespace OnPlaneComponents
 			return -1;
 		}
 
-		/// <inheritdoc cref="Approx" />
+		/// <inheritdoc cref="Approaches" />
 		/// <remarks>
 		///     Default <see cref="Tolerance" /> is considered.
 		/// </remarks>
-		public bool Equals(Point other) => Approx(other, Tolerance);
+		public bool Equals(Point other) => Approaches(other, Tolerance);
 
 		/// <inheritdoc cref="ApproxX" />
 		/// <inheritdoc cref="Equals(Point)" />
@@ -217,7 +225,7 @@ namespace OnPlaneComponents
 
 		/// <inheritdoc cref="ApproxY" />
 		/// <inheritdoc cref="EqualsX" />
-		public bool EqualsY(Point other) => ApproxX(other, Tolerance);
+		public bool EqualsY(Point other) => ApproxY(other, Tolerance);
 
 		public override bool Equals(object obj) => obj is Point other && Equals(other);
 
