@@ -11,9 +11,6 @@ namespace OnPlaneComponents
     /// </summary>
     /// <typeparam name="T1">
     ///     The struct that represents the value of the object.
-    ///     <para>
-    ///         <see cref="double"/>, <see cref="Length"/>, <see cref="Force"/>, <see cref="Pressure"/>, etc.
-    ///     </para>
     /// </typeparam>
     /// <typeparam name="T2">
     ///     The enum of unit that represents the object.
@@ -22,7 +19,6 @@ namespace OnPlaneComponents
     ///     </para>
     /// </typeparam>
     public interface IUnitConvertible<out T1, T2>
-		where T1 : struct
 		where T2 : Enum
     {
         /// <summary>
