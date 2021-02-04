@@ -89,9 +89,9 @@ namespace OnPlaneComponents
 		/// <param name="forceY"><see cref="UnitsNet.Force" /> component in Y direction (positive upwards).</param>
 		public Force(UnitsNet.Force forceX, UnitsNet.Force forceY)
 		{
-			X         = forceX;
-			Y         = forceY.ToUnit(forceX.Unit);
-			Resultant = CalculateResultant(X, Y).ToUnit(forceX.Unit);
+			X         = forceX.ToZero();
+			Y         = forceY.ToZero().ToUnit(forceX.Unit);
+			Resultant = CalculateResultant(X, Y, X.Unit);
 		}
 
 		#endregion

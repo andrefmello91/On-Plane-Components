@@ -123,8 +123,7 @@ namespace OnPlaneComponents
 		/// </summary>
 		/// <param name="stressState">The <see cref="StressState" /> to transform.</param>
 		/// <param name="stiffnessMatrix">
-		///     The stiffness <see cref="Matrix" /> (3 x 3), related to <paramref name="stressState" />
-		///     direction.
+		///     The stiffness <see cref="Matrix" /> (3 x 3), related to <paramref name="stressState" /> direction, with elements in MPa.
 		/// </param>
 		public static StrainState FromStresses(StressState stressState, Matrix<double> stiffnessMatrix) => stressState.IsZero ? Zero : FromVector(stiffnessMatrix.Solve(stressState.AsVector()), stressState.ThetaX);
 

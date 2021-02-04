@@ -142,9 +142,9 @@ namespace OnPlaneComponents
 		/// <inheritdoc cref="PrincipalStressState(double, double, double, PressureUnit)" />
 		public PrincipalStressState(Pressure sigma1, Pressure sigma2, double theta1 = Constants.PiOver4)
 		{
-			Sigma1               = sigma1;
-			Sigma2               = sigma2.ToUnit(sigma1.Unit);
-			Sigma2               = sigma2.ToUnit(sigma1.Unit);
+			Sigma1               = sigma1.ToZero();
+			Sigma2               = sigma2.ToZero().ToUnit(sigma1.Unit);
+			Sigma2               = sigma2.ToZero().ToUnit(sigma1.Unit);
 			Theta1               = theta1.ToZero();
 			TransformationMatrix = StrainRelations.TransformationMatrix(theta1);
 		}
@@ -197,12 +197,13 @@ namespace OnPlaneComponents
 		public Pressure[] AsArray() => new[] { Sigma1, Sigma2, Pressure.Zero };
 
 		/// <summary>
-		///     Get principal stresses as a <see cref="Vector" />, in <see cref="Unit" /> considered.
+		///     Get principal stresses as a <see cref="Vector" />, in a desired <see cref="PressureUnit"/>.
 		/// </summary>
 		/// <remarks>
 		///		{ Sigma1, Sigma2, 0 }
 		/// </remarks>
-		public Vector<double> AsVector() => AsArray().Select(s => s.Value).ToVector();
+		/// <param name="unit">The <see cref="PressureUnit"/>.</param>
+		public Vector<double> AsVector(PressureUnit unit = PressureUnit.Megapascal) => AsArray().Select(s => s.ToUnit(unit).Value).ToVector();
 
 		/// <summary>
 		///     Get this <see cref="PrincipalStressState" /> as a <see cref="StressState" />.

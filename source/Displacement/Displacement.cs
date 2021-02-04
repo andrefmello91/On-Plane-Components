@@ -104,9 +104,9 @@ namespace OnPlaneComponents
 		/// <param name="displacementY">Displacement component in Y direction (positive upwards) (<see cref="Length" />).</param>
 		public Displacement(Length displacementX, Length displacementY)
 		{
-			X          = displacementX;
-			Y          = displacementY.ToUnit(displacementX.Unit);
-			Resultant  = CalculateResultant(X, Y, X.Unit).ToUnit(displacementX.Unit);
+			X          = displacementX.ToZero();
+			Y          = displacementY.ToZero().ToUnit(displacementX.Unit);
+			Resultant  = CalculateResultant(X, Y, X.Unit);
 		}
 
 		#endregion

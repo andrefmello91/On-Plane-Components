@@ -106,9 +106,9 @@ namespace OnPlaneComponents
 		/// <inheritdoc cref="StressState(double, double, double, double, PressureUnit)" />
 		public StressState(Pressure sigmaX, Pressure sigmaY, Pressure tauXY, double thetaX = 0)
 		{
-			SigmaX               = sigmaX;
-			SigmaY               = sigmaY.ToUnit(sigmaX.Unit);
-			TauXY                = tauXY.ToUnit(sigmaX.Unit);
+			SigmaX               = sigmaX.ToZero();
+			SigmaY               = sigmaY.ToZero().ToUnit(sigmaX.Unit);
+			TauXY                = tauXY.ToZero().ToUnit(sigmaX.Unit);
 			ThetaX               = thetaX.ToZero();
 			TransformationMatrix = TransformationMatrix(thetaX);
 		}
@@ -254,12 +254,13 @@ namespace OnPlaneComponents
 		public Pressure[] AsArray() => new[] { SigmaX, SigmaY, TauXY };
 
 		/// <summary>
-		///     Get the stresses as <see cref="Vector" />, in current (<see cref="Unit" />).
+		///     Get the stresses as <see cref="Vector" />, in a desired <see cref="PressureUnit" />.
 		/// </summary>
 		/// <remarks>
 		///     { SigmaX, SigmaY, TauXY }
 		/// </remarks>
-		public Vector<double> AsVector() => AsArray().Select(s => s.Value).ToVector();
+		/// <param name="unit">The <see cref="PressureUnit" />.</param>
+		public Vector<double> AsVector(PressureUnit unit = PressureUnit.Megapascal) => AsArray().Select(s => s.ToUnit(unit).Value).ToVector();
 
 		public StressState Clone() => new StressState(SigmaX, SigmaY, TauXY, ThetaX);
 
@@ -287,20 +288,13 @@ namespace OnPlaneComponents
 		/// <param name="other">The <see cref="StressState" /> to compare.</param>
 		public bool Equals(StressState other) => Approaches(other, Tolerance);
 
-		public override bool Equals(object obj)
-		{
-			switch (obj)
+		public override bool Equals(object? obj) =>
+			obj switch
 			{
-				case StressState other:
-					return Equals(other);
-
-				case PrincipalStressState principalStress:
-					return Equals(principalStress);
-
-				default:
-					return false;
-			}
-		}
+				StressState other => Equals(other),
+				PrincipalStressState principalStress => Equals(principalStress),
+				_ => false
+			};
 
 		public override string ToString()
 		{
