@@ -9,7 +9,7 @@ namespace OnPlaneComponents
 	/// <summary>
 	///     Force struct.
 	/// </summary>
-	public partial struct Force : IPlaneComponent<UnitsNet.Force>, IUnitConvertible<Force, ForceUnit>, IApproachable<Force, UnitsNet.Force>, ICloneable<Force>, IEquatable<Force>
+	public partial struct Force : IPlaneComponent<Force, UnitsNet.Force>, IUnitConvertible<Force, ForceUnit>
 	{
 		#region Fields
 

@@ -9,7 +9,7 @@ namespace OnPlaneComponents
 	/// <summary>
 	///     Displacement struct.
 	/// </summary>
-	public partial struct Displacement : IPlaneComponent<Length>, IUnitConvertible<Displacement, LengthUnit>, IApproachable<Displacement, Length>, ICloneable<Displacement>, IEquatable<Displacement>
+	public partial struct Displacement : IPlaneComponent<Displacement, Length>, IUnitConvertible<Displacement, LengthUnit>
 	{
 		#region Fields
 

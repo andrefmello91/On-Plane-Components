@@ -10,7 +10,7 @@ namespace OnPlaneComponents
 	/// <summary>
 	///     Strain struct for XY components.
 	/// </summary>
-	public readonly partial struct StrainState : IState<double>, IApproachable<StrainState, double>, IApproachable<PrincipalStrainState, double>, IEquatable<PrincipalStrainState>, IEquatable<StrainState>, ICloneable<StrainState>
+	public readonly partial struct StrainState : IState<StrainState, PrincipalStrainState, double>, ICloneable<StrainState>
 	{
 		#region Fields
 
@@ -28,11 +28,11 @@ namespace OnPlaneComponents
 
 		#region Properties
 
-		double IState<double>.X => EpsilonX;
+		double IState<StrainState, PrincipalStrainState, double>.X => EpsilonX;
 
-		double IState<double>.Y => EpsilonY;
+		double IState<StrainState, PrincipalStrainState, double>.Y => EpsilonY;
 
-		double IState<double>.XY => GammaXY;
+		double IState<StrainState, PrincipalStrainState, double>.XY => GammaXY;
 
 		/// <summary>
 		///     Returns true if <see cref="EpsilonX" /> is zero.
@@ -234,12 +234,6 @@ namespace OnPlaneComponents
 		public bool Approaches(PrincipalStrainState other, double tolerance) => Approaches(FromPrincipal(other), tolerance);
 
 		public StrainState Clone() => new StrainState(EpsilonX, EpsilonY, GammaXY, ThetaX);
-
-		IState<double> IState<double>.ToHorizontal() => ToHorizontal();
-
-		IState<double> IState<double>.Transform(double rotationAngle) => Transform(rotationAngle);
-
-		IPrincipalState<double> IState<double>.ToPrincipal() => ToPrincipal();
 
 		/// <summary>
 		///     Compare a <see cref="StrainState" /> to a <see cref="PrincipalStrainState" /> object.

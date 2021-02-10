@@ -14,7 +14,7 @@ namespace OnPlaneComponents
 	/// <summary>
 	///     Principal stress struct.
 	/// </summary>
-	public partial struct PrincipalStressState : IPrincipalState<Pressure>, IApproachable<StressState, Pressure>, IApproachable<PrincipalStressState, Pressure>, IUnitConvertible<PrincipalStressState, PressureUnit>, IEquatable<PrincipalStressState>, IEquatable<StressState>, ICloneable<PrincipalStressState>
+	public partial struct PrincipalStressState : IPrincipalState<PrincipalStressState, StressState, Pressure>, IUnitConvertible<PrincipalStressState, PressureUnit>, ICloneable<PrincipalStressState>
 	{
 		#region Fields
 
@@ -53,29 +53,29 @@ namespace OnPlaneComponents
 			}
 		}
 
-		Pressure IPrincipalState<Pressure>.T1 => Sigma1;
+		Pressure IPrincipalState<PrincipalStressState, StressState, Pressure>.S1 => Sigma1;
 
-		Pressure IPrincipalState<Pressure>.T2 => Sigma2;
+		Pressure IPrincipalState<PrincipalStressState, StressState, Pressure>.S2 => Sigma2;
 
-		bool IState<Pressure>.IsPrincipal => true;
+		bool IState<StressState, PrincipalStressState, Pressure>.IsPrincipal => true;
 
-		bool IState<Pressure>.IsPureShear => false;
+		bool IState<StressState, PrincipalStressState, Pressure>.IsPureShear => false;
 
-		double IState<Pressure>.ThetaX => Theta1;
+		double IState<StressState, PrincipalStressState, Pressure>.ThetaX => Theta1;
 
-		double IState<Pressure>.ThetaY => Theta2;
+		double IState<StressState, PrincipalStressState, Pressure>.ThetaY => Theta2;
 
-		Pressure IState<Pressure>.X => Sigma1;
+		Pressure IState<StressState, PrincipalStressState, Pressure>.X => Sigma1;
 
-		Pressure IState<Pressure>.Y => Sigma1;
+		Pressure IState<StressState, PrincipalStressState, Pressure>.Y => Sigma1;
 
-		Pressure IState<Pressure>.XY => Pressure.Zero;
+		Pressure IState<StressState, PrincipalStressState, Pressure>.XY => Pressure.Zero;
 
-		bool IState<Pressure>.IsXZero => Is1Zero;
+		bool IState<StressState, PrincipalStressState, Pressure>.IsXZero => Is1Zero;
 
-		bool IState<Pressure>.IsYZero => Is2Zero;
+		bool IState<StressState, PrincipalStressState, Pressure>.IsYZero => Is2Zero;
 
-		bool IState<Pressure>.IsXYZero => true;
+		bool IState<StressState, PrincipalStressState, Pressure>.IsXYZero => true;
 
 		public bool IsHorizontal => Theta1.ApproxZero() || Theta1.Approx(Constants.Pi);
 
@@ -165,7 +165,7 @@ namespace OnPlaneComponents
 			return new PrincipalStressState(s1, s2, stressState.ThetaX + theta1);
 		}
 
-		public IPrincipalState<Pressure> ToPrincipal() => this;
+		public PrincipalStressState ToPrincipal() => this;
 
 		/// <summary>
 		///     Change the <see cref="PressureUnit" /> of this <see cref="PrincipalStressState" />.
@@ -224,11 +224,7 @@ namespace OnPlaneComponents
 		/// <inheritdoc cref="IState{T}.Transform" />
 		public StressState Transform(double rotationAngle) => AsStressState().Transform(rotationAngle);
 
-		IState<Pressure> IPrincipalState<Pressure>.AsState() => AsStressState();
-
-		IState<Pressure> IState<Pressure>.ToHorizontal() => ToHorizontal();
-
-		IState<Pressure> IState<Pressure>.Transform(double rotationAngle) => Transform(rotationAngle);
+		StressState IPrincipalState<PrincipalStressState, StressState, Pressure>.AsState() => AsStressState();
 
 		/// <summary>
 		///     Return a copy of this <see cref="PrincipalStressState" />.

@@ -11,7 +11,7 @@ namespace OnPlaneComponents
 	/// <summary>
 	///     Principal strain struct.
 	/// </summary>
-	public readonly partial struct PrincipalStrainState : IPrincipalState<double>, IApproachable<StrainState, double>, IApproachable<PrincipalStrainState, double>, IEquatable<PrincipalStrainState>, IEquatable<StrainState>, ICloneable<PrincipalStrainState>
+	public readonly partial struct PrincipalStrainState : IPrincipalState<PrincipalStrainState, StrainState, double>, ICloneable<PrincipalStrainState>
 	{
 		#region Fields
 
@@ -41,9 +41,9 @@ namespace OnPlaneComponents
 			}
 		}
 
-		double IPrincipalState<double>.T1 => Epsilon1;
+		double IPrincipalState<PrincipalStrainState, StrainState, double>.S1 => Epsilon1;
 
-		double IPrincipalState<double>.T2 => Epsilon2;
+		double IPrincipalState<PrincipalStrainState, StrainState, double>.S2 => Epsilon2;
 
 		/// <summary>
 		///     Returns true if <see cref="Epsilon1" /> is nearly zero.
@@ -59,27 +59,27 @@ namespace OnPlaneComponents
 
 		public bool IsVertical => Theta1.Approx(Constants.PiOver2) || Theta1.Approx(Constants.Pi3Over2);
 
-		bool IState<double>.IsPrincipal => true;
+		bool IState<StrainState, PrincipalStrainState, double>.IsPrincipal => true;
 
-		bool IState<double>.IsPureShear => false;
+		bool IState<StrainState, PrincipalStrainState, double>.IsPureShear => false;
 
-		double IState<double>.ThetaX => Theta1;
+		double IState<StrainState, PrincipalStrainState, double>.ThetaX => Theta1;
 
-		double IState<double>.ThetaY => Theta2;
+		double IState<StrainState, PrincipalStrainState, double>.ThetaY => Theta2;
 
 		public bool IsAt45Degrees => Theta1.Approx(Constants.PiOver4) || Theta2.Approx(Constants.PiOver4) || Theta1.Approx(-Constants.PiOver4) || Theta2.Approx(-Constants.PiOver4);
 
-		double IState<double>.X => Epsilon1;
+		double IState<StrainState, PrincipalStrainState, double>.X => Epsilon1;
 
-		double IState<double>.Y => Epsilon2;
+		double IState<StrainState, PrincipalStrainState, double>.Y => Epsilon2;
 
-		double IState<double>.XY => 0;
+		double IState<StrainState, PrincipalStrainState, double>.XY => 0;
 
-		bool IState<double>.IsXZero => Is1Zero;
+		bool IState<StrainState, PrincipalStrainState, double>.IsXZero => Is1Zero;
 
-		bool IState<double>.IsYZero => Is2Zero;
+		bool IState<StrainState, PrincipalStrainState, double>.IsYZero => Is2Zero;
 
-		bool IState<double>.IsXYZero => true;
+		bool IState<StrainState, PrincipalStrainState, double>.IsXYZero => true;
 
 		public bool IsZero => Is1Zero && Is2Zero;
 
@@ -136,7 +136,7 @@ namespace OnPlaneComponents
 			return new PrincipalStrainState(e1, e2, strainState.ThetaX + theta1);
 		}
 
-		public IPrincipalState<double> ToPrincipal() => this;
+		public PrincipalStrainState ToPrincipal() => this;
 
 		public PrincipalStrainState Clone() => new PrincipalStrainState(Epsilon1, Epsilon2, Theta1);
 
@@ -179,14 +179,10 @@ namespace OnPlaneComponents
 		/// <summary>
 		///     Get this <see cref="PrincipalStrainState" /> transformed by a rotation angle.
 		/// </summary>
-		/// <inheritdoc cref="IState{T}.Transform" />
+		/// <inheritdoc/>
 		public StrainState Transform(double rotationAngle) => AsStrainState().Transform(rotationAngle);
 
-		IState<double> IPrincipalState<double>.AsState() => AsStrainState();
-
-		IState<double> IState<double>.ToHorizontal() => ToHorizontal();
-
-		IState<double> IState<double>.Transform(double rotationAngle) => Transform(rotationAngle);
+		StrainState IPrincipalState<PrincipalStrainState, StrainState, double>.AsState() => AsStrainState();
 
 		/// <summary>
 		///     Compare two <see cref="PrincipalStrainState" /> objects.
@@ -229,6 +225,11 @@ namespace OnPlaneComponents
 
 		public override int GetHashCode() => (int) (Epsilon1 * Epsilon2);
 
-		#endregion
-	}
+        public StrainState AsState()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+    }
 }

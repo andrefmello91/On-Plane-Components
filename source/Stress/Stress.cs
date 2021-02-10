@@ -13,7 +13,7 @@ namespace OnPlaneComponents
 	/// <summary>
 	///     Stress object for XY components.
 	/// </summary>
-	public partial struct StressState : IState<Pressure>, IApproachable<StressState, Pressure>, IApproachable<PrincipalStressState, Pressure>, IUnitConvertible<StressState, PressureUnit>, IEquatable<StressState>, IEquatable<PrincipalStressState>, ICloneable<StressState>
+	public partial struct StressState : IState<StressState, PrincipalStressState, Pressure>, IUnitConvertible<StressState, PressureUnit>, ICloneable<StressState>
 	{
 		#region Fields
 
@@ -54,11 +54,11 @@ namespace OnPlaneComponents
 
 		public bool IsXYZero => TauXY.ApproxZero(Tolerance);
 
-		Pressure IState<Pressure>.X => SigmaX;
+		Pressure IState<StressState, PrincipalStressState, Pressure>.X => SigmaX;
 
-		Pressure IState<Pressure>.Y => SigmaY;
+		Pressure IState<StressState, PrincipalStressState, Pressure>.Y => SigmaY;
 
-		Pressure IState<Pressure>.XY => TauXY;
+		Pressure IState<StressState, PrincipalStressState, Pressure>.XY => TauXY;
 
 		public bool IsZero => IsXZero && IsYZero && IsXYZero;
 
@@ -269,12 +269,6 @@ namespace OnPlaneComponents
 			SigmaY.Approx(other.SigmaY, tolerance) &&  TauXY.Approx(other.TauXY,  tolerance);
 
 		public bool Approaches(PrincipalStressState other, Pressure tolerance) => Approaches(FromPrincipal(other), tolerance);
-
-		IPrincipalState<Pressure> IState<Pressure>.ToPrincipal() => ToPrincipal();
-
-		IState<Pressure> IState<Pressure>.ToHorizontal() => ToHorizontal();
-
-		IState<Pressure> IState<Pressure>.Transform(double rotationAngle) => Transform(rotationAngle);
 
 		/// <summary>
 		///     Compare a <see cref="StressState" /> to a <see cref="PrincipalStressState" /> object.

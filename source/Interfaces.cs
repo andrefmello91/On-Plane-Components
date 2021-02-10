@@ -1,24 +1,27 @@
-﻿using MathNet.Numerics.LinearAlgebra;
+﻿using System;
+using Extensions;
+using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace OnPlaneComponents
 {
-	/// <summary>
+    /// <summary>
     /// Plane component interface.
     /// </summary>
-    /// <typeparam name="T">The struct that represents the values of the object's components.</typeparam>
-    public interface IPlaneComponent<out T>
-	    where T : struct
+    /// <typeparam name="T1">Any type that implements <see cref="IPlaneComponent{T1,T2}."/></typeparam>
+    /// <typeparam name="T2">The struct that represents the values of the object's components.</typeparam>
+    public interface IPlaneComponent<T1, T2> : IApproachable<T1, T2>, ICloneable<T1>, IEquatable<T1>
+        where T2 : struct
     {
         /// <summary>
         ///     Get the component in X (horizontal) direction.
         /// </summary>
-        T X { get; }
+        T2 X { get; }
 
         /// <summary>
         ///     Get the component in Y (vertical) direction.
         /// </summary>
-        T Y { get; }
+        T2 Y { get; }
 
         /// <summary>
         ///     Returns true if X component is nearly zero.
@@ -39,24 +42,28 @@ namespace OnPlaneComponents
     /// <summary>
     /// Interface to strain/stress states.
     /// </summary>
-    /// <typeparam name="T">The struct that represents the values of the object's components.</typeparam>
-    public interface IState<T>
-	    where T : struct
+    /// <typeparam name="T1">Any type that implements <see cref="IState{T1,T2,T3}"/>.</typeparam>
+    /// <typeparam name="T2">Any type that implements <see cref="IPrincipalState{T1,T2,T3}"/>.</typeparam>
+    /// <typeparam name="T3">The struct that represents the values of the object's components.</typeparam>
+    public interface IState<T1, T2, T3> : IApproachable<T1, T2, T3>, IEquatable<T1, T2>
+		where T1 : IState<T1, T2, T3>
+		where T2 : IPrincipalState<T2, T1, T3>
+		where T3 : struct
     {
 	    /// <summary>
 	    ///     Get the normal component in X direction.
 	    /// </summary>
-	    T X  { get; }
+	    T3 X  { get; }
 
 	    /// <summary>
 	    ///     Get the normal component in Y direction.
 	    /// </summary>
-	    T Y  { get; }
+	    T3 Y  { get; }
 
 	    /// <summary>
 	    ///     Get the shear component.
 	    /// </summary>
-	    T XY { get; }
+	    T3 XY { get; }
 
         /// <summary>
         ///     Returns true if normal component in X is nearly zero.
@@ -119,12 +126,12 @@ namespace OnPlaneComponents
         /// <summary>
         ///     Get this state as an array.
         /// </summary>
-        T[] AsArray();
+        T3[] AsArray();
 
 	    /// <summary>
         ///     Get this state transformed to horizontal direction (<see cref="ThetaX" /> = 0).
         /// </summary>
-        IState<T> ToHorizontal();
+        T1 ToHorizontal();
 
         /// <summary>
         ///     Rotate this state by a <paramref name="rotationAngle"/>.
@@ -133,35 +140,39 @@ namespace OnPlaneComponents
         ///     <paramref name="rotationAngle"/> is positive if counterclockwise.
         /// </remarks>
         /// <param name="rotationAngle">The rotation angle in radians.</param>
-        IState<T> Transform(double rotationAngle);
+        T1 Transform(double rotationAngle);
 
         /// <summary>
         ///     Transform this state into a principal state.
         /// </summary>
-        IPrincipalState<T> ToPrincipal();
+        T2 ToPrincipal();
     }
 
     /// <summary>
     /// Interface to principal strain/stress states.
     /// </summary>
-    /// <typeparam name="T">The struct that represents the values of the object's components.</typeparam>
-    public interface IPrincipalState<T> : IState<T>
-	    where T : struct
+    /// <typeparam name="T1">Any type that implements <see cref="IPrincipalState{T1,T2,T3}"/>.</typeparam>
+    /// <typeparam name="T2">Any type that implements <see cref="IState{T3,T2,T1}"/>.</typeparam>
+    /// <typeparam name="T3">The struct that represents the values of the object's components.</typeparam>
+    public interface IPrincipalState<T1, T2, T3> : IState<T2, T1, T3>
+        where T1 : IPrincipalState<T1, T2, T3>
+	    where T3 : struct
+	    where T2 : IState<T2, T1, T3>
     {
-	    /// <summary>
-	    ///     Get the <see cref="PrincipalCase" /> of this state.
-	    /// </summary>
-	    PrincipalCase Case { get; }
+        /// <summary>
+        ///     Get the <see cref="PrincipalCase" /> of this state.
+        /// </summary>
+        PrincipalCase Case { get; }
 
         /// <summary>
         ///     Get the maximum component.
         /// </summary>
-        T T1  { get; }
+        T3 S1  { get; }
 
         /// <summary>
         ///     Get the minimum component.
 	    /// </summary>
-        T T2  { get; }
+        T3 S2  { get; }
 
         /// <summary>
         ///     Returns true if maximum component is nearly zero.
@@ -191,6 +202,6 @@ namespace OnPlaneComponents
         /// <summary>
         ///     Get this principal state as a state.
         /// </summary>
-        IState<T> AsState();
+        T2 AsState();
     }
 }
