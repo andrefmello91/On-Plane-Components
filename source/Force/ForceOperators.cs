@@ -1,55 +1,55 @@
 ﻿namespace OnPlaneComponents
 {
-	public partial struct Force
+	public partial struct PlaneForce
 	{
 		/// <summary>
         /// Returns true if components are equal.
         /// </summary>
-		public static bool operator == (Force left, Force right) => left.Equals(right);
+		public static bool operator == (PlaneForce left, PlaneForce right) => left.Equals(right);
 
 		/// <summary>
 		/// Returns true if components are different.
 		/// </summary>
-		public static bool operator != (Force left, Force right) => !left.Equals(right);
+		public static bool operator != (PlaneForce left, PlaneForce right) => !left.Equals(right);
 
         /// <summary>
-        /// Returns a <see cref="Force"/> object with summed components, in left argument's unit.
+        /// Returns a <see cref="PlaneForce"/> object with summed components, in left argument's unit.
         /// </summary>
-        public static Force operator + (Force left, Force right) => new Force(left.X + right.X.ToUnit(left.Unit), left.Y + right.Y.ToUnit(left.Unit));
+        public static PlaneForce operator + (PlaneForce left, PlaneForce right) => new PlaneForce(left.X + right.X.ToUnit(left.Unit), left.Y + right.Y.ToUnit(left.Unit));
 
         /// <summary>
-        /// Returns a <see cref="Force"/> object with subtracted components, in left argument's unit.
+        /// Returns a <see cref="PlaneForce"/> object with subtracted components, in left argument's unit.
         /// </summary>
-        public static Force operator - (Force left, Force right) => new Force(left.X - right.X.ToUnit(left.Unit), left.Y - right.Y.ToUnit(left.Unit));
+        public static PlaneForce operator - (PlaneForce left, PlaneForce right) => new PlaneForce(left.X - right.X.ToUnit(left.Unit), left.Y - right.Y.ToUnit(left.Unit));
 
         /// <summary>
-        /// Returns a <see cref="Force"/> object with multiplied components by a <see cref="double"/>.
+        /// Returns a <see cref="PlaneForce"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
-        public static Force operator * (Force force, double multiplier) => new Force(multiplier * force.X, multiplier * force.Y);
+        public static PlaneForce operator * (PlaneForce planeForce, double multiplier) => new PlaneForce(multiplier * planeForce.X, multiplier * planeForce.Y);
 
         /// <summary>
-        /// Returns a <see cref="Force"/> object with multiplied components by a <see cref="double"/>.
+        /// Returns a <see cref="PlaneForce"/> object with multiplied components by a <see cref="double"/>.
         /// </summary>
-        public static Force operator * (double multiplier, Force force) => force * multiplier;
+        public static PlaneForce operator * (double multiplier, PlaneForce planeForce) => planeForce * multiplier;
 
         /// <summary>
-        /// Returns a <see cref="Force"/> object with multiplied components by an <see cref="int"/>.
+        /// Returns a <see cref="PlaneForce"/> object with multiplied components by an <see cref="int"/>.
         /// </summary>
-        public static Force operator * (Force force, int multiplier) => force * (double) multiplier;
+        public static PlaneForce operator * (PlaneForce planeForce, int multiplier) => planeForce * (double) multiplier;
 
         /// <summary>
-        /// Returns a <see cref="Force"/> object with multiplied components by an <see cref="int"/>.
+        /// Returns a <see cref="PlaneForce"/> object with multiplied components by an <see cref="int"/>.
         /// </summary>
-        public static Force operator * (int multiplier, Force force) => force * (double) multiplier;
+        public static PlaneForce operator * (int multiplier, PlaneForce planeForce) => planeForce * (double) multiplier;
 
         /// <summary>
-        /// Returns a <see cref="Force"/> object with components divided by a <see cref="double"/>.
+        /// Returns a <see cref="PlaneForce"/> object with components divided by a <see cref="double"/>.
         /// </summary>
-        public static Force operator / (Force force, double divider) => new Force(force.X / divider, force.Y / divider);
+        public static PlaneForce operator / (PlaneForce planeForce, double divider) => new PlaneForce(planeForce.X / divider, planeForce.Y / divider);
 
         /// <summary>
-        /// Returns a <see cref="Force"/> object with components divided by an <see cref="int"/>.
+        /// Returns a <see cref="PlaneForce"/> object with components divided by an <see cref="int"/>.
         /// </summary>
-        public static Force operator / (Force force, int divider) => force / (double) divider;
+        public static PlaneForce operator / (PlaneForce planeForce, int divider) => planeForce / (double) divider;
 	}
 }

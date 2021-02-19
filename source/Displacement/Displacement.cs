@@ -9,7 +9,7 @@ namespace OnPlaneComponents
 	/// <summary>
 	///     Displacement struct.
 	/// </summary>
-	public partial struct Displacement : IPlaneComponent<Displacement, Length>, IUnitConvertible<Displacement, LengthUnit>
+	public partial struct PlaneDisplacement : IPlaneComponent<PlaneDisplacement, Length>, IUnitConvertible<PlaneDisplacement, LengthUnit>
 	{
 		#region Fields
 
@@ -19,9 +19,9 @@ namespace OnPlaneComponents
 		public static readonly Length Tolerance = Length.FromMillimeters(1E-6);
 
 		/// <summary>
-		///     Get a <see cref="Displacement" /> with zero value.
+		///     Get a <see cref="PlaneDisplacement" /> with zero value.
 		/// </summary>
-		public static readonly Displacement Zero = new Displacement(0, 0);
+		public static readonly PlaneDisplacement Zero = new PlaneDisplacement(0, 0);
 
 		#endregion
 
@@ -92,7 +92,7 @@ namespace OnPlaneComponents
 		///     upwards).
 		/// </param>
 		/// <param name="unit">The <see cref="LengthUnit" /> of displacement (default: <see cref="LengthUnit.Millimeter" />).</param>
-		public Displacement(double componentX, double componentY, LengthUnit unit = LengthUnit.Millimeter)
+		public PlaneDisplacement(double componentX, double componentY, LengthUnit unit = LengthUnit.Millimeter)
 			: this (Length.From(componentX.ToZero(), unit), Length.From(componentY.ToZero(), unit))
 		{
 		}
@@ -102,7 +102,7 @@ namespace OnPlaneComponents
 		/// </summary>
 		/// <param name="displacementX">Displacement component in X direction (positive to right) (<see cref="Length" />).</param>
 		/// <param name="displacementY">Displacement component in Y direction (positive upwards) (<see cref="Length" />).</param>
-		public Displacement(Length displacementX, Length displacementY)
+		public PlaneDisplacement(Length displacementX, Length displacementY)
 		{
 			X          = displacementX.ToZero();
 			Y          = displacementY.ToZero().ToUnit(displacementX.Unit);
@@ -114,49 +114,49 @@ namespace OnPlaneComponents
 		#region
 
 		/// <summary>
-		///     Get a <see cref="Displacement" /> in X direction.
+		///     Get a <see cref="PlaneDisplacement" /> in X direction.
 		/// </summary>
 		/// <param name="value">Value of displacement component in X direction (positive to right).</param>
 		/// <param name="unit">The <see cref="LengthUnit" /> of displacement (default: <see cref="LengthUnit.Millimeter" />).</param>
-		public static Displacement InX(double value, LengthUnit unit = LengthUnit.Millimeter) => new Displacement(value, 0, unit);
+		public static PlaneDisplacement InX(double value, LengthUnit unit = LengthUnit.Millimeter) => new PlaneDisplacement(value, 0, unit);
 
 		/// <summary>
-		///     Get a <see cref="Displacement" /> in X direction.
+		///     Get a <see cref="PlaneDisplacement" /> in X direction.
 		/// </summary>
 		/// <param name="displacement">Displacement component in X direction (positive to right).</param>
-		public static Displacement InX(Length displacement) => new Displacement(displacement, Length.Zero);
+		public static PlaneDisplacement InX(Length displacement) => new PlaneDisplacement(displacement, Length.Zero);
 
 		/// <summary>
-		///     Get a <see cref="Displacement" /> in X direction.
+		///     Get a <see cref="PlaneDisplacement" /> in X direction.
 		/// </summary>
 		/// <param name="value">Value of displacement component in Y direction (positive upwards).</param>
 		/// <param name="unit">The <see cref="LengthUnit" /> of displacement (default: <see cref="LengthUnit.Millimeter" />).</param>
-		public static Displacement InY(double value, LengthUnit unit = LengthUnit.Millimeter) => new Displacement(0, value, unit);
+		public static PlaneDisplacement InY(double value, LengthUnit unit = LengthUnit.Millimeter) => new PlaneDisplacement(0, value, unit);
 
 		/// <summary>
-		///     Get a <see cref="Displacement" /> in Y direction.
+		///     Get a <see cref="PlaneDisplacement" /> in Y direction.
 		/// </summary>
 		/// <param name="displacement">Displacement component in Y direction (positive to right).</param>
-		public static Displacement InY(Length displacement) => new Displacement(Length.Zero, displacement);
+		public static PlaneDisplacement InY(Length displacement) => new PlaneDisplacement(Length.Zero, displacement);
 
 		/// <summary>
-		///     Get a <see cref="Displacement" /> in from a resultant.
+		///     Get a <see cref="PlaneDisplacement" /> in from a resultant.
 		/// </summary>
 		/// <param name="resultant">Absolute value of displacement resultant.</param>
 		/// <param name="angle">Angle that displacement resultant is pointing at, in radians.</param>
 		/// <param name="unit">The <see cref="LengthUnit" /> of displacement (default: <see cref="LengthUnit.Millimeter" />).</param>
-		public static Displacement FromResultant(double resultant, double angle, LengthUnit unit = LengthUnit.Millimeter) => FromResultant(Length.From(resultant, unit), angle);
+		public static PlaneDisplacement FromResultant(double resultant, double angle, LengthUnit unit = LengthUnit.Millimeter) => FromResultant(Length.From(resultant, unit), angle);
 
 		/// <summary>
-		///     Get a <see cref="Displacement" /> in from a resultant.
+		///     Get a <see cref="PlaneDisplacement" /> in from a resultant.
 		/// </summary>
 		/// <param name="resultantDisplacement">Absolute value of displacement resultant.</param>
 		/// <param name="angle">Angle that displacement resultant is pointing at, in radians.</param>
-		public static Displacement FromResultant(Length resultantDisplacement, double angle)
+		public static PlaneDisplacement FromResultant(Length resultantDisplacement, double angle)
 		{
 			var (x, y) = CalculateComponents(resultantDisplacement, angle);
 
-			return new Displacement(x, y);
+			return new PlaneDisplacement(x, y);
 		}
 
 		/// <summary>
@@ -175,25 +175,25 @@ namespace OnPlaneComponents
 		}
 
 		/// <summary>
-		///     Convert this <see cref="Displacement" /> to another <see cref="LengthUnit" />.
+		///     Convert this <see cref="PlaneDisplacement" /> to another <see cref="LengthUnit" />.
 		/// </summary>
 		/// <param name="unit">The <see cref="LengthUnit" /> to convert.</param>
-		public Displacement Convert(LengthUnit unit) => unit == Unit
+		public PlaneDisplacement Convert(LengthUnit unit) => unit == Unit
 			? this
-			: new Displacement(X.ToUnit(unit), Y.ToUnit(unit));
+			: new PlaneDisplacement(X.ToUnit(unit), Y.ToUnit(unit));
 
 		/// <inheritdoc />
-		public bool Approaches(Displacement other, Length tolerance) => X.Approx(other.X, tolerance) && Y.Approx(other.Y, tolerance);
+		public bool Approaches(PlaneDisplacement other, Length tolerance) => X.Approx(other.X, tolerance) && Y.Approx(other.Y, tolerance);
 
-		public Displacement Clone() => new Displacement(X, Y);
+		public PlaneDisplacement Clone() => new PlaneDisplacement(X, Y);
 
 		/// <inheritdoc cref="Approaches" />
 		/// <remarks>
 		///     Default <see cref="Tolerance" /> is considered.
 		/// </remarks>
-		public bool Equals(Displacement other) => Approaches(other, Tolerance);
+		public bool Equals(PlaneDisplacement other) => Approaches(other, Tolerance);
 
-		public override bool Equals(object obj) => obj is Displacement other && Equals(other);
+		public override bool Equals(object obj) => obj is PlaneDisplacement other && Equals(other);
 
 		public override string ToString() =>
 			$"ux = {X}\n" +

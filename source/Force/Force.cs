@@ -9,14 +9,14 @@ namespace OnPlaneComponents
 	/// <summary>
 	///     Force struct.
 	/// </summary>
-	public partial struct Force : IPlaneComponent<Force, UnitsNet.Force>, IUnitConvertible<Force, ForceUnit>
+	public partial struct PlaneForce : IPlaneComponent<PlaneForce, Force>, IUnitConvertible<PlaneForce, ForceUnit>
 	{
 		#region Fields
 
 		/// <summary>
-		///     Get a <see cref="Force" /> with zero value.
+		///     Get a <see cref="PlaneForce" /> with zero value.
 		/// </summary>
-		public static readonly Force Zero = new Force(0, 0);
+		public static readonly PlaneForce Zero = new PlaneForce(0, 0);
 
 		/// <summary>
 		///     The tolerance to consider forces equal.
@@ -77,7 +77,7 @@ namespace OnPlaneComponents
 		/// <param name="componentX">Value of force component in X direction, in <paramref name="unit" />. (positive to right).</param>
 		/// <param name="componentY">Value of force component in Y direction, in <paramref name="unit" />. (positive upwards).</param>
 		/// <param name="unit">The <see cref="ForceUnit" /> (default: <see cref="ForceUnit.Newton" />).</param>
-		public Force(double componentX, double componentY, ForceUnit unit = ForceUnit.Newton)
+		public PlaneForce(double componentX, double componentY, ForceUnit unit = ForceUnit.Newton)
 			: this (UnitsNet.Force.From(componentX.ToZero(), unit), UnitsNet.Force.From(componentY.ToZero(), unit))
 		{
 		}
@@ -87,7 +87,7 @@ namespace OnPlaneComponents
 		/// </summary>
 		/// <param name="forceX"><see cref="UnitsNet.Force" /> component in X direction (positive to right).</param>
 		/// <param name="forceY"><see cref="UnitsNet.Force" /> component in Y direction (positive upwards).</param>
-		public Force(UnitsNet.Force forceX, UnitsNet.Force forceY)
+		public PlaneForce(UnitsNet.Force forceX, UnitsNet.Force forceY)
 		{
 			X         = forceX.ToZero();
 			Y         = forceY.ToZero().ToUnit(forceX.Unit);
@@ -99,55 +99,55 @@ namespace OnPlaneComponents
 		#region
 
 		/// <summary>
-		///     Get a <see cref="Force" /> in X direction.
+		///     Get a <see cref="PlaneForce" /> in X direction.
 		/// </summary>
 		/// <param name="value">Value of force component in X direction (positive to right).</param>
 		/// <param name="unit">The <see cref="ForceUnit" /> (default: <see cref="ForceUnit.Newton" />).</param>
-		public static Force InX(double value, ForceUnit unit = ForceUnit.Newton) => new Force(value, 0, unit);
+		public static PlaneForce InX(double value, ForceUnit unit = ForceUnit.Newton) => new PlaneForce(value, 0, unit);
 
 		/// <summary>
-		///     Get a <see cref="Force" /> in X direction.
+		///     Get a <see cref="PlaneForce" /> in X direction.
 		/// </summary>
 		/// <param name="force"><see cref="UnitsNet.Force" /> component in X direction (positive to right).</param>
-		public static Force InX(UnitsNet.Force force) => new Force(force, UnitsNet.Force.Zero);
+		public static PlaneForce InX(UnitsNet.Force force) => new PlaneForce(force, UnitsNet.Force.Zero);
 
 		/// <summary>
-		///     Get a <see cref="Force" /> in X direction.
+		///     Get a <see cref="PlaneForce" /> in X direction.
 		/// </summary>
 		/// <param name="value">Value of force component in Y direction (positive upwards).</param>
 		/// <param name="unit">The <see cref="ForceUnit" /> (default: <see cref="ForceUnit.Newton" />).</param>
-		public static Force InY(double value, ForceUnit unit = ForceUnit.Newton) => new Force(0, value, unit);
+		public static PlaneForce InY(double value, ForceUnit unit = ForceUnit.Newton) => new PlaneForce(0, value, unit);
 
 		/// <summary>
-		///     Get a <see cref="Force" /> in Y direction.
+		///     Get a <see cref="PlaneForce" /> in Y direction.
 		/// </summary>
 		/// <param name="force"><see cref="UnitsNet.Force" /> component in Y direction (positive upwards).</param>
-		public static Force InY(UnitsNet.Force force) => new Force(UnitsNet.Force.Zero, force);
+		public static PlaneForce InY(UnitsNet.Force force) => new PlaneForce(UnitsNet.Force.Zero, force);
 
 		/// <summary>
-		///     Get a <see cref="Force" /> from a resultant.
+		///     Get a <see cref="PlaneForce" /> from a resultant.
 		/// </summary>
 		/// <param name="resultant">Absolute value of force resultant.</param>
 		/// <param name="angle">Angle that force resultant is pointing at, in radians.</param>
 		/// <param name="unit">The <see cref="ForceUnit" /> (default: <see cref="ForceUnit.Newton" />).</param>
-		public static Force FromResultant(double resultant, double angle, ForceUnit unit = ForceUnit.Newton)
+		public static PlaneForce FromResultant(double resultant, double angle, ForceUnit unit = ForceUnit.Newton)
 		{
 			var (x, y) = CalculateComponents(resultant, angle);
 
-			return new Force(x, y, unit);
+			return new PlaneForce(x, y, unit);
 		}
 
 		/// <summary>
-		///     Get a <see cref="Force" /> from a resultant.
+		///     Get a <see cref="PlaneForce" /> from a resultant.
 		/// </summary>
 		/// <param name="resultantForce">Absolute <see cref="UnitsNet.Force" /> resultant.</param>
 		/// <param name="angle">Angle that force resultant is pointing at, in radians.</param>
-		public static Force FromResultant(UnitsNet.Force resultantForce, double angle)
+		public static PlaneForce FromResultant(UnitsNet.Force resultantForce, double angle)
 		{
 			var (x, y) = CalculateComponents(resultantForce, angle);
 
 			return
-				new Force(x, y);
+				new PlaneForce(x, y);
 		}
 
 		/// <summary>
@@ -166,24 +166,24 @@ namespace OnPlaneComponents
 		}
 
 		/// <summary>
-		///     Convert this <see cref="Force" /> to another <see cref="ForceUnit" />.
+		///     Convert this <see cref="PlaneForce" /> to another <see cref="ForceUnit" />.
 		/// </summary>
 		/// <inheritdoc cref="ChangeUnit" />
-		public Force Convert(ForceUnit unit) => unit == Unit
+		public PlaneForce Convert(ForceUnit unit) => unit == Unit
 			? this
-			: new Force(X.ToUnit(unit), Y.ToUnit(unit));
+			: new PlaneForce(X.ToUnit(unit), Y.ToUnit(unit));
 
-		public Force Clone() => new Force(X, Y);
+		public PlaneForce Clone() => new PlaneForce(X, Y);
 
-		public bool Approaches(Force other, UnitsNet.Force tolerance) => X.Approx(other.X, tolerance) && Y.Approx(other.X, tolerance);
+		public bool Approaches(PlaneForce other, UnitsNet.Force tolerance) => X.Approx(other.X, tolerance) && Y.Approx(other.X, tolerance);
 
 		/// <inheritdoc cref="Approaches" />
 		/// <remarks>
 		///     Default <see cref="Tolerance" /> is considered.
 		/// </remarks>
-		public bool Equals(Force other) => Approaches(other, Tolerance);
+		public bool Equals(PlaneForce other) => Approaches(other, Tolerance);
 
-		public override bool Equals(object obj) => obj is Force other && Equals(other);
+		public override bool Equals(object obj) => obj is PlaneForce other && Equals(other);
 
 		public override string ToString() =>
 			$"Fx = {X}\n" +

@@ -31,7 +31,7 @@ namespace OnPlaneComponents
     /// <summary>
     ///     Constraint struct.
     /// </summary>
-    public struct Constraint : IEquatable<Constraint?>, ICloneable<Constraint>
+    public struct Constraint : IEquatable<Constraint>, ICloneable<Constraint>
     {
         /// <summary>
         ///     Get/set the X (horizontal) constraint.
@@ -71,6 +71,19 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
+        ///     Get a <see cref="Constraint"/> from a <see cref="ConstraintDirection"/>.
+        /// </summary>
+        /// <param name="direction">The <see cref="ConstraintDirection"/>.</param>
+        public static Constraint FromDirection(ConstraintDirection direction) =>
+	        direction switch
+	        {
+                ConstraintDirection.X    => XOnly,
+                ConstraintDirection.Y    => YOnly,
+                ConstraintDirection.Both => FullConstraint,
+                _                        => Free
+			};
+
+        /// <summary>
         ///     A free constraint.
         /// </summary>
         public static readonly Constraint Free = new Constraint(false, false);
@@ -90,7 +103,7 @@ namespace OnPlaneComponents
         /// </summary>
         public static readonly Constraint FullConstraint = new Constraint(true, true);
 
-        public bool Equals(Constraint? other) => !(other is null) && Direction == other.Value.Direction;
+        public bool Equals(Constraint other) => !(other is null) && Direction == other.Value.Direction;
 
         public Constraint Clone() => new Constraint(X, Y);
 
