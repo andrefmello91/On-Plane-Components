@@ -1,5 +1,5 @@
 ﻿using System;
-using Extensions.Number;
+using Extensions;
 using MathNet.Numerics;
 using UnitsNet.Units;
 

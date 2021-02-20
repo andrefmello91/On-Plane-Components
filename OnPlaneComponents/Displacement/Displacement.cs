@@ -1,5 +1,5 @@
 ﻿using System;
-using Extensions.Number;
+using Extensions;
 using UnitsNet;
 using UnitsNet.Units;
 using static OnPlaneComponents.DisplacementRelations;

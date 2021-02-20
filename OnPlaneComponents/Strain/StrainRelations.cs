@@ -1,7 +1,6 @@
 ﻿using System;
 using Extensions;
-using Extensions.LinearAlgebra;
-using Extensions.Number;
+using Extensions;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
