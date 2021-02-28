@@ -43,6 +43,18 @@ namespace OnPlaneComponents
 		public bool IsYZero => Y.ApproxZero(Tolerance);
 
 		/// <summary>
+		///     Get the existent displacement directions.
+		/// </summary>
+		public ComponentDirection Direction => IsZero
+			? ComponentDirection.None
+			: IsXZero switch
+			{
+				false when IsYZero => ComponentDirection.X,
+				true when !IsYZero => ComponentDirection.Y,
+				_ => ComponentDirection.Both
+			};
+
+		/// <summary>
 		///     Get/set the displacement unit (<see cref="LengthUnit" />).
 		/// </summary>
 		public LengthUnit Unit

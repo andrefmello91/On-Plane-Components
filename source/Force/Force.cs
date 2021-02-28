@@ -1,5 +1,4 @@
-﻿using System;
-using Extensions;
+﻿using Extensions;
 using UnitsNet;
 using UnitsNet.Units;
 using static OnPlaneComponents.ForceRelations;
@@ -36,6 +35,19 @@ namespace OnPlaneComponents
 			set => ChangeUnit(value);
 		}
 
+		/// <summary>
+		///     Get the applied force directions.
+		/// </summary>
+		public ComponentDirection Direction => IsZero
+			? ComponentDirection.None
+			: IsXZero switch
+			{
+				false when IsYZero => ComponentDirection.X,
+				true when !IsYZero => ComponentDirection.Y,
+				_                  => ComponentDirection.Both
+			};
+
+
 		public bool IsZero => IsXZero && IsYZero;
 
 		public bool IsXZero => X.ApproxZero(Tolerance);
@@ -45,12 +57,12 @@ namespace OnPlaneComponents
 		/// <summary>
 		///     Get the force component in X direction.
 		/// </summary>
-		public UnitsNet.Force X { get; private set; }
+		public Force X { get; private set; }
 
 		/// <summary>
 		///     Get the force component in Y direction.
 		/// </summary>
-		public UnitsNet.Force Y { get; private set; }
+		public Force Y { get; private set; }
 
 		/// <summary>
 		///     Verify if force resultant is approximately zero.
@@ -60,7 +72,7 @@ namespace OnPlaneComponents
 		/// <summary>
 		///     Get the resultant force value.
 		/// </summary>
-		public UnitsNet.Force Resultant { get; private set; }
+		public Force Resultant { get; private set; }
 
 		/// <summary>
 		///     Get the resultant force angle, in radians.

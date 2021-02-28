@@ -1,37 +1,9 @@
-﻿using System;
-using Extensions;
-
-namespace OnPlaneComponents
+﻿namespace OnPlaneComponents
 {
-    /// <summary>
-    ///     Constraint direction enumeration.
-    /// </summary>
-	public enum ConstraintDirection
-	{
-        /// <summary>
-        ///     Constrained in none direction (point is free).
-        /// </summary>
-        None,
-
-        /// <summary>
-        ///     Constrained only in X (horizontal) direction.
-        /// </summary>
-        X,
-
-        /// <summary>
-        ///     Constrained only in Y (vertical) direction.
-        /// </summary>
-        Y,
-
-        /// <summary>
-        ///     Constrained in both X (horizontal) and Y (vertical) directions.
-        /// </summary>
-        Both
-    }
-    /// <summary>
+	/// <summary>
     ///     Constraint struct.
     /// </summary>
-    public struct Constraint : IEquatable<Constraint>, ICloneable<Constraint>
+    public struct Constraint : IPlaneComponent<Constraint, bool>
     {
         /// <summary>
         ///     Get/set the X (horizontal) constraint.
@@ -48,15 +20,39 @@ namespace OnPlaneComponents
         public bool Y { get; set; }
 
         /// <summary>
+        ///     Returns true if the displacement in X direction from this constraint will be zero.
+        /// </summary>
+        /// <remarks>
+        ///     In this case <see cref="Direction"/> is <see cref="ComponentDirection.Both"/> or <see cref="ComponentDirection.X"/>.
+        /// </remarks>
+        public bool IsXZero => IsZero || Direction is ComponentDirection.X;
+
+        /// <summary>
+        ///     Returns true if the displacement in Y direction from this constraint will be zero.
+        /// </summary>
+        /// <remarks>
+        ///     In this case <see cref="Direction"/> is <see cref="ComponentDirection.Both"/> or <see cref="ComponentDirection.Y"/>.
+        /// </remarks>
+        public bool IsYZero => IsZero || Direction is ComponentDirection.Y;
+
+        /// <summary>
+        ///     Returns true if the displacement from this constraint will be zero.
+        /// </summary>
+        /// <remarks>
+        ///     In this case <see cref="Direction"/> is <see cref="ComponentDirection.Both"/>.
+        /// </remarks>
+        public bool IsZero => Direction is ComponentDirection.Both;
+
+        /// <summary>
         ///     Get the constraint direction.
         /// </summary>
-	    public ConstraintDirection Direction =>
+	    public ComponentDirection Direction =>
 		    X switch
 		    {
-                false when !Y => ConstraintDirection.None,
-                false when  Y => ConstraintDirection.Y,
-                true when  !Y => ConstraintDirection.X,
-                _             => ConstraintDirection.Both
+                false when !Y => ComponentDirection.None,
+                false when  Y => ComponentDirection.Y,
+                true when  !Y => ComponentDirection.X,
+                _             => ComponentDirection.Both
 		    };
 
         /// <summary>
@@ -71,15 +67,15 @@ namespace OnPlaneComponents
         }
 
         /// <summary>
-        ///     Get a <see cref="Constraint"/> from a <see cref="ConstraintDirection"/>.
+        ///     Get a <see cref="Constraint"/> from a <see cref="ComponentDirection"/>.
         /// </summary>
-        /// <param name="direction">The <see cref="ConstraintDirection"/>.</param>
-        public static Constraint FromDirection(ConstraintDirection direction) =>
+        /// <param name="direction">The <see cref="ComponentDirection"/>.</param>
+        public static Constraint FromDirection(ComponentDirection direction) =>
 	        direction switch
 	        {
-                ConstraintDirection.X    => XOnly,
-                ConstraintDirection.Y    => YOnly,
-                ConstraintDirection.Both => FullConstraint,
+                ComponentDirection.X    => XOnly,
+                ComponentDirection.Y    => YOnly,
+                ComponentDirection.Both => FullConstraint,
                 _                        => Free
 			};
 
@@ -103,7 +99,7 @@ namespace OnPlaneComponents
         /// </summary>
         public static readonly Constraint FullConstraint = new Constraint(true, true);
 
-        public bool Equals(Constraint other) => !(other is null) && Direction == other.Value.Direction;
+        public bool Equals(Constraint other) => Direction == other.Direction;
 
         public Constraint Clone() => new Constraint(X, Y);
 
@@ -116,5 +112,7 @@ namespace OnPlaneComponents
         ///     Returns true if objects are not equal.
         /// </summary
         public static bool operator != (Constraint left, Constraint right) => !left.Equals(right);
+
+        public bool Approaches(Constraint other, bool tolerance) => Equals(other);
     }
 }

@@ -11,7 +11,7 @@ namespace OnPlaneComponents
     /// <typeparam name="T1">Any type that implements <see cref="IPlaneComponent{T1,T2}."/></typeparam>
     /// <typeparam name="T2">The struct that represents the values of the object's components.</typeparam>
     public interface IPlaneComponent<T1, T2> : IApproachable<T1, T2>, ICloneable<T1>, IEquatable<T1>
-        where T2 : struct
+        where T2 : notnull
     {
         /// <summary>
         ///     Get the component in X (horizontal) direction.
@@ -22,6 +22,11 @@ namespace OnPlaneComponents
         ///     Get the component in Y (vertical) direction.
         /// </summary>
         T2 Y { get; }
+
+        /// <summary>
+        ///     Get the direction of this component;
+        /// </summary>
+        ComponentDirection Direction { get; }
 
         /// <summary>
         ///     Returns true if X component is nearly zero.
