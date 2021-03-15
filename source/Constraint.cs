@@ -114,5 +114,7 @@
         public static bool operator != (Constraint left, Constraint right) => !left.Equals(right);
 
         public bool Approaches(Constraint other, bool tolerance) => Equals(other);
+
+        public override string ToString() => $"Constraint direction: {Direction}";
     }
 }
