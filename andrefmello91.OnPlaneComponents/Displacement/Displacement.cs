@@ -1,10 +1,9 @@
-﻿using System;
-using Extensions;
+﻿using Extensions;
 using UnitsNet;
 using UnitsNet.Units;
-using static OnPlaneComponents.DisplacementRelations;
+using static andrefmello91.OnPlaneComponents.Displacement.DisplacementRelations;
 
-namespace OnPlaneComponents
+namespace andrefmello91.OnPlaneComponents.Displacement
 {
 	/// <summary>
 	///     Displacement struct.

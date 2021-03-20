@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net5.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
+        <LangVersion>9.0</LangVersion>
+        <Nullable>enable</Nullable>
+        <PackageId>andrefmello91.OnPlaneComponents</PackageId>
+        <Version>0.1</Version>
+        <Authors>andrefmello91</Authors>
+        <PackageDescription>Implementation of forces, displacements, stress and strain states on plane.</PackageDescription>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageVersion>0.1</PackageVersion>
+        <Description>Implementation of forces, displacements, stress and strain states on plane.</Description>
+        <PackageProjectUrl>https://github.com/andrefmello91/On-Plane-Components</PackageProjectUrl>
+        <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
+        <AssemblyName>andrefmello91.OnPlaneComponents</AssemblyName>
+        <RootNamespace>andrefmello91.OnPlaneComponents</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
+        <PackageReference Include="UnitsNet" Version="4.86.0" />
+        <PackageReference Include="andrefmello91.Extensions" Version="0.1.0" />
+    </ItemGroup>
+
+</Project>

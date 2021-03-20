@@ -1,4 +1,4 @@
-﻿namespace OnPlaneComponents
+﻿namespace andrefmello91.OnPlaneComponents.Displacement
 {
     public partial struct PlaneDisplacement
     {

@@ -1,14 +1,14 @@
 ﻿using Extensions;
 using UnitsNet;
 using UnitsNet.Units;
-using static OnPlaneComponents.ForceRelations;
+using static andrefmello91.OnPlaneComponents.Force.ForceRelations;
 
-namespace OnPlaneComponents
+namespace andrefmello91.OnPlaneComponents.Force
 {
 	/// <summary>
 	///     Force struct.
 	/// </summary>
-	public partial struct PlaneForce : IPlaneComponent<PlaneForce, Force>, IUnitConvertible<PlaneForce, ForceUnit>
+	public partial struct PlaneForce : IPlaneComponent<PlaneForce, UnitsNet.Force>, IUnitConvertible<PlaneForce, ForceUnit>
 	{
 		#region Fields
 
@@ -57,12 +57,12 @@ namespace OnPlaneComponents
 		/// <summary>
 		///     Get the force component in X direction.
 		/// </summary>
-		public Force X { get; private set; }
+		public UnitsNet.Force X { get; private set; }
 
 		/// <summary>
 		///     Get the force component in Y direction.
 		/// </summary>
-		public Force Y { get; private set; }
+		public UnitsNet.Force Y { get; private set; }
 
 		/// <summary>
 		///     Verify if force resultant is approximately zero.
@@ -72,7 +72,7 @@ namespace OnPlaneComponents
 		/// <summary>
 		///     Get the resultant force value.
 		/// </summary>
-		public Force Resultant { get; private set; }
+		public UnitsNet.Force Resultant { get; private set; }
 
 		/// <summary>
 		///     Get the resultant force angle, in radians.

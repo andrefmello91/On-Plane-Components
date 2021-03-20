@@ -1,9 +1,9 @@
-﻿using MathNet.Numerics;
+﻿using Extensions;
+using MathNet.Numerics;
 using UnitsNet;
 using UnitsNet.Units;
-using Extensions;
 
-namespace OnPlaneComponents
+namespace andrefmello91.OnPlaneComponents.Displacement
 {
 	/// <summary>
     /// Static class for displacement relations.

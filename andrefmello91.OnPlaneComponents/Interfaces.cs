@@ -1,9 +1,10 @@
 ﻿using System;
+using andrefmello91.OnPlaneComponents.Strain;
 using Extensions;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 
-namespace OnPlaneComponents
+namespace andrefmello91.OnPlaneComponents
 {
     /// <summary>
     /// Plane component interface.

@@ -1,11 +1,12 @@
 ﻿using System;
+using andrefmello91.OnPlaneComponents.Stress;
 using Extensions;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
-using static OnPlaneComponents.StrainRelations;
+using static andrefmello91.OnPlaneComponents.Strain.StrainRelations;
 
-namespace OnPlaneComponents
+namespace andrefmello91.OnPlaneComponents.Strain
 {
 	/// <summary>
 	///     Strain struct for XY components.

@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Linq;
+using andrefmello91.OnPlaneComponents.Strain;
 using Extensions;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using UnitsNet;
 using UnitsNet.Units;
-using static OnPlaneComponents.StressRelations;
+using static andrefmello91.OnPlaneComponents.Stress.StressRelations;
 
-namespace OnPlaneComponents
+namespace andrefmello91.OnPlaneComponents.Stress
 {
 	/// <summary>
 	///     Stress object for XY components.

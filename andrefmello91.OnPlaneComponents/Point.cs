@@ -4,7 +4,7 @@ using MathNet.Numerics;
 using UnitsNet;
 using UnitsNet.Units;
 
-namespace OnPlaneComponents
+namespace andrefmello91.OnPlaneComponents
 {
 	/// <summary>
 	///     On plane Point struct.

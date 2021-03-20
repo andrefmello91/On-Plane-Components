@@ -1,4 +1,4 @@
-﻿namespace OnPlaneComponents
+﻿namespace andrefmello91.OnPlaneComponents
 {
 	/// <summary>
     ///     Constraint struct.
@@ -76,7 +76,7 @@
                 ComponentDirection.X    => XOnly,
                 ComponentDirection.Y    => YOnly,
                 ComponentDirection.Both => FullConstraint,
-                _                        => Free
+                _                       => Free
 			};
 
         /// <summary>

@@ -1,11 +1,11 @@
 ﻿using System;
+using andrefmello91.OnPlaneComponents.Stress;
 using Extensions;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 
-
-namespace OnPlaneComponents
+namespace andrefmello91.OnPlaneComponents.Strain
 {
     public static class StrainRelations
     {

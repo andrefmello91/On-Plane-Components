@@ -1,9 +1,8 @@
-﻿using System;
-using Extensions;
+﻿using Extensions;
 using MathNet.Numerics;
 using UnitsNet.Units;
 
-namespace OnPlaneComponents
+namespace andrefmello91.OnPlaneComponents.Force
 {
 	/// <summary>
     /// Static class for force relations.

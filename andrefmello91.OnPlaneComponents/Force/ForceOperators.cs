@@ -1,4 +1,4 @@
-﻿namespace OnPlaneComponents
+﻿namespace andrefmello91.OnPlaneComponents.Force
 {
 	public partial struct PlaneForce
 	{

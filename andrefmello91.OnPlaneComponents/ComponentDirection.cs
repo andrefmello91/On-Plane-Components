@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace OnPlaneComponents
+namespace andrefmello91.OnPlaneComponents
 {
 	/// <summary>
 	///		Component attributes class.

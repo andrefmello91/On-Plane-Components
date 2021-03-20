@@ -3,10 +3,10 @@ using Extensions;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
-using static OnPlaneComponents.StrainRelations;
-using static OnPlaneComponents.StrainState;
+using static andrefmello91.OnPlaneComponents.Strain.StrainRelations;
+using static andrefmello91.OnPlaneComponents.Strain.StrainState;
 
-namespace OnPlaneComponents
+namespace andrefmello91.OnPlaneComponents.Strain
 {
 	/// <summary>
 	///     Principal strain struct.

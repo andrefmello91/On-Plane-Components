@@ -1,4 +1,6 @@
-﻿namespace OnPlaneComponents
+﻿using andrefmello91.OnPlaneComponents.Stress;
+
+namespace andrefmello91.OnPlaneComponents.Strain
 {
 	/// <summary>
 	/// Cases of <see cref="PrincipalStrainState"/> and <see cref="PrincipalStressState"/>.

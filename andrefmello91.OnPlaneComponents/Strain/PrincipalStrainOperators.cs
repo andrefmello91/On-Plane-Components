@@ -1,4 +1,4 @@
-﻿namespace OnPlaneComponents
+﻿namespace andrefmello91.OnPlaneComponents.Strain
 {
 	public partial struct PrincipalStrainState
 	{
