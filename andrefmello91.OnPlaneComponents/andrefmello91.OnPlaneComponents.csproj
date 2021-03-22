@@ -11,8 +11,9 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageVersion>1.0.0</PackageVersion>
         <Description>Implementation of forces, displacements, stress and strain states on plane.</Description>
+        <RepositoryUrl>https://github.com/andrefmello91/On-Plane-Components</RepositoryUrl>
         <PackageProjectUrl>https://github.com/andrefmello91/On-Plane-Components</PackageProjectUrl>
-        <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
+        <PackageReleaseNotes>Updated versioning.</PackageReleaseNotes>
         <AssemblyName>andrefmello91.OnPlaneComponents</AssemblyName>
         <RootNamespace>andrefmello91.OnPlaneComponents</RootNamespace>
     </PropertyGroup>
