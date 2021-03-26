@@ -85,7 +85,7 @@ namespace andrefmello91.OnPlaneComponents
 
 		#endregion
 
-		#region
+		#region Methods
 
 		/// <summary>
 		///     Change the <see cref="LengthUnit" /> of this <see cref="Point" />.
@@ -112,16 +112,31 @@ namespace andrefmello91.OnPlaneComponents
 		///     <paramref name="other" />.
 		/// </summary>
 		/// <param name="other">The other <see cref="Point" /> to calculate distance.</param>
-		public Length GetDistanceInX(Point other) => (X - other.X).ToUnit(Unit).Abs();
+		/// <param name="absoluteValue">Return the absolute value of distance?</param>
+		public Length GetDistanceInX(Point other, bool absoluteValue = true)
+		{
+			var x = (X - other.X).ToUnit(Unit);
+			
+			return absoluteValue
+				? x.Abs()
+				: x;
+		}
 
 		/// <summary>
 		///     Get the vertical distance, in <see cref="Unit" />, between this <see cref="Point" /> and <paramref name="other" />.
 		/// </summary>
 		/// <inheritdoc cref="GetDistanceInX" />
-		public Length GetDistanceInY(Point other) => (Y - other.Y).ToUnit(Unit).Abs();
+		public Length GetDistanceInY(Point other, bool absoluteValue = true)
+		{
+			var y = (Y - other.Y).ToUnit(Unit);
+			
+			return absoluteValue
+				? y.Abs()
+				: y;
+		}
 
 		/// <summary>
-		///     Get the length, in <see cref="Unit" />, of a line connecting this <see cref="Point" /> to <paramref name="other" />
+		///     Get the absolute distance, in <see cref="Unit" />, of a line connecting this <see cref="Point" /> to <paramref name="other" />
 		///     .
 		/// </summary>
 		/// <inheritdoc cref="GetDistanceInX" />
@@ -144,9 +159,28 @@ namespace andrefmello91.OnPlaneComponents
 		public double GetAngle(Point other)
 		{
 			Length
-				x   = GetDistanceInX(other),
-				y   = GetDistanceInY(other);
+				x   = GetDistanceInX(other, false),
+				y   = GetDistanceInY(other, false);
 
+			bool
+				xZero = x.Abs() <= Tolerance,
+				yZero = y.Abs() <= Tolerance;
+
+			return xZero switch
+			{
+				true when yZero  => 0,
+				
+				true when !yZero => y > Length.Zero
+					? Constants.PiOver2
+					: Constants.Pi3Over2,
+				
+				false when yZero => x > Length.Zero
+					? 0
+					: Constants.Pi,
+				
+				_                => (y / x).Atan()
+			};
+			
 			if (x < Tolerance && y < Tolerance)
 				return 0;
 
@@ -185,6 +219,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <param name="tolerance">The tolerance <see cref="Length" /> to consider coordinates equal.</param>
 		public bool Approaches(Point other, Length tolerance) => ApproxX(other, tolerance) && ApproxY(other, tolerance);
 
+		/// <inheritdoc />
 		public Point Clone() => new Point(X, Y);
 
 		/// <summary>
@@ -226,10 +261,13 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="EqualsX" />
 		public bool EqualsY(Point other) => ApproxY(other, Tolerance);
 
+		/// <inheritdoc />
 		public override bool Equals(object obj) => obj is Point other && Equals(other);
-
+		
+		/// <inheritdoc />
 		public override int GetHashCode() => (int) X.Value * (int) Y.Value;
 
+		/// <inheritdoc />
 		public override string ToString() => $"({X:0.00}, {Y:0.00})";
 
 		#endregion
