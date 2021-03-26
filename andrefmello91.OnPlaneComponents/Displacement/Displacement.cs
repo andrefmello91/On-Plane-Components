@@ -1,15 +1,17 @@
-﻿using Extensions;
+﻿using System;
+using Extensions;
 using UnitsNet;
 using UnitsNet.Units;
-using static andrefmello91.OnPlaneComponents.Displacement.DisplacementRelations;
+using static andrefmello91.OnPlaneComponents.DisplacementRelations;
 
-namespace andrefmello91.OnPlaneComponents.Displacement
+namespace andrefmello91.OnPlaneComponents
 {
 	/// <summary>
 	///     Displacement struct.
 	/// </summary>
-	public partial struct PlaneDisplacement : IPlaneComponent<PlaneDisplacement, Length>, IUnitConvertible<PlaneDisplacement, LengthUnit>
+	public partial struct PlaneDisplacement : IPlaneComponent<Length>, IUnitConvertible<PlaneDisplacement, LengthUnit>, IApproachable<PlaneDisplacement, Length>, IEquatable<PlaneDisplacement>, ICloneable<PlaneDisplacement>
 	{
+
 		#region Fields
 
 		/// <summary>
@@ -20,7 +22,7 @@ namespace andrefmello91.OnPlaneComponents.Displacement
 		/// <summary>
 		///     Get a <see cref="PlaneDisplacement" /> with zero value.
 		/// </summary>
-		public static readonly PlaneDisplacement Zero = new PlaneDisplacement(0, 0);
+		public static readonly PlaneDisplacement Zero = new(0, 0);
 
 		#endregion
 
@@ -50,7 +52,7 @@ namespace andrefmello91.OnPlaneComponents.Displacement
 			{
 				false when IsYZero => ComponentDirection.X,
 				true when !IsYZero => ComponentDirection.Y,
-				_ => ComponentDirection.Both
+				_                  => ComponentDirection.Both
 			};
 
 		/// <summary>
@@ -104,7 +106,7 @@ namespace andrefmello91.OnPlaneComponents.Displacement
 		/// </param>
 		/// <param name="unit">The <see cref="LengthUnit" /> of displacement (default: <see cref="LengthUnit.Millimeter" />).</param>
 		public PlaneDisplacement(double componentX, double componentY, LengthUnit unit = LengthUnit.Millimeter)
-			: this (Length.From(componentX.ToZero(), unit), Length.From(componentY.ToZero(), unit))
+			: this(Length.From(componentX.ToZero(), unit), Length.From(componentY.ToZero(), unit))
 		{
 		}
 
@@ -115,9 +117,9 @@ namespace andrefmello91.OnPlaneComponents.Displacement
 		/// <param name="displacementY">Displacement component in Y direction (positive upwards) (<see cref="Length" />).</param>
 		public PlaneDisplacement(Length displacementX, Length displacementY)
 		{
-			X          = displacementX.ToZero();
-			Y          = displacementY.ToZero().ToUnit(displacementX.Unit);
-			Resultant  = CalculateResultant(X, Y, X.Unit);
+			X         = displacementX.ToZero();
+			Y         = displacementY.ToZero().ToUnit(displacementX.Unit);
+			Resultant = CalculateResultant(X, Y, X.Unit);
 		}
 
 		#endregion
@@ -129,26 +131,26 @@ namespace andrefmello91.OnPlaneComponents.Displacement
 		/// </summary>
 		/// <param name="value">Value of displacement component in X direction (positive to right).</param>
 		/// <param name="unit">The <see cref="LengthUnit" /> of displacement (default: <see cref="LengthUnit.Millimeter" />).</param>
-		public static PlaneDisplacement InX(double value, LengthUnit unit = LengthUnit.Millimeter) => new PlaneDisplacement(value, 0, unit);
+		public static PlaneDisplacement InX(double value, LengthUnit unit = LengthUnit.Millimeter) => new(value, 0, unit);
 
 		/// <summary>
 		///     Get a <see cref="PlaneDisplacement" /> in X direction.
 		/// </summary>
 		/// <param name="displacement">Displacement component in X direction (positive to right).</param>
-		public static PlaneDisplacement InX(Length displacement) => new PlaneDisplacement(displacement, Length.Zero);
+		public static PlaneDisplacement InX(Length displacement) => new(displacement, Length.Zero);
 
 		/// <summary>
 		///     Get a <see cref="PlaneDisplacement" /> in X direction.
 		/// </summary>
 		/// <param name="value">Value of displacement component in Y direction (positive upwards).</param>
 		/// <param name="unit">The <see cref="LengthUnit" /> of displacement (default: <see cref="LengthUnit.Millimeter" />).</param>
-		public static PlaneDisplacement InY(double value, LengthUnit unit = LengthUnit.Millimeter) => new PlaneDisplacement(0, value, unit);
+		public static PlaneDisplacement InY(double value, LengthUnit unit = LengthUnit.Millimeter) => new(0, value, unit);
 
 		/// <summary>
 		///     Get a <see cref="PlaneDisplacement" /> in Y direction.
 		/// </summary>
 		/// <param name="displacement">Displacement component in Y direction (positive to right).</param>
-		public static PlaneDisplacement InY(Length displacement) => new PlaneDisplacement(Length.Zero, displacement);
+		public static PlaneDisplacement InY(Length displacement) => new(Length.Zero, displacement);
 
 		/// <summary>
 		///     Get a <see cref="PlaneDisplacement" /> in from a resultant.
@@ -180,9 +182,9 @@ namespace andrefmello91.OnPlaneComponents.Displacement
 				return;
 
 			// Update values
-			X = X.ToUnit(unit);
-			Y = Y.ToUnit(unit);
-			Resultant  = CalculateResultant(X, Y).ToUnit(unit);
+			X         = X.ToUnit(unit);
+			Y         = Y.ToUnit(unit);
+			Resultant = CalculateResultant(X, Y).ToUnit(unit);
 		}
 
 		/// <summary>
@@ -196,7 +198,8 @@ namespace andrefmello91.OnPlaneComponents.Displacement
 		/// <inheritdoc />
 		public bool Approaches(PlaneDisplacement other, Length tolerance) => X.Approx(other.X, tolerance) && Y.Approx(other.Y, tolerance);
 
-		public PlaneDisplacement Clone() => new PlaneDisplacement(X, Y);
+		/// <inheritdoc />
+		public PlaneDisplacement Clone() => new(X, Y);
 
 		/// <inheritdoc cref="Approaches" />
 		/// <remarks>
@@ -204,14 +207,18 @@ namespace andrefmello91.OnPlaneComponents.Displacement
 		/// </remarks>
 		public bool Equals(PlaneDisplacement other) => Approaches(other, Tolerance);
 
-		public override bool Equals(object obj) => obj is PlaneDisplacement other && Equals(other);
+		/// <inheritdoc />
+		public override bool Equals(object? obj) => obj is PlaneDisplacement other && Equals(other);
 
+		/// <inheritdoc />
 		public override string ToString() =>
 			$"ux = {X}\n" +
 			$"uy = {Y}";
 
+		/// <inheritdoc />
 		public override int GetHashCode() => (int) (X.Value * Y.Value);
 
 		#endregion
+
 	}
 }

@@ -3,27 +3,29 @@ using Extensions;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
-using static andrefmello91.OnPlaneComponents.Strain.StrainRelations;
-using static andrefmello91.OnPlaneComponents.Strain.StrainState;
+using static andrefmello91.OnPlaneComponents.StrainRelations;
+using static andrefmello91.OnPlaneComponents.StrainState;
 
-namespace andrefmello91.OnPlaneComponents.Strain
+namespace andrefmello91.OnPlaneComponents
 {
 	/// <summary>
 	///     Principal strain struct.
 	/// </summary>
-	public readonly partial struct PrincipalStrainState : IPrincipalState<PrincipalStrainState, StrainState, double>, ICloneable<PrincipalStrainState>
+	public readonly partial struct PrincipalStrainState : IPrincipalState<double>, IApproachable<StrainState, double>, IApproachable<PrincipalStrainState, double>, IEquatable<StrainState>, IEquatable<PrincipalStrainState>, ICloneable<PrincipalStrainState>
 	{
+
 		#region Fields
 
 		/// <summary>
 		///     Get a <see cref="PrincipalStrainState" /> with zero elements.
 		/// </summary>
-		public static readonly PrincipalStrainState Zero = new PrincipalStrainState(0, 0);
+		public static readonly PrincipalStrainState Zero = new(0, 0);
 
 		#endregion
 
 		#region Properties
 
+		/// <inheritdoc />
 		public PrincipalCase Case
 		{
 			get
@@ -41,9 +43,9 @@ namespace andrefmello91.OnPlaneComponents.Strain
 			}
 		}
 
-		double IPrincipalState<PrincipalStrainState, StrainState, double>.S1 => Epsilon1;
+		double IPrincipalState<double>.S1 => Epsilon1;
 
-		double IPrincipalState<PrincipalStrainState, StrainState, double>.S2 => Epsilon2;
+		double IPrincipalState<double>.S2 => Epsilon2;
 
 		/// <summary>
 		///     Returns true if <see cref="Epsilon1" /> is nearly zero.
@@ -55,38 +57,45 @@ namespace andrefmello91.OnPlaneComponents.Strain
 		/// </summary>
 		public bool Is2Zero => Epsilon2.ApproxZero();
 
+		/// <inheritdoc />
 		public bool IsHorizontal => Theta1.ApproxZero() || Theta1.Approx(Constants.Pi);
 
+		/// <inheritdoc />
 		public bool IsVertical => Theta1.Approx(Constants.PiOver2) || Theta1.Approx(Constants.Pi3Over2);
 
-		bool IState<StrainState, PrincipalStrainState, double>.IsPrincipal => true;
+		bool IState<double>.IsPrincipal => true;
 
-		bool IState<StrainState, PrincipalStrainState, double>.IsPureShear => false;
+		bool IState<double>.IsPureShear => false;
 
-		double IState<StrainState, PrincipalStrainState, double>.ThetaX => Theta1;
+		double IState<double>.ThetaX => Theta1;
 
-		double IState<StrainState, PrincipalStrainState, double>.ThetaY => Theta2;
+		double IState<double>.ThetaY => Theta2;
 
+		/// <inheritdoc />
 		public bool IsAt45Degrees => Theta1.Approx(Constants.PiOver4) || Theta2.Approx(Constants.PiOver4) || Theta1.Approx(-Constants.PiOver4) || Theta2.Approx(-Constants.PiOver4);
 
-		double IState<StrainState, PrincipalStrainState, double>.X => Epsilon1;
+		double IState<double>.X => Epsilon1;
 
-		double IState<StrainState, PrincipalStrainState, double>.Y => Epsilon2;
+		double IState<double>.Y => Epsilon2;
 
-		double IState<StrainState, PrincipalStrainState, double>.XY => 0;
+		double IState<double>.XY => 0;
 
-		bool IState<StrainState, PrincipalStrainState, double>.IsXZero => Is1Zero;
+		bool IState<double>.IsXZero => Is1Zero;
 
-		bool IState<StrainState, PrincipalStrainState, double>.IsYZero => Is2Zero;
+		bool IState<double>.IsYZero => Is2Zero;
 
-		bool IState<StrainState, PrincipalStrainState, double>.IsXYZero => true;
+		bool IState<double>.IsXYZero => true;
 
+		/// <inheritdoc />
 		public bool IsZero => Is1Zero && Is2Zero;
 
+		/// <inheritdoc />
 		public double Theta1 { get; }
 
+		/// <inheritdoc />
 		public double Theta2 => Theta1 + Constants.PiOver2;
 
+		/// <inheritdoc />
 		public Matrix<double> TransformationMatrix { get; }
 
 		/// <summary>
@@ -131,14 +140,16 @@ namespace andrefmello91.OnPlaneComponents.Strain
 		public static PrincipalStrainState FromStrain(StrainState strainState)
 		{
 			var (e1, e2) = CalculatePrincipal(strainState.AsVector());
-			var theta1   = CalculatePrincipalAngles(strainState.AsVector(), e2).theta1;
+			var theta1 = CalculatePrincipalAngles(strainState.AsVector(), e2).theta1;
 
 			return new PrincipalStrainState(e1, e2, strainState.ThetaX + theta1);
 		}
 
-		public PrincipalStrainState ToPrincipal() => this;
+		/// <inheritdoc />
+		public IPrincipalState<double> ToPrincipal() => this;
 
-		public PrincipalStrainState Clone() => new PrincipalStrainState(Epsilon1, Epsilon2, Theta1);
+		/// <inheritdoc />
+		public PrincipalStrainState Clone() => new(Epsilon1, Epsilon2, Theta1);
 
 		/// <summary>
 		///     Get principal strains as an <see cref="Array" />.
@@ -156,10 +167,12 @@ namespace andrefmello91.OnPlaneComponents.Strain
 		/// </remarks>
 		public Vector<double> AsVector() => AsArray().ToVector();
 
-		public bool Approaches(StrainState other, double tolerance) => Approaches(other.ToPrincipal(), tolerance);
+		/// <inheritdoc />
+		public bool Approaches(StrainState other, double tolerance) => Approaches((PrincipalStrainState) other.ToPrincipal(), tolerance);
 
+		/// <inheritdoc />
 		public bool Approaches(PrincipalStrainState other, double tolerance) =>
-			Theta1.Approx(other.Theta1,   1E-3)      &&
+			Theta1.Approx(other.Theta1, 1E-3) &&
 			Epsilon1.Approx(other.Epsilon1, tolerance) && Epsilon2.Approx(other.Epsilon2, tolerance);
 
 		/// <summary>
@@ -168,21 +181,21 @@ namespace andrefmello91.OnPlaneComponents.Strain
 		/// <remarks>
 		///     { Epsilon1, Epsilon2, 0 }
 		/// </remarks>
-		public StrainState AsStrainState() => new StrainState(Epsilon1, Epsilon2, 0, Theta1);
+		public StrainState AsStrainState() => new(Epsilon1, Epsilon2, 0, Theta1);
 
 		/// <summary>
 		///     Get this <see cref="PrincipalStrainState" /> transformed to horizontal direction (<see cref="StrainState.ThetaX" />
 		///     = 0).
 		/// </summary>
-		public StrainState ToHorizontal() => AsStrainState().ToHorizontal();
+		public IState<double> ToHorizontal() => AsStrainState().ToHorizontal();
 
 		/// <summary>
 		///     Get this <see cref="PrincipalStrainState" /> transformed by a rotation angle.
 		/// </summary>
-		/// <inheritdoc/>
-		public StrainState Transform(double rotationAngle) => AsStrainState().Transform(rotationAngle);
+		/// <inheritdoc />
+		public IState<double> Transform(double rotationAngle) => AsStrainState().Transform(rotationAngle);
 
-		StrainState IPrincipalState<PrincipalStrainState, StrainState, double>.AsState() => AsStrainState();
+		IState<double> IPrincipalState<double>.AsState() => AsStrainState();
 
 		/// <summary>
 		///     Compare two <see cref="PrincipalStrainState" /> objects.
@@ -196,7 +209,8 @@ namespace andrefmello91.OnPlaneComponents.Strain
 		/// <param name="other">The <see cref="StrainState" /> to compare.</param>
 		public bool Equals(StrainState other) => Approaches(other, Tolerance);
 
-		public override bool Equals(object obj)
+		/// <inheritdoc />
+		public override bool Equals(object? obj)
 		{
 			switch (obj)
 			{
@@ -211,6 +225,7 @@ namespace andrefmello91.OnPlaneComponents.Strain
 			}
 		}
 
+		/// <inheritdoc />
 		public override string ToString()
 		{
 			char
@@ -223,13 +238,10 @@ namespace andrefmello91.OnPlaneComponents.Strain
 				$"{theta}1 = {Theta1:0.00} rad";
 		}
 
+		/// <inheritdoc />
 		public override int GetHashCode() => (int) (Epsilon1 * Epsilon2);
 
-        public StrainState AsState()
-        {
-            throw new NotImplementedException();
-        }
+		#endregion
 
-        #endregion
-    }
+	}
 }

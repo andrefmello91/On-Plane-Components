@@ -3,12 +3,29 @@
 namespace andrefmello91.OnPlaneComponents
 {
 	/// <summary>
-	///		Component attributes class.
+	///     Component attributes class.
 	/// </summary>
 	public class ComponentAttribute : XmlEnumAttribute
 	{
+
+		#region Properties
+
+		/// <summary>
+		///     Get/set the X direction.
+		/// </summary>
+		/// <remarks>
+		///     True if there is a component in this direction.
+		/// </remarks>
 		public bool X { get; set; }
+
+		/// <summary>
+		///     Get/set the X direction.
+		/// </summary>
+		/// <inheritdoc cref="X" />
 		public bool Y { get; set; }
+
+		#endregion
+
 	}
 
 	/// <summary>
@@ -29,7 +46,7 @@ namespace andrefmello91.OnPlaneComponents
 		X,
 
 		/// <summary>
-		///      Component exists only in Y (vertical) direction.
+		///     Component exists only in Y (vertical) direction.
 		/// </summary>
 		[Component(Name = "Y", X = false, Y = true)]
 		Y,

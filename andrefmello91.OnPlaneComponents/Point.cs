@@ -11,6 +11,7 @@ namespace andrefmello91.OnPlaneComponents
 	/// </summary>
 	public struct Point : IUnitConvertible<Point, LengthUnit>, IApproachable<Point, Length>, IEquatable<Point>, IComparable<Point>, ICloneable<Point>
 	{
+
 		#region Fields
 
 		/// <summary>
@@ -21,7 +22,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <summary>
 		///     The <see cref="Point" /> located at the origin of the coordinate system.
 		/// </summary>
-		public static readonly Point Origin = new Point(0, 0);
+		public static readonly Point Origin = new(0, 0);
 
 		#endregion
 
@@ -72,7 +73,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <param name="y">The vertical (y) coordinate.</param>
 		/// <param name="unit">The <see cref="LengthUnit" /> of <paramref name="x" /> and <paramref name="y" /> coordinates.</param>
 		public Point(double x, double y, LengthUnit unit = LengthUnit.Millimeter)
-			: this (Length.From(x, unit), Length.From(y, unit))
+			: this(Length.From(x, unit), Length.From(y, unit))
 		{
 		}
 
@@ -116,7 +117,7 @@ namespace andrefmello91.OnPlaneComponents
 		public Length GetDistanceInX(Point other, bool absoluteValue = true)
 		{
 			var x = (X - other.X).ToUnit(Unit);
-			
+
 			return absoluteValue
 				? x.Abs()
 				: x;
@@ -129,14 +130,15 @@ namespace andrefmello91.OnPlaneComponents
 		public Length GetDistanceInY(Point other, bool absoluteValue = true)
 		{
 			var y = (Y - other.Y).ToUnit(Unit);
-			
+
 			return absoluteValue
 				? y.Abs()
 				: y;
 		}
 
 		/// <summary>
-		///     Get the absolute distance, in <see cref="Unit" />, of a line connecting this <see cref="Point" /> to <paramref name="other" />
+		///     Get the absolute distance, in <see cref="Unit" />, of a line connecting this <see cref="Point" /> to
+		///     <paramref name="other" />
 		///     .
 		/// </summary>
 		/// <inheritdoc cref="GetDistanceInX" />
@@ -159,8 +161,8 @@ namespace andrefmello91.OnPlaneComponents
 		public double GetAngle(Point other)
 		{
 			Length
-				x   = GetDistanceInX(other, false),
-				y   = GetDistanceInY(other, false);
+				x = GetDistanceInX(other, false),
+				y = GetDistanceInY(other, false);
 
 			bool
 				xZero = x.Abs() <= Tolerance,
@@ -168,37 +170,25 @@ namespace andrefmello91.OnPlaneComponents
 
 			return xZero switch
 			{
-				true when yZero  => 0,
-				
+				true when yZero => 0,
+
 				true when !yZero => y > Length.Zero
 					? Constants.PiOver2
 					: Constants.Pi3Over2,
-				
+
 				false when yZero => x > Length.Zero
 					? 0
 					: Constants.Pi,
-				
-				_                => (y / x).Atan()
+
+				_ => (y / x).Atan()
 			};
-			
-			if (x < Tolerance && y < Tolerance)
-				return 0;
-
-			if (y < Tolerance)
-				return x > Length.Zero ? 0 : Constants.Pi;
-
-			if (x < Tolerance)
-				return y > Length.Zero ? Constants.PiOver2 : Constants.Pi3Over2;
-
-			return
-				(y / x).Atan();
 		}
 
 		/// <summary>
 		///     Get the midpoint between this and <paramref name="other" /> <see cref="Point" />.
 		/// </summary>
 		/// <param name="other">The other <see cref="Point" />.</param>
-		public Point MidPoint(Point other) => new Point(0.5 * (X + other.X), 0.5 * (Y + other.Y));
+		public Point MidPoint(Point other) => new(0.5 * (X + other.X), 0.5 * (Y + other.Y));
 
 		/// <summary>
 		///     Returns true if <paramref name="other" /> X coordinate is approximately equal to this object's X coordinate.
@@ -220,7 +210,7 @@ namespace andrefmello91.OnPlaneComponents
 		public bool Approaches(Point other, Length tolerance) => ApproxX(other, tolerance) && ApproxY(other, tolerance);
 
 		/// <inheritdoc />
-		public Point Clone() => new Point(X, Y);
+		public Point Clone() => new(X, Y);
 
 		/// <summary>
 		///     Compare this to <paramref name="other" /> <see cref="Point" />.
@@ -262,8 +252,8 @@ namespace andrefmello91.OnPlaneComponents
 		public bool EqualsY(Point other) => ApproxY(other, Tolerance);
 
 		/// <inheritdoc />
-		public override bool Equals(object obj) => obj is Point other && Equals(other);
-		
+		public override bool Equals(object? obj) => obj is Point other && Equals(other);
+
 		/// <inheritdoc />
 		public override int GetHashCode() => (int) X.Value * (int) Y.Value;
 
@@ -277,33 +267,34 @@ namespace andrefmello91.OnPlaneComponents
 		/// <summary>
 		///     Returns true if <see cref="Point" />'s are equal.
 		/// </summary>
-		public static bool operator == (Point left, Point right) => left.Equals(right);
+		public static bool operator ==(Point left, Point right) => left.Equals(right);
 
 		/// <summary>
 		///     Returns true if <see cref="Point" />'s are not equal.
 		/// </summary>
-		public static bool operator != (Point left, Point right) => !left.Equals(right);
+		public static bool operator !=(Point left, Point right) => !left.Equals(right);
 
 		/// <summary>
 		///     Returns true if <paramref name="left" />'s position is above or right to <paramref name="right" />.
 		/// </summary>
-		public static bool operator > (Point left, Point right) => left.CompareTo(right) == 1;
+		public static bool operator >(Point left, Point right) => left.CompareTo(right) == 1;
 
 		/// <summary>
 		///     Returns true if <paramref name="left" />'s position is below or left to <paramref name="right" />.
 		/// </summary>
-		public static bool operator < (Point left, Point right) => left.CompareTo(right) == -1;
+		public static bool operator <(Point left, Point right) => left.CompareTo(right) == -1;
 
 		/// <summary>
 		///     Returns true if <paramref name="left" />'s position is equal, above or right to <paramref name="right" />.
 		/// </summary>
-		public static bool operator >= (Point left, Point right) => left.CompareTo(right) >= 0;
+		public static bool operator >=(Point left, Point right) => left.CompareTo(right) >= 0;
 
 		/// <summary>
 		///     Returns true if <paramref name="left" />'s position is equal, below or left to <paramref name="right" />.
 		/// </summary>
-		public static bool operator <= (Point left, Point right) => left.CompareTo(right) <= 0;
+		public static bool operator <=(Point left, Point right) => left.CompareTo(right) <= 0;
 
 		#endregion
+
 	}
 }

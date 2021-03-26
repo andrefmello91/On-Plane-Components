@@ -1,26 +1,24 @@
-﻿using andrefmello91.OnPlaneComponents.Stress;
-
-namespace andrefmello91.OnPlaneComponents.Strain
+﻿namespace andrefmello91.OnPlaneComponents
 {
 	/// <summary>
-	/// Cases of <see cref="PrincipalStrainState"/> and <see cref="PrincipalStressState"/>.
+	///     Cases of <see cref="PrincipalStrainState" /> and <see cref="PrincipalStressState" />.
 	/// </summary>
 	public enum PrincipalCase
 	{
 		/// <summary>
-		/// Tension at both directions.
+		///     Tension at both directions.
 		/// </summary>
 		PureTension,
 		/// <summary>
-		/// Compression at both directions.
+		///     Compression at both directions.
 		/// </summary>
 		PureCompression,
 		/// <summary>
-		/// Tension at one direction and compression at another one..
+		///     Tension at one direction and compression at another one..
 		/// </summary>
 		TensionCompression,
 		/// <summary>
-		/// The state has no stress/strain.
+		///     The state has no stress/strain.
 		/// </summary>
 		Zero
 	}

@@ -1,28 +1,28 @@
 ﻿using System;
 using System.Linq;
-using andrefmello91.OnPlaneComponents.Strain;
 using Extensions;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using UnitsNet;
 using UnitsNet.Units;
-using static andrefmello91.OnPlaneComponents.Stress.StressRelations;
-using static andrefmello91.OnPlaneComponents.Stress.StressState;
+using static andrefmello91.OnPlaneComponents.StressRelations;
+using static andrefmello91.OnPlaneComponents.StressState;
 
-namespace andrefmello91.OnPlaneComponents.Stress
+namespace andrefmello91.OnPlaneComponents
 {
 	/// <summary>
 	///     Principal stress struct.
 	/// </summary>
-	public partial struct PrincipalStressState : IPrincipalState<PrincipalStressState, StressState, Pressure>, IUnitConvertible<PrincipalStressState, PressureUnit>, ICloneable<PrincipalStressState>
+	public partial struct PrincipalStressState : IPrincipalState<Pressure>, IUnitConvertible<PrincipalStressState, PressureUnit>, IApproachable<StressState, Pressure>, IApproachable<PrincipalStressState, Pressure>, IEquatable<StressState>, IEquatable<PrincipalStressState>, ICloneable<PrincipalStressState>
 	{
+
 		#region Fields
 
 		/// <summary>
 		///     Get a <see cref="PrincipalStressState" /> with zero elements.
 		/// </summary>
-		public static readonly  PrincipalStressState Zero = new PrincipalStressState(0, 0);
+		public static readonly PrincipalStressState Zero = new(0, 0);
 
 		#endregion
 
@@ -37,6 +37,7 @@ namespace andrefmello91.OnPlaneComponents.Stress
 			set => ChangeUnit(value);
 		}
 
+		/// <inheritdoc />
 		public PrincipalCase Case
 		{
 			get
@@ -54,34 +55,37 @@ namespace andrefmello91.OnPlaneComponents.Stress
 			}
 		}
 
-		Pressure IPrincipalState<PrincipalStressState, StressState, Pressure>.S1 => Sigma1;
+		Pressure IPrincipalState<Pressure>.S1 => Sigma1;
 
-		Pressure IPrincipalState<PrincipalStressState, StressState, Pressure>.S2 => Sigma2;
+		Pressure IPrincipalState<Pressure>.S2 => Sigma2;
 
-		bool IState<StressState, PrincipalStressState, Pressure>.IsPrincipal => true;
+		bool IState<Pressure>.IsPrincipal => true;
 
-		bool IState<StressState, PrincipalStressState, Pressure>.IsPureShear => false;
+		bool IState<Pressure>.IsPureShear => false;
 
-		double IState<StressState, PrincipalStressState, Pressure>.ThetaX => Theta1;
+		double IState<Pressure>.ThetaX => Theta1;
 
-		double IState<StressState, PrincipalStressState, Pressure>.ThetaY => Theta2;
+		double IState<Pressure>.ThetaY => Theta2;
 
-		Pressure IState<StressState, PrincipalStressState, Pressure>.X => Sigma1;
+		Pressure IState<Pressure>.X => Sigma1;
 
-		Pressure IState<StressState, PrincipalStressState, Pressure>.Y => Sigma1;
+		Pressure IState<Pressure>.Y => Sigma1;
 
-		Pressure IState<StressState, PrincipalStressState, Pressure>.XY => Pressure.Zero;
+		Pressure IState<Pressure>.XY => Pressure.Zero;
 
-		bool IState<StressState, PrincipalStressState, Pressure>.IsXZero => Is1Zero;
+		bool IState<Pressure>.IsXZero => Is1Zero;
 
-		bool IState<StressState, PrincipalStressState, Pressure>.IsYZero => Is2Zero;
+		bool IState<Pressure>.IsYZero => Is2Zero;
 
-		bool IState<StressState, PrincipalStressState, Pressure>.IsXYZero => true;
+		bool IState<Pressure>.IsXYZero => true;
 
+		/// <inheritdoc />
 		public bool IsHorizontal => Theta1.ApproxZero() || Theta1.Approx(Constants.Pi);
 
+		/// <inheritdoc />
 		public bool IsVertical => Theta1.Approx(Constants.PiOver2) || Theta1.Approx(Constants.Pi3Over2);
 
+		/// <inheritdoc />
 		public bool IsAt45Degrees => Theta1.Approx(Constants.PiOver4) || Theta2.Approx(Constants.PiOver4) || Theta1.Approx(-Constants.PiOver4) || Theta2.Approx(-Constants.PiOver4);
 
 		/// <summary>
@@ -109,6 +113,7 @@ namespace andrefmello91.OnPlaneComponents.Stress
 		/// </summary>
 		public double Theta2 => Theta1 + Constants.PiOver2;
 
+		/// <inheritdoc />
 		public Matrix<double> TransformationMatrix { get; }
 
 		/// <summary>
@@ -161,12 +166,13 @@ namespace andrefmello91.OnPlaneComponents.Stress
 		public static PrincipalStressState FromStress(StressState stressState)
 		{
 			var (s1, s2) = CalculatePrincipal(stressState.AsVector());
-			var theta1   = CalculatePrincipalAngles(stressState.AsVector(), s2).theta1;
+			var theta1 = CalculatePrincipalAngles(stressState.AsVector(), s2).theta1;
 
 			return new PrincipalStressState(s1, s2, stressState.ThetaX + theta1);
 		}
 
-		public PrincipalStressState ToPrincipal() => this;
+		/// <inheritdoc />
+		public IPrincipalState<Pressure> ToPrincipal() => this;
 
 		/// <summary>
 		///     Change the <see cref="PressureUnit" /> of this <see cref="PrincipalStressState" />.
@@ -193,47 +199,50 @@ namespace andrefmello91.OnPlaneComponents.Stress
 		///     Get principal stresses as an <see cref="Array" />.
 		/// </summary>
 		/// <remarks>
-		///		{ Sigma1, Sigma2, 0 }
+		///     { Sigma1, Sigma2, 0 }
 		/// </remarks>
 		public Pressure[] AsArray() => new[] { Sigma1, Sigma2, Pressure.Zero };
 
 		/// <summary>
-		///     Get principal stresses as a <see cref="Vector" />, in a desired <see cref="PressureUnit"/>.
+		///     Get principal stresses as a <see cref="Vector" />, in a desired <see cref="PressureUnit" />.
 		/// </summary>
 		/// <remarks>
-		///		{ Sigma1, Sigma2, 0 }
+		///     { Sigma1, Sigma2, 0 }
 		/// </remarks>
-		/// <param name="unit">The <see cref="PressureUnit"/>.</param>
+		/// <param name="unit">The <see cref="PressureUnit" />.</param>
 		public Vector<double> AsVector(PressureUnit unit = PressureUnit.Megapascal) => AsArray().Select(s => s.ToUnit(unit).Value).ToVector();
 
 		/// <summary>
 		///     Get this <see cref="PrincipalStressState" /> as a <see cref="StressState" />.
 		/// </summary>
 		/// <remarks>
-		///		{ Sigma1, Sigma2, 0 }
+		///     { Sigma1, Sigma2, 0 }
 		/// </remarks>
-		public StressState AsStressState() => new StressState(Sigma1, Sigma2, Pressure.Zero, Theta1);
+		public StressState AsStressState() => new(Sigma1, Sigma2, Pressure.Zero, Theta1);
 
 		/// <summary>
-		///     Get this <see cref="PrincipalStressState" /> transformed to horizontal direction (<see cref="StressState.ThetaX" /> = 0).
+		///     Get this <see cref="PrincipalStressState" /> transformed to horizontal direction (<see cref="StressState.ThetaX" />
+		///     = 0).
 		/// </summary>
-		public StressState ToHorizontal() => AsStressState().ToHorizontal();
+		public IState<Pressure> ToHorizontal() => AsStressState().ToHorizontal();
 
 		/// <summary>
 		///     Get this <see cref="PrincipalStressState" /> transformed by a rotation angle.
 		/// </summary>
 		/// <inheritdoc cref="IState{T}.Transform" />
-		public StressState Transform(double rotationAngle) => AsStressState().Transform(rotationAngle);
+		public IState<Pressure> Transform(double rotationAngle) => AsStressState().Transform(rotationAngle);
 
-		StressState IPrincipalState<PrincipalStressState, StressState, Pressure>.AsState() => AsStressState();
+		IState<Pressure> IPrincipalState<Pressure>.AsState() => AsStressState();
 
 		/// <summary>
 		///     Return a copy of this <see cref="PrincipalStressState" />.
 		/// </summary>
-		public PrincipalStressState Clone() => new PrincipalStressState(Sigma1, Sigma2, Theta1);
+		public PrincipalStressState Clone() => new(Sigma1, Sigma2, Theta1);
 
-		public bool Approaches(StressState other, Pressure tolerance) => Approaches(other.ToPrincipal(), tolerance);
+		/// <inheritdoc />
+		public bool Approaches(StressState other, Pressure tolerance) => Approaches((PrincipalStressState) other.ToPrincipal(), tolerance);
 
+		/// <inheritdoc />
 		public bool Approaches(PrincipalStressState other, Pressure tolerance) =>
 			Theta1.Approx(other.Theta1, 1E-3) &&
 			Sigma1.Approx(other.Sigma1, tolerance) && Sigma2.Approx(other.Sigma2, tolerance);
@@ -250,7 +259,8 @@ namespace andrefmello91.OnPlaneComponents.Stress
 		/// <param name="other">The <see cref="StressState" /> to compare.</param>
 		public bool Equals(StressState other) => Approaches(other, Tolerance);
 
-		public override bool Equals(object obj)
+		/// <inheritdoc />
+		public override bool Equals(object? obj)
 		{
 			switch (obj)
 			{
@@ -265,6 +275,7 @@ namespace andrefmello91.OnPlaneComponents.Stress
 			}
 		}
 
+		/// <inheritdoc />
 		public override string ToString()
 		{
 			char
@@ -277,8 +288,10 @@ namespace andrefmello91.OnPlaneComponents.Stress
 				$"{theta}1 = {Theta1:0.00} rad";
 		}
 
+		/// <inheritdoc />
 		public override int GetHashCode() => (int) (Sigma1.Value * Sigma2.Value);
 
 		#endregion
+
 	}
 }

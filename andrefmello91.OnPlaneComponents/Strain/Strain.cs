@@ -1,24 +1,24 @@
 ﻿using System;
-using andrefmello91.OnPlaneComponents.Stress;
 using Extensions;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
-using static andrefmello91.OnPlaneComponents.Strain.StrainRelations;
+using static andrefmello91.OnPlaneComponents.StrainRelations;
 
-namespace andrefmello91.OnPlaneComponents.Strain
+namespace andrefmello91.OnPlaneComponents
 {
 	/// <summary>
 	///     Strain struct for XY components.
 	/// </summary>
-	public readonly partial struct StrainState : IState<StrainState, PrincipalStrainState, double>, ICloneable<StrainState>
+	public readonly partial struct StrainState : IState<double>, IApproachable<StrainState, double>, IApproachable<PrincipalStrainState, double>, IEquatable<StrainState>, IEquatable<PrincipalStrainState>, ICloneable<StrainState>
 	{
+
 		#region Fields
 
 		/// <summary>
 		///     Get a <see cref="StrainState" /> with zero elements.
 		/// </summary>
-		public static readonly StrainState Zero = new StrainState(0, 0, 0);
+		public static readonly StrainState Zero = new(0, 0, 0);
 
 		/// <summary>
 		///     The default tolerance for strains.
@@ -29,11 +29,11 @@ namespace andrefmello91.OnPlaneComponents.Strain
 
 		#region Properties
 
-		double IState<StrainState, PrincipalStrainState, double>.X => EpsilonX;
+		double IState<double>.X => EpsilonX;
 
-		double IState<StrainState, PrincipalStrainState, double>.Y => EpsilonY;
+		double IState<double>.Y => EpsilonY;
 
-		double IState<StrainState, PrincipalStrainState, double>.XY => GammaXY;
+		double IState<double>.XY => GammaXY;
 
 		/// <summary>
 		///     Returns true if <see cref="EpsilonX" /> is zero.
@@ -50,20 +50,28 @@ namespace andrefmello91.OnPlaneComponents.Strain
 		/// </summary>
 		public bool IsXYZero => GammaXY.ApproxZero();
 
+		/// <inheritdoc />
 		public bool IsHorizontal => ThetaX.ApproxZero() || ThetaX.Approx(Constants.Pi);
 
+		/// <inheritdoc />
 		public bool IsVertical => ThetaX.Approx(Constants.PiOver2) || ThetaX.Approx(Constants.Pi3Over2);
 
+		/// <inheritdoc />
 		public bool IsPrincipal => !IsXZero && !IsYZero && IsXYZero;
 
+		/// <inheritdoc />
 		public bool IsPureShear => IsXZero && IsYZero && !IsXYZero;
 
+		/// <inheritdoc />
 		public bool IsZero => IsXZero && IsYZero && IsXYZero;
 
+		/// <inheritdoc />
 		public double ThetaX { get; }
 
+		/// <inheritdoc />
 		public double ThetaY => ThetaX + Constants.PiOver2;
 
+		/// <inheritdoc />
 		public Matrix<double> TransformationMatrix { get; }
 
 		/// <summary>
@@ -117,14 +125,15 @@ namespace andrefmello91.OnPlaneComponents.Strain
 		/// </param>
 		/// <param name="thetaX">The angle of X direction, related to horizontal axis (positive counterclockwise).</param>
 		public static StrainState FromVector(Vector<double> strainVector, double thetaX = 0) =>
-			new StrainState(strainVector[0], strainVector[1], strainVector[2], thetaX);
+			new(strainVector[0], strainVector[1], strainVector[2], thetaX);
 
 		/// <summary>
 		///     Get a <see cref="StrainState" /> from a <see cref="StressState" />.
 		/// </summary>
 		/// <param name="stressState">The <see cref="StressState" /> to transform.</param>
 		/// <param name="stiffnessMatrix">
-		///     The stiffness <see cref="Matrix" /> (3 x 3), related to <paramref name="stressState" /> direction, with elements in MPa.
+		///     The stiffness <see cref="Matrix" /> (3 x 3), related to <paramref name="stressState" /> direction, with elements in
+		///     MPa.
 		/// </param>
 		public static StrainState FromStresses(StressState stressState, Matrix<double> stiffnessMatrix) => stressState.IsZero ? Zero : FromVector(stiffnessMatrix.Solve(stressState.AsVector()), stressState.ThetaX);
 
@@ -138,7 +147,7 @@ namespace andrefmello91.OnPlaneComponents.Strain
 				return strainState;
 
 			// Get the strain vector transformed
-			var sVec = StrainRelations.Transform(strainState.AsVector(), - strainState.ThetaX);
+			var sVec = StrainRelations.Transform(strainState.AsVector(), -strainState.ThetaX);
 
 			// Return with corrected angle
 			return FromVector(sVec);
@@ -198,19 +207,19 @@ namespace andrefmello91.OnPlaneComponents.Strain
 		/// <summary>
 		///     Get this <see cref="StrainState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
 		/// </summary>
-		public StrainState ToHorizontal() => ToHorizontal(this);
+		public IState<double> ToHorizontal() => ToHorizontal(this);
 
 		/// <summary>
 		///     Get this <see cref="StrainState" /> transformed by a rotation angle.
 		/// </summary>
 		/// <inheritdoc cref="IState{T}.Transform" />
-		public StrainState Transform(double rotationAngle) => Transform(this, rotationAngle);
+		public IState<double> Transform(double rotationAngle) => Transform(this, rotationAngle);
 
 		/// <summary>
 		///     Get strains as an <see cref="Array" />.
 		/// </summary>
 		/// <remarks>
-		///		{ EpsilonX, EpsilonY, GammaXY }
+		///     { EpsilonX, EpsilonY, GammaXY }
 		/// </remarks>
 		public double[] AsArray() => new[] { EpsilonX, EpsilonY, GammaXY };
 
@@ -218,23 +227,26 @@ namespace andrefmello91.OnPlaneComponents.Strain
 		///     Get strains as a <see cref="Vector" />.
 		/// </summary>
 		/// <remarks>
-		///		{ EpsilonX, EpsilonY, GammaXY }
+		///     { EpsilonX, EpsilonY, GammaXY }
 		/// </remarks>
 		public Vector<double> AsVector() => AsArray().ToVector();
 
 		/// <summary>
 		///     Get the <see cref="PrincipalStrainState" /> related to this <see cref="StrainState" />.
 		/// </summary>
-		public PrincipalStrainState ToPrincipal() => PrincipalStrainState.FromStrain(this);
+		public IPrincipalState<double> ToPrincipal() => PrincipalStrainState.FromStrain(this);
 
+		/// <inheritdoc />
 		public bool Approaches(StrainState other, double tolerance) =>
-			ThetaX.Approx(other.ThetaX,   tolerance) && EpsilonX.Approx(other.EpsilonX, tolerance) &&
-			EpsilonY.Approx(other.EpsilonY, tolerance) &&  GammaXY.Approx(other.GammaXY,  tolerance);
+			ThetaX.Approx(other.ThetaX, tolerance) && EpsilonX.Approx(other.EpsilonX, tolerance) &&
+			EpsilonY.Approx(other.EpsilonY, tolerance) && GammaXY.Approx(other.GammaXY, tolerance);
 
 
+		/// <inheritdoc />
 		public bool Approaches(PrincipalStrainState other, double tolerance) => Approaches(FromPrincipal(other), tolerance);
 
-		public StrainState Clone() => new StrainState(EpsilonX, EpsilonY, GammaXY, ThetaX);
+		/// <inheritdoc />
+		public StrainState Clone() => new(EpsilonX, EpsilonY, GammaXY, ThetaX);
 
 		/// <summary>
 		///     Compare a <see cref="StrainState" /> to a <see cref="PrincipalStrainState" /> object.
@@ -248,7 +260,8 @@ namespace andrefmello91.OnPlaneComponents.Strain
 		/// <param name="other">The strain to compare.</param>
 		public bool Equals(StrainState other) => Approaches(other, Tolerance);
 
-		public override bool Equals(object obj)
+		/// <inheritdoc />
+		public override bool Equals(object? obj)
 		{
 			switch (obj)
 			{
@@ -263,6 +276,7 @@ namespace andrefmello91.OnPlaneComponents.Strain
 			}
 		}
 
+		/// <inheritdoc />
 		public override string ToString()
 		{
 			char
@@ -278,8 +292,10 @@ namespace andrefmello91.OnPlaneComponents.Strain
 				$"{theta}x = {ThetaX:0.00} rad";
 		}
 
+		/// <inheritdoc />
 		public override int GetHashCode() => (int) (EpsilonX * EpsilonY * GammaXY);
 
 		#endregion
+
 	}
 }
