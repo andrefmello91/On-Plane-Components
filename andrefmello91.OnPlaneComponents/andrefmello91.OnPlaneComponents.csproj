@@ -5,17 +5,17 @@
         <LangVersion>9.0</LangVersion>
         <Nullable>enable</Nullable>
         <PackageId>andrefmello91.OnPlaneComponents</PackageId>
-        <Version>1.0.2</Version>
+        <Version>1.0.3</Version>
         <Authors>andrefmello91</Authors>
         <PackageDescription>Implementation of forces, displacements, stress and strain states on plane.</PackageDescription>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-        <PackageVersion>1.0.2</PackageVersion>
+        <PackageVersion>1.0.3</PackageVersion>
         <Description>Implementation of forces, displacements, stress and strain states on plane.</Description>
         <RepositoryUrl>https://github.com/andrefmello91/On-Plane-Components</RepositoryUrl>
         <PackageProjectUrl>https://github.com/andrefmello91/On-Plane-Components</PackageProjectUrl>
-        <PackageReleaseNotes>Corrected Point.AngleTo.</PackageReleaseNotes>
+        <PackageReleaseNotes>Updated namespaces.</PackageReleaseNotes>
         <AssemblyName>andrefmello91.OnPlaneComponents</AssemblyName>
         <RootNamespace>andrefmello91.OnPlaneComponents</RootNamespace>
     </PropertyGroup>
