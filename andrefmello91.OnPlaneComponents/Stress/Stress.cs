@@ -325,6 +325,5 @@ namespace andrefmello91.OnPlaneComponents
 		public override int GetHashCode() => (int) (SigmaX.Value * SigmaY.Value * TauXY.Value);
 
 		#endregion
-
 	}
 }

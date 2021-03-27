@@ -63,6 +63,14 @@
 		///     Returns a <see cref="PrincipalStressState" /> object with components divided by an <see cref="int" />.
 		/// </summary>
 		public static PrincipalStressState operator /(PrincipalStressState principalStrain, int divider) => principalStrain / (double) divider;
+		
+		/// <summary>
+		///		Convert a <see cref="StressState"/> into a <see cref="PrincipalStressState"/>.
+		/// </summary>
+		/// <remarks>
+		///		See: <see cref="StressState.ToPrincipal"/>.
+		/// </remarks>
+		public static explicit operator PrincipalStressState(StressState state) => state.ToPrincipal().ToPrincipalStressState();
 
 	}
 }
