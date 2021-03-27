@@ -1,4 +1,4 @@
-﻿using Extensions;
+﻿using andrefmello91.Extensions;
 using MathNet.Numerics;
 using UnitsNet;
 using UnitsNet.Units;

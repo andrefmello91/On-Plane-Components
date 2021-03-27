@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Extensions;
+using andrefmello91.Extensions;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
