@@ -112,11 +112,14 @@ namespace andrefmello91.OnPlaneComponents
 		///     Get the horizontal distance, in <see cref="Unit" />, between this <see cref="Point" /> and
 		///     <paramref name="other" />.
 		/// </summary>
+		/// <remarks>
+		///		The distance is calculated considering <paramref name="other"/> point as reference.
+		/// </remarks>
 		/// <param name="other">The other <see cref="Point" /> to calculate distance.</param>
 		/// <param name="absoluteValue">Return the absolute value of distance?</param>
 		public Length GetDistanceInX(Point other, bool absoluteValue = true)
 		{
-			var x = (X - other.X).ToUnit(Unit);
+			var x = (other.X - X).ToUnit(Unit);
 
 			return absoluteValue
 				? x.Abs()
@@ -126,10 +129,13 @@ namespace andrefmello91.OnPlaneComponents
 		/// <summary>
 		///     Get the vertical distance, in <see cref="Unit" />, between this <see cref="Point" /> and <paramref name="other" />.
 		/// </summary>
+		/// <remarks>
+		///		The distance is calculated considering <paramref name="other"/> point as reference.
+		/// </remarks>
 		/// <inheritdoc cref="GetDistanceInX" />
 		public Length GetDistanceInY(Point other, bool absoluteValue = true)
 		{
-			var y = (Y - other.Y).ToUnit(Unit);
+			var y = (other.Y - Y).ToUnit(Unit);
 
 			return absoluteValue
 				? y.Abs()
