@@ -18,7 +18,7 @@ jobs:
       with:
         dotnet-version: 5.0.x
     - name: Add source
-      run: dotnet nuget add source https://nuget.pkg.github.com/andrefmello91/index.json --name=default --username=andrefmello91
+      run: dotnet nuget add source https://nuget.pkg.github.com/andrefmello91/index.json -n default -u andrefmello91 -p ${{secrets.NUGET_GITHUB_KEY}} --store-password-in-clear-text
     - name: Enable source
       run: dotnet nuget enable source default
     - name: Build
