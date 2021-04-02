@@ -4,20 +4,23 @@
         <TargetFrameworks>net5.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
         <LangVersion>9.0</LangVersion>
         <Nullable>enable</Nullable>
-        <PackageId>andrefmello91.OnPlaneComponents</PackageId>
-        <Version>1.0.7-beta1</Version>
+        <Version>1.0.7</Version>
         <Authors>andrefmello91</Authors>
-        <PackageDescription>Implementation of forces, displacements, stress and strain states on plane.</PackageDescription>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-        <PackageVersion>1.0.7-beta1</PackageVersion>
         <Description>Implementation of forces, displacements, stress and strain states on plane.</Description>
         <RepositoryUrl>https://github.com/andrefmello91/On-Plane-Components</RepositoryUrl>
         <PackageProjectUrl>https://github.com/andrefmello91/On-Plane-Components</PackageProjectUrl>
-        <PackageReleaseNotes>Updated principal cases.</PackageReleaseNotes>
         <AssemblyName>andrefmello91.OnPlaneComponents</AssemblyName>
         <RootNamespace>andrefmello91.OnPlaneComponents</RootNamespace>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+        <PackageId>andrefmello91.OnPlaneComponents</PackageId>
+        <PackageDescription>Implementation of forces, displacements, stress and strain states on plane.</PackageDescription>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageVersion>1.0.7</PackageVersion>
+        <PackageReleaseNotes>Updated principal cases.</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
@@ -26,7 +29,7 @@
     </ItemGroup>
 
     <ItemGroup Condition="'$(Configuration)'=='Release'">
-        <PackageReference Include="andrefmello91.Extensions" Version="1.0.3" />
+        <PackageReference Include="andrefmello91.Extensions" Version="1.0.4" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(Configuration)'=='Debug'">
