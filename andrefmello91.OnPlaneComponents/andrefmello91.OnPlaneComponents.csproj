@@ -5,17 +5,17 @@
         <LangVersion>9.0</LangVersion>
         <Nullable>enable</Nullable>
         <PackageId>andrefmello91.OnPlaneComponents</PackageId>
-        <Version>1.0.6</Version>
+        <Version>1.0.7-beta1</Version>
         <Authors>andrefmello91</Authors>
         <PackageDescription>Implementation of forces, displacements, stress and strain states on plane.</PackageDescription>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-        <PackageVersion>1.0.6</PackageVersion>
+        <PackageVersion>1.0.7-beta1</PackageVersion>
         <Description>Implementation of forces, displacements, stress and strain states on plane.</Description>
         <RepositoryUrl>https://github.com/andrefmello91/On-Plane-Components</RepositoryUrl>
         <PackageProjectUrl>https://github.com/andrefmello91/On-Plane-Components</PackageProjectUrl>
-        <PackageReleaseNotes>Updated code for point.</PackageReleaseNotes>
+        <PackageReleaseNotes>Updated principal cases.</PackageReleaseNotes>
         <AssemblyName>andrefmello91.OnPlaneComponents</AssemblyName>
         <RootNamespace>andrefmello91.OnPlaneComponents</RootNamespace>
     </PropertyGroup>
@@ -23,7 +23,7 @@
     <ItemGroup>
         <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
         <PackageReference Include="UnitsNet" Version="4.87.0" />
-        <PackageReference Include="andrefmello91.Extensions" Version="1.0.3" />
+        <PackageReference Include="andrefmello91.Extensions" Version="1.0.4-beta1" />
     </ItemGroup>
 
 </Project>
