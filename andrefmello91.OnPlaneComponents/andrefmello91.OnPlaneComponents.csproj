@@ -25,8 +25,12 @@
         <PackageReference Include="UnitsNet" Version="4.87.0" />
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\..\Extensions\andrefmello91.Extensions\andrefmello91.Extensions.csproj" />
+    <ItemGroup Condition="'$(Configuration)'=='Release'">
+        <PackageReference Include="andrefmello91.Extensions" Version="1.0.3" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(Configuration)'=='Debug'">
+        <ProjectReference Include="..\..\Extensions\andrefmello91.Extensions\andrefmello91.Extensions.csproj" />
     </ItemGroup>
 
 </Project>
