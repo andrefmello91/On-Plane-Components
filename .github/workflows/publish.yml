@@ -21,10 +21,6 @@ jobs:
       run: dotnet nuget add source https://nuget.pkg.github.com/andrefmello91/index.json -n default -u andrefmello91 -p ${{secrets.NUGET_GITHUB_KEY}} --store-password-in-clear-text
     - name: Enable source
       run: dotnet nuget enable source default
-    - name: Build
-      run: dotnet build --configuration Release
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
     - name: Publish  
       uses: brandedoutcast/publish-nuget@v2.5.5  
       with:   
