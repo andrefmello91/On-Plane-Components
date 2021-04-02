@@ -38,22 +38,16 @@ namespace andrefmello91.OnPlaneComponents
 		}
 
 		/// <inheritdoc />
-		public PrincipalCase Case
-		{
-			get
+		public PrincipalCase Case => 
+			Is1Zero switch
 			{
-				if (IsZero)
-					return PrincipalCase.Zero;
-
-				if (Sigma1 > Pressure.Zero && Sigma2 >= Pressure.Zero)
-					return PrincipalCase.PureTension;
-
-				if (Sigma1 <= Pressure.Zero && Sigma2 < Pressure.Zero)
-					return PrincipalCase.PureCompression;
-
-				return PrincipalCase.TensionCompression;
-			}
-		}
+				true when Is2Zero                 => PrincipalCase.Zero,
+				true when !Is2Zero                => PrincipalCase.UniaxialCompression,
+				false when Is2Zero                => PrincipalCase.UniaxialTension,
+				false when Sigma2 > Pressure.Zero => PrincipalCase.PureTension,
+				false when Sigma1 < Pressure.Zero => PrincipalCase.PureCompression,
+				_                                 => PrincipalCase.TensionCompression
+			};
 
 		Pressure IPrincipalState<Pressure>.S1 => Sigma1;
 
@@ -122,7 +116,7 @@ namespace andrefmello91.OnPlaneComponents
 		public Pressure Sigma1 { get; private set; }
 
 		/// <summary>
-		///     Get minimum principal stress=.
+		///     Get minimum principal stress.
 		/// </summary>
 		public Pressure Sigma2 { get; private set; }
 

@@ -26,22 +26,16 @@ namespace andrefmello91.OnPlaneComponents
 		#region Properties
 
 		/// <inheritdoc />
-		public PrincipalCase Case
-		{
-			get
+		public PrincipalCase Case => 
+			Is1Zero switch
 			{
-				if (IsZero)
-					return PrincipalCase.Zero;
-
-				if (Epsilon1 > 0 && Epsilon2 >= 0)
-					return PrincipalCase.PureTension;
-
-				if (Epsilon1 <= 0 && Epsilon2 < 0)
-					return PrincipalCase.PureCompression;
-
-				return PrincipalCase.TensionCompression;
-			}
-		}
+				true when Is2Zero       => PrincipalCase.Zero,
+				true when !Is2Zero      => PrincipalCase.UniaxialCompression,
+				false when Is2Zero      => PrincipalCase.UniaxialTension,
+				false when Epsilon2 > 0 => PrincipalCase.PureTension,
+				false when Epsilon1 < 0 => PrincipalCase.PureCompression,
+				_                       => PrincipalCase.TensionCompression
+			};
 
 		double IPrincipalState<double>.S1 => Epsilon1;
 
