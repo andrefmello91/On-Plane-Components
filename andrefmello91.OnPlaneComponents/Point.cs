@@ -313,7 +313,9 @@ namespace andrefmello91.OnPlaneComponents
 		/// <summary>
 		///		Create a new <see cref="Point"/> by applying a <paramref name="displacement"/> in <paramref name="point"/>'s coordinates.
 		/// </summary>
-		public static Point operator +(Point point, PlaneDisplacement displacement) => new (point.X + displacement.X, point.Y + displacement.Y);
+		public static Point operator +(Point point, PlaneDisplacement displacement) => displacement.IsZero
+			? point
+			: new Point(point.X + displacement.X, point.Y + displacement.Y);
 		
 		/// <summary>
 		///		Create a new <see cref="Point"/> by multiplying <paramref name="point"/>'s coordinates by a <see cref="number"/>.
