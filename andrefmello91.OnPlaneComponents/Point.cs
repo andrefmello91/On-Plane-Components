@@ -300,6 +300,43 @@ namespace andrefmello91.OnPlaneComponents
 		/// </summary>
 		public static bool operator <=(Point left, Point right) => left.CompareTo(right) <= 0;
 
+		/// <summary>
+		///		Create a new <see cref="Point"/> by summing two <see cref="Point"/>'s coordinates.
+		/// </summary>
+		public static Point operator +(Point left, Point right) => new (left.X + right.X, left.Y + right.Y);
+		
+		/// <summary>
+		///		Create a new <see cref="Point"/> by subtracting <paramref name="right"/>'s coordinates from <paramref name="left"/>'s.
+		/// </summary>
+		public static Point operator -(Point left, Point right) => new (left.X - right.X, left.Y - right.Y);
+
+		/// <summary>
+		///		Create a new <see cref="Point"/> by applying a <paramref name="displacement"/> in <paramref name="point"/>'s coordinates.
+		/// </summary>
+		public static Point operator +(Point point, PlaneDisplacement displacement) => new (point.X + displacement.X, point.Y + displacement.Y);
+		
+		/// <summary>
+		///		Create a new <see cref="Point"/> by multiplying <paramref name="point"/>'s coordinates by a <see cref="number"/>.
+		/// </summary>
+		public static Point operator *(Point point, double number) => new (point.X * number, point.Y * number);
+		
+		/// <inheritdoc cref="operator *(Point,double)"/>
+		public static Point operator *(Point point, int number) => new (point.X * number, point.Y * number);
+
+		/// <inheritdoc cref="operator *(Point,double)"/>
+		public static Point operator *(double number, Point point) => point * number;
+		
+		/// <inheritdoc cref="operator *(Point,double)"/>
+		public static Point operator *(int number, Point point) => point * number;
+
+		/// <summary>
+		///		Create a new <see cref="Point"/> by dividing <paramref name="point"/>'s coordinates by a <see cref="number"/>.
+		/// </summary>
+		public static Point operator /(Point point, double number) => new (point.X / number, point.Y / number);
+		
+		/// <inheritdoc cref="operator /(Point,double)"/>
+		public static Point operator /(Point point, int number) => new (point.X / number, point.Y / number);
+
 		#endregion
 
 	}
