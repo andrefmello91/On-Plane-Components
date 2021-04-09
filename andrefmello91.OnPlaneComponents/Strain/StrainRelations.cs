@@ -89,7 +89,7 @@ namespace andrefmello91.OnPlaneComponents
 					theta1 = Constants.PiOver2 - 0.5 * (gammaXY / (epsilonY - epsilonX)).Atan();
 				}
 
-				if (theta1.IsNaN())
+				if (!theta1.IsFinite())
 					theta1 = Constants.PiOver4;
 			}
 
