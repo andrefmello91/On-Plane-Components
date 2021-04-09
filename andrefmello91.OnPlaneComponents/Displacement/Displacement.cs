@@ -106,7 +106,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// </param>
 		/// <param name="unit">The <see cref="LengthUnit" /> of displacement (default: <see cref="LengthUnit.Millimeter" />).</param>
 		public PlaneDisplacement(double componentX, double componentY, LengthUnit unit = LengthUnit.Millimeter)
-			: this(Length.From(componentX.ToZero(), unit), Length.From(componentY.ToZero(), unit))
+			: this((Length) componentX.As(unit), (Length) componentY.As(unit))
 		{
 		}
 
@@ -117,8 +117,8 @@ namespace andrefmello91.OnPlaneComponents
 		/// <param name="displacementY">Displacement component in Y direction (positive upwards) (<see cref="Length" />).</param>
 		public PlaneDisplacement(Length displacementX, Length displacementY)
 		{
-			X         = displacementX.ToZero();
-			Y         = displacementY.ToZero().ToUnit(displacementX.Unit);
+			X         = displacementX;
+			Y         = displacementY.ToUnit(displacementX.Unit);
 			Resultant = CalculateResultant(X, Y, X.Unit);
 		}
 

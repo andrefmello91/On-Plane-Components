@@ -73,7 +73,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <param name="y">The vertical (y) coordinate.</param>
 		/// <param name="unit">The <see cref="LengthUnit" /> of <paramref name="x" /> and <paramref name="y" /> coordinates.</param>
 		public Point(double x, double y, LengthUnit unit = LengthUnit.Millimeter)
-			: this(Length.From(x, unit), Length.From(y, unit))
+			: this((Length) x.As(unit), (Length) y.As(unit))
 		{
 		}
 

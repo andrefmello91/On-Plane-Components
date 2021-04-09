@@ -135,16 +135,15 @@ namespace andrefmello91.OnPlaneComponents
 		/// </param>
 		/// <param name="unit">The <see cref="PressureUnit" /> of stresses (default: <see cref="PressureUnit.Megapascal" />).</param>
 		public PrincipalStressState(double sigma1, double sigma2, double theta1 = Constants.PiOver4, PressureUnit unit = PressureUnit.Megapascal)
-			: this(Pressure.From(sigma1.ToZero(), unit), Pressure.From(sigma2.ToZero(), unit), theta1)
+			: this((Pressure) sigma1.As(unit), (Pressure) sigma2.As(unit), theta1)
 		{
 		}
 
 		/// <inheritdoc cref="PrincipalStressState(double, double, double, PressureUnit)" />
 		public PrincipalStressState(Pressure sigma1, Pressure sigma2, double theta1 = Constants.PiOver4)
 		{
-			Sigma1               = sigma1.ToZero();
-			Sigma2               = sigma2.ToZero().ToUnit(sigma1.Unit);
-			Sigma2               = sigma2.ToZero().ToUnit(sigma1.Unit);
+			Sigma1               = sigma1;
+			Sigma2               = sigma2.ToUnit(sigma1.Unit);
 			Theta1               = theta1.ToZero();
 			TransformationMatrix = StrainRelations.TransformationMatrix(theta1);
 		}

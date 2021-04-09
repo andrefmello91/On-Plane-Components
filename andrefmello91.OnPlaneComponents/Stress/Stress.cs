@@ -111,16 +111,16 @@ namespace andrefmello91.OnPlaneComponents
 		/// </param>
 		/// <param name="unit">The <see cref="PressureUnit" /> of stresses (default: <see cref="PressureUnit.Megapascal" />).</param>
 		public StressState(double sigmaX, double sigmaY, double tauXY, double thetaX = 0, PressureUnit unit = PressureUnit.Megapascal)
-			: this(Pressure.From(sigmaX.ToZero(), unit), Pressure.From(sigmaY.ToZero(), unit), Pressure.From(tauXY.ToZero(), unit), thetaX)
+			: this((Pressure) sigmaX.As(unit), (Pressure) sigmaY.As(unit), (Pressure) tauXY.As(unit), thetaX)
 		{
 		}
 
 		/// <inheritdoc cref="StressState(double, double, double, double, PressureUnit)" />
 		public StressState(Pressure sigmaX, Pressure sigmaY, Pressure tauXY, double thetaX = 0)
 		{
-			SigmaX               = sigmaX.ToZero();
-			SigmaY               = sigmaY.ToZero().ToUnit(sigmaX.Unit);
-			TauXY                = tauXY.ToZero().ToUnit(sigmaX.Unit);
+			SigmaX               = sigmaX;
+			SigmaY               = sigmaY.ToUnit(sigmaX.Unit);
+			TauXY                = tauXY.ToUnit(sigmaX.Unit);
 			ThetaX               = thetaX.ToZero();
 			TransformationMatrix = TransformationMatrix(thetaX);
 		}

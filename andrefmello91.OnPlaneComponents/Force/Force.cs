@@ -95,7 +95,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <param name="componentY">Value of force component in Y direction, in <paramref name="unit" />. (positive upwards).</param>
 		/// <param name="unit">The <see cref="ForceUnit" /> (default: <see cref="ForceUnit.Newton" />).</param>
 		public PlaneForce(double componentX, double componentY, ForceUnit unit = ForceUnit.Newton)
-			: this(Force.From(componentX.ToZero(), unit), Force.From(componentY.ToZero(), unit))
+			: this((Force) componentX.As(unit), (Force) componentY.As(unit))
 		{
 		}
 
@@ -106,8 +106,8 @@ namespace andrefmello91.OnPlaneComponents
 		/// <param name="forceY"><see cref="UnitsNet.Force" /> component in Y direction (positive upwards).</param>
 		public PlaneForce(Force forceX, Force forceY)
 		{
-			X         = forceX.ToZero();
-			Y         = forceY.ToZero().ToUnit(forceX.Unit);
+			X         = forceX;
+			Y         = forceY.ToUnit(forceX.Unit);
 			Resultant = CalculateResultant(X, Y, X.Unit);
 		}
 
