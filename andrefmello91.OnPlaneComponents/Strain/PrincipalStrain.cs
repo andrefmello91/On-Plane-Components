@@ -117,9 +117,9 @@ namespace andrefmello91.OnPlaneComponents
 		/// </param>
 		public PrincipalStrainState(double epsilon1, double epsilon2, double theta1 = Constants.PiOver4)
 		{
-			Epsilon1             = epsilon1.ToZero();
-			Epsilon2             = epsilon2.ToZero();
-			Theta1               = theta1.ToZero();
+			Epsilon1             = epsilon1.AsFinite();
+			Epsilon2             = epsilon2.AsFinite();
+			Theta1               = theta1.AsFinite();
 			TransformationMatrix = TransformationMatrix(theta1);
 		}
 

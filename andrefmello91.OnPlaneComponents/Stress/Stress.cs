@@ -121,7 +121,7 @@ namespace andrefmello91.OnPlaneComponents
 			SigmaX               = sigmaX;
 			SigmaY               = sigmaY.ToUnit(sigmaX.Unit);
 			TauXY                = tauXY.ToUnit(sigmaX.Unit);
-			ThetaX               = thetaX.ToZero();
+			ThetaX               = thetaX.AsFinite();
 			TransformationMatrix = TransformationMatrix(thetaX);
 		}
 

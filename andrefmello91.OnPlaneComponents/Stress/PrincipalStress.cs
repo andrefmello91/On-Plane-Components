@@ -144,7 +144,7 @@ namespace andrefmello91.OnPlaneComponents
 		{
 			Sigma1               = sigma1;
 			Sigma2               = sigma2.ToUnit(sigma1.Unit);
-			Theta1               = theta1.ToZero();
+			Theta1               = theta1.AsFinite();
 			TransformationMatrix = StrainRelations.TransformationMatrix(theta1);
 		}
 

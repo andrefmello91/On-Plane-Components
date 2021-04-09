@@ -105,10 +105,10 @@ namespace andrefmello91.OnPlaneComponents
 		/// </param>
 		public StrainState(double epsilonX, double epsilonY, double gammaXY, double thetaX = 0)
 		{
-			EpsilonX             = epsilonX.ToZero();
-			EpsilonY             = epsilonY.ToZero();
-			GammaXY              = gammaXY.ToZero();
-			ThetaX               = thetaX.ToZero();
+			EpsilonX             = epsilonX.AsFinite();
+			EpsilonY             = epsilonY.AsFinite();
+			GammaXY              = gammaXY.AsFinite();
+			ThetaX               = thetaX.AsFinite();
 			TransformationMatrix = TransformationMatrix(thetaX);
 		}
 
