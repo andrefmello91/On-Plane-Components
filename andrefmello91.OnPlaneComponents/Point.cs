@@ -311,6 +311,11 @@ namespace andrefmello91.OnPlaneComponents
 		public static Point operator -(Point left, Point right) => new (left.X - right.X, left.Y - right.Y);
 
 		/// <summary>
+		///     Returns a <see cref="Point" /> object with negated components.
+		/// </summary>
+		public static Point operator -(Point point) => new(-point.X, -point.Y);
+		
+		/// <summary>
 		///		Create a new <see cref="Point"/> by applying a <paramref name="displacement"/> in <paramref name="point"/>'s coordinates.
 		/// </summary>
 		public static Point operator +(Point point, PlaneDisplacement displacement) => displacement.IsZero

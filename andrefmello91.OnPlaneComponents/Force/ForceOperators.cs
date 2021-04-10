@@ -23,6 +23,11 @@
 		public static PlaneForce operator -(PlaneForce left, PlaneForce right) => new(left.X - right.X.ToUnit(left.Unit), left.Y - right.Y.ToUnit(left.Unit));
 
 		/// <summary>
+		///     Returns a <see cref="PlaneForce" /> object with negated components.
+		/// </summary>
+		public static PlaneForce operator -(PlaneForce force) => new(-force.X, -force.Y);
+
+		/// <summary>
 		///     Returns a <see cref="PlaneForce" /> object with multiplied components by a <see cref="double" />.
 		/// </summary>
 		public static PlaneForce operator *(PlaneForce planeForce, double multiplier) => new(multiplier * planeForce.X, multiplier * planeForce.Y);
