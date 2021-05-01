@@ -13,7 +13,7 @@ namespace andrefmello91.OnPlaneComponents
 	/// <summary>
 	///     Stress object for XY components.
 	/// </summary>
-	public partial struct StressState : IState<Pressure>, IUnitConvertible<StressState, PressureUnit>, IApproachable<StressState, Pressure>, IApproachable<PrincipalStressState, Pressure>, IEquatable<StressState>, IEquatable<PrincipalStressState>, ICloneable<StressState>
+	public partial struct StressState : IState<Pressure>, IUnitConvertible<PressureUnit>, IApproachable<StressState, Pressure>, IApproachable<PrincipalStressState, Pressure>, IEquatable<StressState>, IEquatable<PrincipalStressState>, ICloneable<StressState>
 	{
 
 		#region Fields
@@ -256,6 +256,8 @@ namespace andrefmello91.OnPlaneComponents
 		public StressState Convert(PressureUnit unit) => unit == Unit
 			? this
 			: new StressState(SigmaX.ToUnit(unit), SigmaY.ToUnit(unit), TauXY.ToUnit(unit), ThetaX);
+
+		IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
 
 		/// <summary>
 		///     Get the stresses as an <see cref="Array" />.

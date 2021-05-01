@@ -9,7 +9,7 @@ namespace andrefmello91.OnPlaneComponents
 	/// <summary>
 	///     On plane Point struct.
 	/// </summary>
-	public struct Point : IUnitConvertible<Point, LengthUnit>, IApproachable<Point, Length>, IEquatable<Point>, IComparable<Point>, ICloneable<Point>
+	public struct Point : IUnitConvertible<LengthUnit>, IApproachable<Point, Length>, IEquatable<Point>, IComparable<Point>, ICloneable<Point>
 	{
 
 		#region Fields
@@ -107,6 +107,8 @@ namespace andrefmello91.OnPlaneComponents
 		/// </summary>
 		/// <inheritdoc cref="ChangeUnit" />
 		public Point Convert(LengthUnit unit) => Unit == unit ? this : new Point(X.ToUnit(unit), Y.ToUnit(unit));
+
+		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
 
 		/// <summary>
 		///     Get the horizontal distance, in <see cref="Unit" />, between this <see cref="Point" /> and

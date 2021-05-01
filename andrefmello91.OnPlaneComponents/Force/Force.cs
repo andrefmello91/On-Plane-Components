@@ -9,7 +9,7 @@ namespace andrefmello91.OnPlaneComponents
 	/// <summary>
 	///     Force struct.
 	/// </summary>
-	public partial struct PlaneForce : IPlaneComponent<Force>, IUnitConvertible<PlaneForce, ForceUnit>, IApproachable<PlaneForce, Force>, IEquatable<PlaneForce>, ICloneable<PlaneForce>
+	public partial struct PlaneForce : IPlaneComponent<Force>, IUnitConvertible<ForceUnit>, IApproachable<PlaneForce, Force>, IEquatable<PlaneForce>, ICloneable<PlaneForce>
 	{
 
 		#region Fields
@@ -189,6 +189,8 @@ namespace andrefmello91.OnPlaneComponents
 		public PlaneForce Convert(ForceUnit unit) => unit == Unit
 			? this
 			: new PlaneForce(X.ToUnit(unit), Y.ToUnit(unit));
+
+		IUnitConvertible<ForceUnit> IUnitConvertible<ForceUnit>.Convert(ForceUnit unit) => Convert(unit);
 
 		/// <inheritdoc />
 		public PlaneForce Clone() => new(X, Y);

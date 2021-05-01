@@ -14,7 +14,7 @@ namespace andrefmello91.OnPlaneComponents
 	/// <summary>
 	///     Principal stress struct.
 	/// </summary>
-	public partial struct PrincipalStressState : IPrincipalState<Pressure>, IUnitConvertible<PrincipalStressState, PressureUnit>, IApproachable<StressState, Pressure>, IApproachable<PrincipalStressState, Pressure>, IEquatable<StressState>, IEquatable<PrincipalStressState>, ICloneable<PrincipalStressState>
+	public partial struct PrincipalStressState : IPrincipalState<Pressure>, IUnitConvertible<PressureUnit>, IApproachable<StressState, Pressure>, IApproachable<PrincipalStressState, Pressure>, IEquatable<StressState>, IEquatable<PrincipalStressState>, ICloneable<PrincipalStressState>
 	{
 
 		#region Fields
@@ -187,6 +187,8 @@ namespace andrefmello91.OnPlaneComponents
 		public PrincipalStressState Convert(PressureUnit unit) => unit == Unit
 			? this
 			: new PrincipalStressState(Sigma1.ToUnit(unit), Sigma2.ToUnit(unit), Theta1);
+
+		IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
 
 		/// <summary>
 		///     Get principal stresses as an <see cref="Array" />.

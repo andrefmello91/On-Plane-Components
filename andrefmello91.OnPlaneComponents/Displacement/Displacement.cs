@@ -9,7 +9,7 @@ namespace andrefmello91.OnPlaneComponents
 	/// <summary>
 	///     Displacement struct.
 	/// </summary>
-	public partial struct PlaneDisplacement : IPlaneComponent<Length>, IUnitConvertible<PlaneDisplacement, LengthUnit>, IApproachable<PlaneDisplacement, Length>, IEquatable<PlaneDisplacement>, ICloneable<PlaneDisplacement>
+	public partial struct PlaneDisplacement : IPlaneComponent<Length>, IUnitConvertible<LengthUnit>, IApproachable<PlaneDisplacement, Length>, IEquatable<PlaneDisplacement>, ICloneable<PlaneDisplacement>
 	{
 
 		#region Fields
@@ -195,6 +195,8 @@ namespace andrefmello91.OnPlaneComponents
 			? this
 			: new PlaneDisplacement(X.ToUnit(unit), Y.ToUnit(unit));
 
+		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
+		
 		/// <inheritdoc />
 		public bool Approaches(PlaneDisplacement other, Length tolerance) => X.Approx(other.X, tolerance) && Y.Approx(other.Y, tolerance);
 
