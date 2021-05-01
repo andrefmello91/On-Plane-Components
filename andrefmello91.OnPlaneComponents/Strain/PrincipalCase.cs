@@ -9,24 +9,24 @@
 		///     Tension at both directions.
 		/// </summary>
 		PureTension,
-		
+
 		/// <summary>
 		///     Compression at both directions.
 		/// </summary>
 		PureCompression,
-		
+
 		/// <summary>
 		///     Tension at one direction and compression at another one..
 		/// </summary>
 		TensionCompression,
-		
+
 		/// <summary>
-		///		Tension at one direction, no stress at another.
+		///     Tension at one direction, no stress at another.
 		/// </summary>
 		UniaxialTension,
-		
+
 		/// <summary>
-		///		Compression at one direction, no stress at another.
+		///     Compression at one direction, no stress at another.
 		/// </summary>
 		UniaxialCompression,
 

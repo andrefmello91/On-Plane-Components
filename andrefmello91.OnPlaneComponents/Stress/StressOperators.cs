@@ -1,6 +1,4 @@
-﻿using UnitsNet;
-
-namespace andrefmello91.OnPlaneComponents
+﻿namespace andrefmello91.OnPlaneComponents
 {
 	public partial struct StressState
 	{
@@ -151,12 +149,12 @@ namespace andrefmello91.OnPlaneComponents
 		public static StressState operator /(StressState stressState, int divider) => stressState / (double) divider;
 
 		/// <summary>
-		///		Convert a <see cref="PrincipalStressState"/> into a <see cref="StressState"/>.
+		///     Convert a <see cref="PrincipalStressState" /> into a <see cref="StressState" />.
 		/// </summary>
 		/// <remarks>
-		///		See: <see cref="PrincipalStressState.AsStressState"/>.
+		///     See: <see cref="PrincipalStressState.AsStressState" />.
 		/// </remarks>
 		public static explicit operator StressState(PrincipalStressState principalStressState) => principalStressState.AsStressState();
-		
+
 	}
 }

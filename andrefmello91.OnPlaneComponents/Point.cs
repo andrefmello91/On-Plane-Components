@@ -115,7 +115,7 @@ namespace andrefmello91.OnPlaneComponents
 		///     <paramref name="other" />.
 		/// </summary>
 		/// <remarks>
-		///		The distance is calculated considering <paramref name="other"/> point as reference.
+		///     The distance is calculated considering <paramref name="other" /> point as reference.
 		/// </remarks>
 		/// <param name="other">The other <see cref="Point" /> to calculate distance.</param>
 		/// <param name="absoluteValue">Return the absolute value of distance?</param>
@@ -132,7 +132,7 @@ namespace andrefmello91.OnPlaneComponents
 		///     Get the vertical distance, in <see cref="Unit" />, between this <see cref="Point" /> and <paramref name="other" />.
 		/// </summary>
 		/// <remarks>
-		///		The distance is calculated considering <paramref name="other"/> point as reference.
+		///     The distance is calculated considering <paramref name="other" /> point as reference.
 		/// </remarks>
 		/// <inheritdoc cref="GetDistanceInX" />
 		public Length GetDistanceInY(Point other, bool absoluteValue = true)
@@ -303,48 +303,51 @@ namespace andrefmello91.OnPlaneComponents
 		public static bool operator <=(Point left, Point right) => left.CompareTo(right) <= 0;
 
 		/// <summary>
-		///		Create a new <see cref="Point"/> by summing two <see cref="Point"/>'s coordinates.
+		///     Create a new <see cref="Point" /> by summing two <see cref="Point" />'s coordinates.
 		/// </summary>
-		public static Point operator +(Point left, Point right) => new (left.X + right.X, left.Y + right.Y);
-		
+		public static Point operator +(Point left, Point right) => new(left.X + right.X, left.Y + right.Y);
+
 		/// <summary>
-		///		Create a new <see cref="Point"/> by subtracting <paramref name="right"/>'s coordinates from <paramref name="left"/>'s.
+		///     Create a new <see cref="Point" /> by subtracting <paramref name="right" />'s coordinates from
+		///     <paramref name="left" />'s.
 		/// </summary>
-		public static Point operator -(Point left, Point right) => new (left.X - right.X, left.Y - right.Y);
+		public static Point operator -(Point left, Point right) => new(left.X - right.X, left.Y - right.Y);
 
 		/// <summary>
 		///     Returns a <see cref="Point" /> object with negated components.
 		/// </summary>
 		public static Point operator -(Point point) => new(-point.X, -point.Y);
-		
+
 		/// <summary>
-		///		Create a new <see cref="Point"/> by applying a <paramref name="displacement"/> in <paramref name="point"/>'s coordinates.
+		///     Create a new <see cref="Point" /> by applying a <paramref name="displacement" /> in <paramref name="point" />'s
+		///     coordinates.
 		/// </summary>
 		public static Point operator +(Point point, PlaneDisplacement displacement) => displacement.IsZero
 			? point
 			: new Point(point.X + displacement.X, point.Y + displacement.Y);
-		
-		/// <summary>
-		///		Create a new <see cref="Point"/> by multiplying <paramref name="point"/>'s coordinates by a <see cref="number"/>.
-		/// </summary>
-		public static Point operator *(Point point, double number) => new (point.X * number, point.Y * number);
-		
-		/// <inheritdoc cref="operator *(Point,double)"/>
-		public static Point operator *(Point point, int number) => new (point.X * number, point.Y * number);
 
-		/// <inheritdoc cref="operator *(Point,double)"/>
+		/// <summary>
+		///     Create a new <see cref="Point" /> by multiplying <paramref name="point" />'s coordinates by a <see cref="number" />
+		///     .
+		/// </summary>
+		public static Point operator *(Point point, double number) => new(point.X * number, point.Y * number);
+
+		/// <inheritdoc cref="operator *(Point,double)" />
+		public static Point operator *(Point point, int number) => new(point.X * number, point.Y * number);
+
+		/// <inheritdoc cref="operator *(Point,double)" />
 		public static Point operator *(double number, Point point) => point * number;
-		
-		/// <inheritdoc cref="operator *(Point,double)"/>
+
+		/// <inheritdoc cref="operator *(Point,double)" />
 		public static Point operator *(int number, Point point) => point * number;
 
 		/// <summary>
-		///		Create a new <see cref="Point"/> by dividing <paramref name="point"/>'s coordinates by a <see cref="number"/>.
+		///     Create a new <see cref="Point" /> by dividing <paramref name="point" />'s coordinates by a <see cref="number" />.
 		/// </summary>
-		public static Point operator /(Point point, double number) => new (point.X / number, point.Y / number);
-		
-		/// <inheritdoc cref="operator /(Point,double)"/>
-		public static Point operator /(Point point, int number) => new (point.X / number, point.Y / number);
+		public static Point operator /(Point point, double number) => new(point.X / number, point.Y / number);
+
+		/// <inheritdoc cref="operator /(Point,double)" />
+		public static Point operator /(Point point, int number) => new(point.X / number, point.Y / number);
 
 		#endregion
 

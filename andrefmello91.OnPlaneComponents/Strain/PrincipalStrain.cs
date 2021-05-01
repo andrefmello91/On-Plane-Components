@@ -26,7 +26,7 @@ namespace andrefmello91.OnPlaneComponents
 		#region Properties
 
 		/// <inheritdoc />
-		public PrincipalCase Case => 
+		public PrincipalCase Case =>
 			Is1Zero switch
 			{
 				true when Is2Zero       => PrincipalCase.Zero,

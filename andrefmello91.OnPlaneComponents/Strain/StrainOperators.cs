@@ -135,12 +135,12 @@
 		///     Returns a <see cref="StrainState" /> object with components divided by an <see cref="int" />.
 		/// </summary>
 		public static StrainState operator /(StrainState strainState, int divider) => strainState / (double) divider;
-		
+
 		/// <summary>
-		///		Convert a <see cref="PrincipalStrainState"/> into a <see cref="StrainState"/>.
+		///     Convert a <see cref="PrincipalStrainState" /> into a <see cref="StrainState" />.
 		/// </summary>
 		/// <remarks>
-		///		See: <see cref="PrincipalStrainState.AsStrainState"/>.
+		///     See: <see cref="PrincipalStrainState.AsStrainState" />.
 		/// </remarks>
 		public static explicit operator StrainState(PrincipalStrainState principalStressState) => principalStressState.AsStrainState();
 

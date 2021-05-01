@@ -21,7 +21,7 @@
 		///     Returns a <see cref="PlaneDisplacement" /> object with subtracted components, in left argument's unit.
 		/// </summary>
 		public static PlaneDisplacement operator -(PlaneDisplacement left, PlaneDisplacement right) => new(left.X - right.X.ToUnit(left.Unit), left.Y - right.Y.ToUnit(left.Unit));
-		
+
 		/// <summary>
 		///     Returns a <see cref="PlaneDisplacement" /> object with negated components.
 		/// </summary>

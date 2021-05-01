@@ -68,10 +68,10 @@
 		public static PrincipalStrainState operator /(PrincipalStrainState principalStrainState, int divider) => principalStrainState / (double) divider;
 
 		/// <summary>
-		///		Convert a <see cref="StrainState"/> into a <see cref="PrincipalStrainState"/>.
+		///     Convert a <see cref="StrainState" /> into a <see cref="PrincipalStrainState" />.
 		/// </summary>
 		/// <remarks>
-		///		See: <see cref="StrainState.ToPrincipal"/>.
+		///     See: <see cref="StrainState.ToPrincipal" />.
 		/// </remarks>
 		public static explicit operator PrincipalStrainState(StrainState state) => state.ToPrincipal().ToPrincipalStrainState();
 

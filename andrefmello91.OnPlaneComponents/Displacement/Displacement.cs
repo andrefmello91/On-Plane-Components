@@ -196,7 +196,7 @@ namespace andrefmello91.OnPlaneComponents
 			: new PlaneDisplacement(X.ToUnit(unit), Y.ToUnit(unit));
 
 		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
-		
+
 		/// <inheritdoc />
 		public bool Approaches(PlaneDisplacement other, Length tolerance) => X.Approx(other.X, tolerance) && Y.Approx(other.Y, tolerance);
 
