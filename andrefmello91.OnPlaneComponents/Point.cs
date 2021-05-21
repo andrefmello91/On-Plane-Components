@@ -22,7 +22,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <summary>
 		///     The <see cref="Point" /> located at the origin of the coordinate system.
 		/// </summary>
-		public static readonly Point Origin = new(0, 0);
+		public static Point Origin { get; } = new(0, 0);
 
 		#endregion
 
@@ -191,6 +191,41 @@ namespace andrefmello91.OnPlaneComponents
 				_ => (y / x).Atan()
 			};
 		}
+
+
+		/// <summary>
+		///     Rotate this point using a base point.
+		/// </summary>
+		/// <param name="basePoint">The base <see cref="Point" /> to rotate from.</param>
+		/// <inheritdoc cref="Rotate(double)" />
+		public Point Rotate(Point basePoint, double rotationAngle)
+		{
+			if (this == basePoint)
+				return this;
+
+			// Get related coordinates
+			var relPt = this - basePoint;
+
+			// Get direction cosines
+			var (cos, sin) = rotationAngle.DirectionCosines();
+
+			// Calculate coordinates
+			var x = (relPt.X * cos - relPt.Y * sin).ToUnit(Unit);
+			var y = (relPt.X * sin + relPt.Y * cos).ToUnit(Unit);
+
+			// Adjust coordinates
+			return
+				basePoint + new Point(x, y);
+		}
+
+		/// <summary>
+		///     Rotate this point using origin as base point.
+		/// </summary>
+		/// <param name="rotationAngle">The angle of rotation, in radians (positive to counterclockwise).</param>
+		/// <returns>
+		///     The point with rotated coordinates.
+		/// </returns>
+		public Point Rotate(double rotationAngle) => Rotate(Origin, rotationAngle);
 
 		/// <summary>
 		///     Get the midpoint between this and <paramref name="other" /> <see cref="Point" />.
