@@ -200,7 +200,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Rotate(double)" />
 		public Point Rotate(Point basePoint, double rotationAngle)
 		{
-			if (this == basePoint)
+			if (this == basePoint || rotationAngle is 0 or Constants.Pi2)
 				return this;
 
 			// Get related coordinates
