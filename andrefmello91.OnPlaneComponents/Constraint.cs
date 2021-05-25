@@ -9,6 +9,26 @@ namespace andrefmello91.OnPlaneComponents
 	public struct Constraint : IPlaneComponent<bool>, IEquatable<Constraint>, ICloneable<Constraint>
 	{
 		/// <summary>
+		///     A free constraint.
+		/// </summary>
+		public static Constraint Free { get; } = new(false, false);
+
+		/// <summary>
+		///     A constraint in X direction.
+		/// </summary>
+		public static Constraint XOnly { get; } = new(true, false);
+
+		/// <summary>
+		///     A constraint in Y direction.
+		/// </summary>
+		public static Constraint YOnly { get; } = new(false, true);
+
+		/// <summary>
+		///     A constraint in both directions.
+		/// </summary>
+		public static Constraint Full { get; } = new(true, true);
+
+		/// <summary>
 		///     Get/set the X (horizontal) constraint.
 		/// </summary>
 		/// <remarks>
@@ -86,29 +106,10 @@ namespace andrefmello91.OnPlaneComponents
 			{
 				ComponentDirection.X    => XOnly,
 				ComponentDirection.Y    => YOnly,
-				ComponentDirection.Both => FullConstraint,
+				ComponentDirection.Both => Full,
 				_                       => Free
 			};
 
-		/// <summary>
-		///     A free constraint.
-		/// </summary>
-		public static readonly Constraint Free = new(false, false);
-
-		/// <summary>
-		///     A constraint in X direction.
-		/// </summary>
-		public static readonly Constraint XOnly = new(true, false);
-
-		/// <summary>
-		///     A constraint in Y direction.
-		/// </summary>
-		public static readonly Constraint YOnly = new(false, true);
-
-		/// <summary>
-		///     A constraint in both directions.
-		/// </summary>
-		public static readonly Constraint FullConstraint = new(true, true);
 
 		/// <inheritdoc />
 		public bool Equals(Constraint other) => Direction == other.Direction;

@@ -18,12 +18,12 @@ namespace andrefmello91.OnPlaneComponents
 		/// <summary>
 		///     Get a <see cref="StrainState" /> with zero elements.
 		/// </summary>
-		public static readonly StrainState Zero = new(0, 0, 0);
+		public static StrainState Zero { get; } = new(0, 0, 0);
 
 		/// <summary>
 		///     The default tolerance for strains.
 		/// </summary>
-		public static readonly double Tolerance = 1E-12;
+		public static double Tolerance => 1E-12;
 
 		#endregion
 

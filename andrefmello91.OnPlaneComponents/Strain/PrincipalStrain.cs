@@ -19,7 +19,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <summary>
 		///     Get a <see cref="PrincipalStrainState" /> with zero elements.
 		/// </summary>
-		public static readonly PrincipalStrainState Zero = new(0, 0);
+		public static PrincipalStrainState Zero { get; } = new(0, 0);
 
 		#endregion
 

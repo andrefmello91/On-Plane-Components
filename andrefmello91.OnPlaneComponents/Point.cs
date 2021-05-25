@@ -17,7 +17,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <summary>
 		///     The tolerance to consider points equal.
 		/// </summary>
-		public static readonly Length Tolerance = Length.FromMillimeters(1E-3);
+		public static Length Tolerance { get; } = Length.FromMillimeters(1E-3);
 
 		/// <summary>
 		///     The <see cref="Point" /> located at the origin of the coordinate system.

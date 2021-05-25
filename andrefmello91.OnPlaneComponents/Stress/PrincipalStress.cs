@@ -22,7 +22,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <summary>
 		///     Get a <see cref="PrincipalStressState" /> with zero elements.
 		/// </summary>
-		public static readonly PrincipalStressState Zero = new(0, 0);
+		public static PrincipalStressState Zero { get; } = new(0, 0);
 
 		#endregion
 

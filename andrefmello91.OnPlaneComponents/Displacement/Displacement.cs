@@ -17,12 +17,12 @@ namespace andrefmello91.OnPlaneComponents
 		/// <summary>
 		///     The tolerance to consider displacements equal.
 		/// </summary>
-		public static readonly Length Tolerance = Length.FromMillimeters(1E-6);
+		public static Length Tolerance { get; } = Length.FromMillimeters(1E-6);
 
 		/// <summary>
 		///     Get a <see cref="PlaneDisplacement" /> with zero value.
 		/// </summary>
-		public static readonly PlaneDisplacement Zero = new(0, 0);
+		public static PlaneDisplacement Zero { get; } = new(0, 0);
 
 		#endregion
 

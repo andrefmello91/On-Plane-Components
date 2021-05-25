@@ -21,12 +21,12 @@ namespace andrefmello91.OnPlaneComponents
 		/// <summary>
 		///     Get a <see cref="StressState" /> with zero elements.
 		/// </summary>
-		public static readonly StressState Zero = new(0, 0, 0);
+		public static StressState Zero { get; } = new(0, 0, 0);
 
 		/// <summary>
 		///     The default tolerance for stresses.
 		/// </summary>
-		public static readonly Pressure Tolerance = Pressure.FromPascals(1E-3);
+		public static Pressure Tolerance { get; } = Pressure.FromPascals(1E-3);
 
 		#endregion
 

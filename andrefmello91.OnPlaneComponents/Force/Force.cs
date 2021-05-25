@@ -17,12 +17,12 @@ namespace andrefmello91.OnPlaneComponents
 		/// <summary>
 		///     Get a <see cref="PlaneForce" /> with zero value.
 		/// </summary>
-		public static readonly PlaneForce Zero = new(0, 0);
+		public static PlaneForce Zero { get; } = new(0, 0);
 
 		/// <summary>
 		///     The tolerance to consider forces equal.
 		/// </summary>
-		public static readonly Force Tolerance = Force.FromNewtons(1E-6);
+		public static Force Tolerance { get; } = Force.FromNewtons(1E-6);
 
 		#endregion
 
