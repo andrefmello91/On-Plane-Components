@@ -14,7 +14,7 @@ namespace andrefmello91.OnPlaneComponents
 	/// <summary>
 	///     Principal stress struct.
 	/// </summary>
-	public partial struct PrincipalStressState : IPrincipalState<Pressure>, IUnitConvertible<PressureUnit>, IApproachable<StressState, Pressure>, IApproachable<PrincipalStressState, Pressure>, IEquatable<StressState>, IEquatable<PrincipalStressState>, ICloneable<PrincipalStressState>
+	public partial struct PrincipalStressState : IPrincipalState<Pressure>, IUnitConvertible<PressureUnit>, IApproachable<IState<Pressure>, Pressure>, IEquatable<IState<Pressure>>, ICloneable<PrincipalStressState>
 	{
 
 		#region Fields
@@ -164,8 +164,7 @@ namespace andrefmello91.OnPlaneComponents
 			return new PrincipalStressState(s1, s2, stressState.ThetaX + theta1);
 		}
 
-		/// <inheritdoc />
-		public IPrincipalState<Pressure> ToPrincipal() => this;
+		IPrincipalState<Pressure> IState<Pressure>.ToPrincipal() => this;
 
 		/// <summary>
 		///     Change the <see cref="PressureUnit" /> of this <see cref="PrincipalStressState" />.
@@ -219,13 +218,17 @@ namespace andrefmello91.OnPlaneComponents
 		///     Get this <see cref="PrincipalStressState" /> transformed to horizontal direction (<see cref="StressState.ThetaX" />
 		///     = 0).
 		/// </summary>
-		public IState<Pressure> ToHorizontal() => AsStressState().ToHorizontal();
+		public StressState ToHorizontal() => StressState.ToHorizontal(this);
+
+		IState<Pressure> IState<Pressure>.ToHorizontal() => ToHorizontal();
 
 		/// <summary>
 		///     Get this <see cref="PrincipalStressState" /> transformed by a rotation angle.
 		/// </summary>
 		/// <inheritdoc cref="IState{T}.Transform" />
-		public IState<Pressure> Transform(double rotationAngle) => AsStressState().Transform(rotationAngle);
+		public StressState Transform(double rotationAngle) => StressState.Transform(this, rotationAngle);
+
+		IState<Pressure> IState<Pressure>.Transform(double rotationAngle) => Transform(rotationAngle);
 
 		IState<Pressure> IPrincipalState<Pressure>.AsState() => AsStressState();
 
@@ -235,39 +238,33 @@ namespace andrefmello91.OnPlaneComponents
 		public PrincipalStressState Clone() => new(Sigma1, Sigma2, Theta1);
 
 		/// <inheritdoc />
-		public bool Approaches(StressState other, Pressure tolerance) => Approaches((PrincipalStressState) other.ToPrincipal(), tolerance);
+		public bool Approaches(IState<Pressure>? other, Pressure tolerance)
+		{
+			if (other is null)
+				return false;
 
-		/// <inheritdoc />
-		public bool Approaches(PrincipalStressState other, Pressure tolerance) =>
-			Theta1.Approx(other.Theta1, 1E-3) &&
-			Sigma1.Approx(other.Sigma1, tolerance) && Sigma2.Approx(other.Sigma2, tolerance);
-
-		/// <summary>
-		///     Compare two <see cref="PrincipalStressState" /> objects.
-		/// </summary>
-		/// <param name="other">The other <see cref="PrincipalStressState" /> to compare.</param>
-		public bool Equals(PrincipalStressState other) => Approaches(other, Tolerance);
+			var principal = other.ToPrincipal();
+			
+			return 
+				Theta1.Approx(principal.Theta1, 1E-3)  &&
+				Sigma1.Approx(principal.S1, tolerance) && Sigma2.Approx(principal.S2, tolerance);
+		}
 
 		/// <summary>
 		///     Compare a <see cref="PrincipalStressState" /> to a <see cref="StressState" /> object.
 		/// </summary>
 		/// <param name="other">The <see cref="StressState" /> to compare.</param>
-		public bool Equals(StressState other) => Approaches(other, Tolerance);
+		public bool Equals(IState<Pressure>? other) => Approaches(other, Tolerance);
 
 		/// <inheritdoc />
 		public override bool Equals(object? obj)
 		{
-			switch (obj)
+			return obj switch
 			{
-				case PrincipalStressState other:
-					return Equals(other);
-
-				case StressState stress:
-					return Equals(stress);
-
-				default:
-					return false;
-			}
+				PrincipalStressState other => Equals(other),
+				StressState stress         => Equals(stress),
+				_                          => false
+			};
 		}
 
 		/// <inheritdoc />

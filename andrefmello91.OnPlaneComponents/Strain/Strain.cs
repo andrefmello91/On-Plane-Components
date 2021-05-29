@@ -10,7 +10,7 @@ namespace andrefmello91.OnPlaneComponents
 	/// <summary>
 	///     Strain struct for XY components.
 	/// </summary>
-	public readonly partial struct StrainState : IState<double>, IApproachable<StrainState, double>, IApproachable<PrincipalStrainState, double>, IEquatable<StrainState>, IEquatable<PrincipalStrainState>, ICloneable<StrainState>
+	public readonly partial struct StrainState : IState<double>, IApproachable<IState<double>, double>, IEquatable<IState<double>>, ICloneable<StrainState>
 	{
 
 		#region Fields
@@ -112,6 +112,11 @@ namespace andrefmello91.OnPlaneComponents
 			TransformationMatrix = TransformationMatrix(thetaX);
 		}
 
+		private StrainState(IState<double> state)
+			: this(state.X, state.Y, state.XY, state.ThetaX)
+		{
+		}
+		
 		#endregion
 
 		#region
@@ -141,50 +146,28 @@ namespace andrefmello91.OnPlaneComponents
 		///     Get <see cref="StrainState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
 		/// </summary>
 		/// <param name="strainState">The <see cref="StrainState" /> to transform.</param>
-		public static StrainState ToHorizontal(StrainState strainState)
-		{
-			if (strainState.IsHorizontal)
-				return strainState;
-
-			// Get the strain vector transformed
-			var sVec = StrainRelations.Transform(strainState.AsVector(), -strainState.ThetaX);
-
-			// Return with corrected angle
-			return FromVector(sVec);
-		}
+		public static StrainState ToHorizontal(IState<double> strainState) =>
+			Transform(strainState, -strainState.ThetaX);
 
 		/// <summary>
 		///     Get <see cref="StrainState" /> transformed by a rotation angle.
 		/// </summary>
 		/// <param name="strainState">The <see cref="StrainState" /> to transform.</param>
 		/// <inheritdoc cref="Transform(double)" />
-		public static StrainState Transform(StrainState strainState, double theta)
+		public static StrainState Transform(IState<double> strainState, double theta)
 		{
-			if (theta.ApproxZero())
-				return strainState;
+			var state = strainState is StrainState strains
+				? strains
+				: new StrainState(strainState);
+
+			if (theta.ApproxZero(1E-6))
+				return state;
 
 			// Get the strain vector transformed
-			var sVec = StrainRelations.Transform(strainState.AsVector(), theta);
+			var sVec = StrainRelations.Transform(state.AsVector(), theta);
 
 			// Return with corrected angle
-			return FromVector(sVec, strainState.ThetaX + theta);
-		}
-
-		/// <summary>
-		///     Get <see cref="StrainState" /> transformed by a rotation angle.
-		/// </summary>
-		/// <param name="principalStrainState">The <see cref="PrincipalStrainState" /> to transform.</param>
-		/// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
-		public static StrainState Transform(PrincipalStrainState principalStrainState, double theta)
-		{
-			if (theta.ApproxZero())
-				return FromVector(principalStrainState.AsVector(), principalStrainState.Theta1);
-
-			// Get the strain vector transformed
-			var sVec = StrainRelations.Transform(principalStrainState.AsVector(), theta);
-
-			// Return with corrected angle
-			return FromVector(sVec, principalStrainState.Theta1 + theta);
+			return FromVector(sVec, state.ThetaX + theta);
 		}
 
 		/// <summary>
@@ -207,13 +190,19 @@ namespace andrefmello91.OnPlaneComponents
 		/// <summary>
 		///     Get this <see cref="StrainState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
 		/// </summary>
-		public IState<double> ToHorizontal() => ToHorizontal(this);
+		public StrainState ToHorizontal() => ToHorizontal(this);
+
+		/// <inheritdoc />
+		IState<double> IState<double>.ToHorizontal() => ToHorizontal();
 
 		/// <summary>
 		///     Get this <see cref="StrainState" /> transformed by a rotation angle.
 		/// </summary>
 		/// <inheritdoc cref="IState{T}.Transform" />
-		public IState<double> Transform(double rotationAngle) => Transform(this, rotationAngle);
+		public StrainState Transform(double rotationAngle) => Transform(this, rotationAngle);
+
+		/// <inheritdoc />
+		IState<double> IState<double>.Transform(double rotationAngle) => Transform(rotationAngle);
 
 		/// <summary>
 		///     Get strains as an <see cref="Array" />.
@@ -234,47 +223,28 @@ namespace andrefmello91.OnPlaneComponents
 		/// <summary>
 		///     Get the <see cref="PrincipalStrainState" /> related to this <see cref="StrainState" />.
 		/// </summary>
-		public IPrincipalState<double> ToPrincipal() => PrincipalStrainState.FromStrain(this);
+		public PrincipalStrainState ToPrincipal() => PrincipalStrainState.FromStrain(this);
 
 		/// <inheritdoc />
-		public bool Approaches(StrainState other, double tolerance) =>
-			ThetaX.Approx(other.ThetaX, tolerance) && EpsilonX.Approx(other.EpsilonX, tolerance) &&
-			EpsilonY.Approx(other.EpsilonY, tolerance) && GammaXY.Approx(other.GammaXY, tolerance);
-
+		IPrincipalState<double> IState<double>.ToPrincipal() => ToPrincipal();
 
 		/// <inheritdoc />
-		public bool Approaches(PrincipalStrainState other, double tolerance) => Approaches(FromPrincipal(other), tolerance);
+		public bool Approaches(IState<double>? other, double tolerance) =>
+			other is not null &&
+			ThetaX.Approx(other.ThetaX, tolerance) && EpsilonX.Approx(other.X, tolerance) &&
+			EpsilonY.Approx(other.Y, tolerance) && GammaXY.Approx(other.XY, tolerance);
 
 		/// <inheritdoc />
 		public StrainState Clone() => new(EpsilonX, EpsilonY, GammaXY, ThetaX);
 
 		/// <summary>
-		///     Compare a <see cref="StrainState" /> to a <see cref="PrincipalStrainState" /> object.
-		/// </summary>
-		/// <param name="other">The <see cref="PrincipalStrainState" /> to compare.</param>
-		public bool Equals(PrincipalStrainState other) => Approaches(other, Tolerance);
-
-		/// <summary>
 		///     Compare two <see cref="StrainState" /> objects.
 		/// </summary>
 		/// <param name="other">The strain to compare.</param>
-		public bool Equals(StrainState other) => Approaches(other, Tolerance);
+		public bool Equals(IState<double>? other) => Approaches(other, Tolerance);
 
 		/// <inheritdoc />
-		public override bool Equals(object? obj)
-		{
-			switch (obj)
-			{
-				case StrainState other:
-					return Equals(other);
-
-				case PrincipalStrainState principalStrain:
-					return Equals(principalStrain);
-
-				default:
-					return false;
-			}
-		}
+		public override bool Equals(object? obj) => obj is IState<double> state && Equals(state);
 
 		/// <inheritdoc />
 		public override string ToString()

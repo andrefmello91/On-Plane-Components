@@ -13,7 +13,7 @@ namespace andrefmello91.OnPlaneComponents
 	/// <summary>
 	///     Stress object for XY components.
 	/// </summary>
-	public partial struct StressState : IState<Pressure>, IUnitConvertible<PressureUnit>, IApproachable<StressState, Pressure>, IApproachable<PrincipalStressState, Pressure>, IEquatable<StressState>, IEquatable<PrincipalStressState>, ICloneable<StressState>
+	public partial struct StressState : IState<Pressure>, IUnitConvertible<PressureUnit>, IApproachable<IState<Pressure>, Pressure>, IEquatable<IState<Pressure>>, ICloneable<StressState>
 	{
 
 		#region Fields
@@ -125,6 +125,11 @@ namespace andrefmello91.OnPlaneComponents
 			TransformationMatrix = TransformationMatrix(thetaX);
 		}
 
+		private StressState(IState<Pressure> state)
+			: this(state.X, state.Y, state.XY, state.ThetaX)
+		{
+		}
+
 		#endregion
 
 		#region Methods
@@ -155,52 +160,29 @@ namespace andrefmello91.OnPlaneComponents
 		///     Get <see cref="StressState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
 		/// </summary>
 		/// <param name="stressState">The <see cref="StressState" /> to transform.</param>
-		public static StressState ToHorizontal(StressState stressState)
-		{
-			if (stressState.IsHorizontal)
-				return stressState;
-
-			// Get the strain vector transformed
-			var sVec = StressRelations.Transform(stressState.AsVector(), -stressState.ThetaX);
-
-			// Return with corrected angle
-			return FromVector(sVec, 0, stressState.Unit);
-		}
-
+		public static StressState ToHorizontal(IState<Pressure> stressState) =>
+			Transform(stressState, -stressState.ThetaX);
+		
 		/// <summary>
 		///     Get <see cref="StressState" /> transformed by a rotation angle.
 		/// </summary>
 		/// <param name="stressState">The <see cref="StressState" /> to transform.</param>
 		/// <inheritdoc cref="Transform(double)" />
-		public static StressState Transform(StressState stressState, double theta)
+		public static StressState Transform(IState<Pressure> stressState, double theta)
 		{
-			if (theta.ApproxZero())
-				return stressState;
+			var state = stressState is StressState stresses
+				? stresses
+				: new StressState(stressState);
+			
+			if (theta.ApproxZero(1E-6))
+				return state;
 
 			// Get the strain vector transformed
-			var sVec = StressRelations.Transform(stressState.AsVector(), theta);
+			var sVec = StressRelations.Transform(state.AsVector(), theta);
 
 			// Return with corrected angle
-			return FromVector(sVec, stressState.ThetaX + theta, stressState.Unit);
+			return FromVector(sVec, state.ThetaX + theta, state.Unit);
 		}
-
-		/// <summary>
-		///     Get <see cref="PrincipalStressState" /> transformed by a rotation angle.
-		/// </summary>
-		/// <param name="principalStressState">The <see cref="PrincipalStressState" /> to transform.</param>
-		/// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
-		public static StressState Transform(PrincipalStressState principalStressState, double theta)
-		{
-			if (theta.ApproxZero())
-				return FromVector(principalStressState.AsVector(), principalStressState.Theta1, principalStressState.Unit);
-
-			// Get the strain vector transformed
-			var sVec = StressRelations.Transform(principalStressState.AsVector(), theta);
-
-			// Return with corrected angle
-			return FromVector(sVec, principalStressState.Theta1 + theta, principalStressState.Unit);
-		}
-
 
 		/// <summary>
 		///     Get <see cref="StressState" /> from a <see cref="PrincipalStressState" /> in horizontal direction (
@@ -222,18 +204,24 @@ namespace andrefmello91.OnPlaneComponents
 		/// <summary>
 		///     Get this <see cref="StressState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
 		/// </summary>
-		public IState<Pressure> ToHorizontal() => ToHorizontal(this);
+		public StressState ToHorizontal() => ToHorizontal(this);
+		
+		IState<Pressure> IState<Pressure>.ToHorizontal() => ToHorizontal();
 
 		/// <summary>
 		///     Get this <see cref="StressState" /> transformed by a rotation angle.
 		/// </summary>
 		/// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
-		public IState<Pressure> Transform(double theta) => Transform(this, theta);
+		public StressState Transform(double theta) => Transform(this, theta);
+		
+		IState<Pressure> IState<Pressure>.Transform(double theta) => Transform(theta);
 
 		/// <summary>
 		///     Get the <see cref="PrincipalStressState" /> related to this <see cref="StressState" />.
 		/// </summary>
-		public IPrincipalState<Pressure> ToPrincipal() => PrincipalStressState.FromStress(this);
+		public PrincipalStressState ToPrincipal() => PrincipalStressState.FromStress(this);
+		
+		IPrincipalState<Pressure> IState<Pressure>.ToPrincipal() => ToPrincipal();
 
 		/// <summary>
 		///     Change the <see cref="PressureUnit" /> of this <see cref="StressState" />.
@@ -280,24 +268,16 @@ namespace andrefmello91.OnPlaneComponents
 		public StressState Clone() => new(SigmaX, SigmaY, TauXY, ThetaX);
 
 		/// <inheritdoc />
-		public bool Approaches(StressState other, Pressure tolerance) =>
-			ThetaX.Approx(other.ThetaX, 1E-3) && SigmaX.Approx(other.SigmaX, tolerance) &&
-			SigmaY.Approx(other.SigmaY, tolerance) && TauXY.Approx(other.TauXY, tolerance);
-
-		/// <inheritdoc />
-		public bool Approaches(PrincipalStressState other, Pressure tolerance) => Approaches(FromPrincipal(other), tolerance);
-
-		/// <summary>
-		///     Compare a <see cref="StressState" /> to a <see cref="PrincipalStressState" /> object.
-		/// </summary>
-		/// <param name="other">The <see cref="PrincipalStressState" /> to compare.</param>
-		public bool Equals(PrincipalStressState other) => Approaches(other, Tolerance);
+		public bool Approaches(IState<Pressure>? other, Pressure tolerance) =>
+			other is not null &&
+			ThetaX.Approx(other.ThetaX, 1E-3) && SigmaX.Approx(other.X, tolerance) &&
+			SigmaY.Approx(other.Y, tolerance) && TauXY.Approx(other.XY, tolerance);
 
 		/// <summary>
 		///     Compare two <see cref="StressState" /> objects.
 		/// </summary>
 		/// <param name="other">The <see cref="StressState" /> to compare.</param>
-		public bool Equals(StressState other) => Approaches(other, Tolerance);
+		public bool Equals(IState<Pressure>? other) => Approaches(other, Tolerance);
 
 		/// <inheritdoc />
 		public override bool Equals(object? obj) =>

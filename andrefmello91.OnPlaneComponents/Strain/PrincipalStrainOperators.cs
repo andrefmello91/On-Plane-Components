@@ -8,34 +8,30 @@
 		/// <summary>
 		///     Returns true if components are equal.
 		/// </summary>
-		public static bool operator ==(PrincipalStrainState left, PrincipalStrainState right) => left.Equals(right);
+		public static bool operator ==(PrincipalStrainState left, IState<double>? right) => left.Equals(right);
 
 		/// <summary>
 		///     Returns true if components are different.
 		/// </summary>
-		public static bool operator !=(PrincipalStrainState left, PrincipalStrainState right) => !left.Equals(right);
-
-		/// <summary>
-		///     Returns true if components are equal.
-		/// </summary>
-		public static bool operator ==(PrincipalStrainState left, StrainState right) => left.Equals(right);
-
-		/// <summary>
-		///     Returns true if components are different.
-		/// </summary>
-		public static bool operator !=(PrincipalStrainState left, StrainState right) => !left.Equals(right);
+		public static bool operator !=(PrincipalStrainState left,  IState<double>? right) => !left.Equals(right);
 
 		/// <summary>
 		///     Returns a <see cref="StrainState" /> object with summed components, in horizontal direction (
 		///     <see cref="StrainState.ThetaX" /> = 0).
 		/// </summary>
-		public static StrainState operator +(PrincipalStrainState left, PrincipalStrainState right) => StrainState.FromPrincipal(left) + StrainState.FromPrincipal(right);
+		public static StrainState operator +(PrincipalStrainState left, IState<double>? right) =>
+			right is not null
+				? StrainState.FromPrincipal(left) + right.ToHorizontal()
+				: (StrainState) left;
 
 		/// <summary>
 		///     Returns a <see cref="StrainState" /> object with subtracted components, in horizontal direction (
 		///     <see cref="StrainState.ThetaX" /> = 0).
 		/// </summary>
-		public static StrainState operator -(PrincipalStrainState left, PrincipalStrainState right) => StrainState.FromPrincipal(left) - StrainState.FromPrincipal(right);
+		public static StrainState operator -(PrincipalStrainState left, IState<double>? right) =>
+			right is not null
+				? StrainState.FromPrincipal(left) - right.ToHorizontal()
+				: (StrainState) left;
 
 		/// <summary>
 		///     Returns a <see cref="PrincipalStrainState" /> object with multiplied components by a <see cref="double" />.
@@ -73,7 +69,7 @@
 		/// <remarks>
 		///     See: <see cref="StrainState.ToPrincipal" />.
 		/// </remarks>
-		public static explicit operator PrincipalStrainState(StrainState state) => state.ToPrincipal().ToPrincipalStrainState();
+		public static explicit operator PrincipalStrainState(StrainState state) => state.ToPrincipal();
 
 		#endregion
 

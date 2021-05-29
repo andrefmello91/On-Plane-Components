@@ -5,29 +5,22 @@
 		/// <summary>
 		///     Returns true if components are equal.
 		/// </summary>
-		public static bool operator ==(StrainState left, StrainState right) => left.Equals(right);
+		public static bool operator ==(StrainState left, IState<double>? right) => left.Equals(right);
 
 		/// <summary>
 		///     Returns true if components are different.
 		/// </summary>
-		public static bool operator !=(StrainState left, StrainState right) => !left.Equals(right);
-
-		/// <summary>
-		///     Returns true if components are equal.
-		/// </summary>
-		public static bool operator ==(StrainState left, PrincipalStrainState right) => left.Equals(right);
-
-		/// <summary>
-		///     Returns true if components are different.
-		/// </summary>
-		public static bool operator !=(StrainState left, PrincipalStrainState right) => !left.Equals(right);
+		public static bool operator !=(StrainState left, IState<double>? right) => !left.Equals(right);
 
 		/// <summary>
 		///     Returns a <see cref="StrainState" /> object with summed components, in horizontal direction (<see cref="ThetaX" />
 		///     = 0).
 		/// </summary>
-		public static StrainState operator +(StrainState left, StrainState right)
+		public static StrainState operator +(StrainState left, IState<double>? right)
 		{
+			if (right is null)
+				return left;
+			
 			// Transform to horizontal
 			StrainState
 				lTrans = ToHorizontal(left),
@@ -40,67 +33,14 @@
 		///     Returns a <see cref="StrainState" /> object with subtracted components, in horizontal direction (
 		///     <see cref="ThetaX" /> = 0).
 		/// </summary>
-		public static StrainState operator -(StrainState left, StrainState right)
+		public static StrainState operator -(StrainState left, IState<double>? right)
 		{
+			if (right is null)
+				return left;
+
 			// Transform to horizontal
 			StrainState
 				lTrans = ToHorizontal(left),
-				rTrans = ToHorizontal(right);
-
-			return FromVector(lTrans.AsVector() - rTrans.AsVector());
-		}
-
-		/// <summary>
-		///     Returns a <see cref="StrainState" /> object with summed components, in horizontal direction (<see cref="ThetaX" />
-		///     = 0).
-		/// </summary>
-		public static StrainState operator +(StrainState left, PrincipalStrainState right)
-		{
-			// Transform to horizontal
-			StrainState
-				lTrans = ToHorizontal(left),
-				rTrans = FromPrincipal(right);
-
-			return FromVector(lTrans.AsVector() + rTrans.AsVector());
-		}
-
-		/// <summary>
-		///     Returns a <see cref="StrainState" /> object with subtracted components, in horizontal direction (
-		///     <see cref="ThetaX" /> = 0).
-		/// </summary>
-		public static StrainState operator -(StrainState left, PrincipalStrainState right)
-		{
-			// Transform to horizontal
-			StrainState
-				lTrans = ToHorizontal(left),
-				rTrans = FromPrincipal(right);
-
-			return FromVector(lTrans.AsVector() - rTrans.AsVector());
-		}
-
-		/// <summary>
-		///     Returns a <see cref="StrainState" /> object with summed components, in horizontal direction (<see cref="ThetaX" />
-		///     = 0).
-		/// </summary>
-		public static StrainState operator +(PrincipalStrainState left, StrainState right)
-		{
-			// Transform to horizontal
-			StrainState
-				lTrans = FromPrincipal(left),
-				rTrans = ToHorizontal(right);
-
-			return FromVector(lTrans.AsVector() + rTrans.AsVector());
-		}
-
-		/// <summary>
-		///     Returns a <see cref="StrainState" /> object with subtracted components, in horizontal direction (
-		///     <see cref="ThetaX" /> = 0).
-		/// </summary>
-		public static StrainState operator -(PrincipalStrainState left, StrainState right)
-		{
-			// Transform to horizontal
-			StrainState
-				lTrans = FromPrincipal(left),
 				rTrans = ToHorizontal(right);
 
 			return FromVector(lTrans.AsVector() - rTrans.AsVector());

@@ -11,7 +11,7 @@ namespace andrefmello91.OnPlaneComponents
 	/// <summary>
 	///     Principal strain struct.
 	/// </summary>
-	public readonly partial struct PrincipalStrainState : IPrincipalState<double>, IApproachable<StrainState, double>, IApproachable<PrincipalStrainState, double>, IEquatable<StrainState>, IEquatable<PrincipalStrainState>, ICloneable<PrincipalStrainState>
+	public readonly partial struct PrincipalStrainState : IPrincipalState<double>, IApproachable<IState<double>, double>, IEquatable<IState<double>>, ICloneable<PrincipalStrainState>
 	{
 
 		#region Fields
@@ -139,8 +139,7 @@ namespace andrefmello91.OnPlaneComponents
 			return new PrincipalStrainState(e1, e2, strainState.ThetaX + theta1);
 		}
 
-		/// <inheritdoc />
-		public IPrincipalState<double> ToPrincipal() => this;
+		IPrincipalState<double> IState<double>.ToPrincipal() => this;
 
 		/// <inheritdoc />
 		public PrincipalStrainState Clone() => new(Epsilon1, Epsilon2, Theta1);
@@ -162,12 +161,17 @@ namespace andrefmello91.OnPlaneComponents
 		public Vector<double> AsVector() => AsArray().ToVector();
 
 		/// <inheritdoc />
-		public bool Approaches(StrainState other, double tolerance) => Approaches((PrincipalStrainState) other.ToPrincipal(), tolerance);
+		public bool Approaches(IState<double>? other, double tolerance)
+		{
+			if (other is null)
+				return false;
 
-		/// <inheritdoc />
-		public bool Approaches(PrincipalStrainState other, double tolerance) =>
-			Theta1.Approx(other.Theta1, 1E-3) &&
-			Epsilon1.Approx(other.Epsilon1, tolerance) && Epsilon2.Approx(other.Epsilon2, tolerance);
+			var principal = other.ToPrincipal();
+			
+			return 
+				Theta1.Approx(principal.Theta1, 1E-3)  &&
+				Epsilon1.Approx(principal.S1, tolerance) && Epsilon2.Approx(principal.S2, tolerance);
+		}
 
 		/// <summary>
 		///     Get this <see cref="PrincipalStrainState" /> as a <see cref="StrainState" />.
@@ -181,43 +185,28 @@ namespace andrefmello91.OnPlaneComponents
 		///     Get this <see cref="PrincipalStrainState" /> transformed to horizontal direction (<see cref="StrainState.ThetaX" />
 		///     = 0).
 		/// </summary>
-		public IState<double> ToHorizontal() => AsStrainState().ToHorizontal();
+		public StrainState ToHorizontal() => StrainState.ToHorizontal(this);
+		
+		IState<double> IState<double>.ToHorizontal() => ToHorizontal();
 
 		/// <summary>
 		///     Get this <see cref="PrincipalStrainState" /> transformed by a rotation angle.
 		/// </summary>
+		public StrainState Transform(double rotationAngle) => StrainState.Transform(this, rotationAngle);
+		
 		/// <inheritdoc />
-		public IState<double> Transform(double rotationAngle) => AsStrainState().Transform(rotationAngle);
+		IState<double> IState<double>.Transform(double rotationAngle) => Transform(rotationAngle);
 
 		IState<double> IPrincipalState<double>.AsState() => AsStrainState();
-
-		/// <summary>
-		///     Compare two <see cref="PrincipalStrainState" /> objects.
-		/// </summary>
-		/// <param name="other">The other <see cref="PrincipalStrainState" /> to compare.</param>
-		public bool Equals(PrincipalStrainState other) => Approaches(other, Tolerance);
 
 		/// <summary>
 		///     Compare a <see cref="PrincipalStrainState" /> to a <see cref="StrainState" /> object.
 		/// </summary>
 		/// <param name="other">The <see cref="StrainState" /> to compare.</param>
-		public bool Equals(StrainState other) => Approaches(other, Tolerance);
+		public bool Equals(IState<double>? other) => Approaches(other, Tolerance);
 
 		/// <inheritdoc />
-		public override bool Equals(object? obj)
-		{
-			switch (obj)
-			{
-				case PrincipalStrainState other:
-					return Equals(other);
-
-				case StrainState strain:
-					return Equals(strain);
-
-				default:
-					return false;
-			}
-		}
+		public override bool Equals(object? obj) => obj is IState<double> state && Equals(state);
 
 		/// <inheritdoc />
 		public override string ToString()
