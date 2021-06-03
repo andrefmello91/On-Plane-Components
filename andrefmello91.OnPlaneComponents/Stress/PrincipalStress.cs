@@ -63,7 +63,7 @@ namespace andrefmello91.OnPlaneComponents
 
 		Pressure IState<Pressure>.X => Sigma1;
 
-		Pressure IState<Pressure>.Y => Sigma1;
+		Pressure IState<Pressure>.Y => Sigma2;
 
 		Pressure IState<Pressure>.XY => Pressure.Zero;
 
