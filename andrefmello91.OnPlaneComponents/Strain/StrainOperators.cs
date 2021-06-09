@@ -30,6 +30,18 @@
 		}
 
 		/// <summary>
+		///     Returns a <see cref="StrainState" /> object with components multiplied by -1, in horizontal axis (
+		///     <see cref="ThetaX" /> = 0).
+		/// </summary>
+		public static StrainState operator -(StrainState right)
+		{
+			// Transform to horizontal
+			var rTrans = ToHorizontal(right);
+
+			return FromVector(-rTrans.AsVector());
+		}
+
+		/// <summary>
 		///     Returns a <see cref="StrainState" /> object with subtracted components, in horizontal direction (
 		///     <see cref="ThetaX" /> = 0).
 		/// </summary>
