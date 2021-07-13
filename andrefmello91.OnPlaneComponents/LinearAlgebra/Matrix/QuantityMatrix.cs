@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using andrefmello91.Extensions;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using MathNet.Numerics.LinearAlgebra.Storage;
+using MathNet.Numerics.Statistics;
 using UnitsNet;
 
 namespace andrefmello91.OnPlaneComponents
@@ -14,7 +16,8 @@ namespace andrefmello91.OnPlaneComponents
 	/// </summary>
 	/// <typeparam name="TQuantity">The quantity that represents the value of components of the matrix.</typeparam>
 	/// <typeparam name="TUnit">The unit enumeration that represents the quantity of the components of the matrix.</typeparam>
-	public abstract partial class QuantityMatrix<TQuantity, TUnit> : DenseMatrix, IUnitConvertible<TUnit>, ICloneable<QuantityMatrix<TQuantity, TUnit>>, IEquatable<QuantityMatrix<TQuantity, TUnit>> where TQuantity : IQuantity<TUnit>
+	public abstract partial class QuantityMatrix<TQuantity, TUnit> : DenseMatrix, IUnitConvertible<TUnit>, ICloneable<QuantityMatrix<TQuantity, TUnit>>, IApproachable<QuantityMatrix<TQuantity, TUnit>, TQuantity>, IEquatable<QuantityMatrix<TQuantity, TUnit>>, IEnumerable<TQuantity>
+		where TQuantity : IQuantity<TUnit>
 		where TUnit : Enum
 	{
 
@@ -369,7 +372,7 @@ namespace andrefmello91.OnPlaneComponents
 		public abstract QuantityMatrix<TQuantity, TUnit> Clone();
 
 		/// <inheritdoc />
-		public bool Equals(QuantityMatrix<TQuantity, TUnit>? other) =>
+		public virtual bool Equals(QuantityMatrix<TQuantity, TUnit>? other) =>
 			other is not null &&
 			base.Equals(other.Unit.Equals(Unit)
 				? other
@@ -385,10 +388,6 @@ namespace andrefmello91.OnPlaneComponents
 			var multiplier = 1.As(Unit).As(unit);
 			MapInplace(x => x * multiplier);
 
-			// for (var i = 0; i < RowCount; i++)
-			// for (var j = 0; j < ColumnCount; j++)
-			// 	base[i, j] = this[i, j].As(unit);
-
 			// Set
 			_unit = unit;
 		}
@@ -401,6 +400,17 @@ namespace andrefmello91.OnPlaneComponents
 		#region Object override
 
 		/// <inheritdoc />
+		public virtual bool Approaches(QuantityMatrix<TQuantity, TUnit>? other, TQuantity tolerance) =>
+			other is not null &&
+			(this - other).Values.MaximumAbsolute().As(Unit).Value <= tolerance.As(Unit);
+
+		/// <inheritdoc />
+		public IEnumerator<TQuantity> GetEnumerator() => Values
+			.Select(v => v.As(Unit))
+			.Cast<TQuantity>()
+			.GetEnumerator();
+
+		/// <inheritdoc />
 		public override bool Equals(object? obj) =>
 			obj is QuantityMatrix<TQuantity, TUnit> other && Equals(other);
 
@@ -411,6 +421,9 @@ namespace andrefmello91.OnPlaneComponents
 		public new string ToString() =>
 			$"Unit: {Unit} \n" +
 			$"Value: {base.ToString()}";
+
+		/// <inheritdoc />
+		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 		#endregion
 

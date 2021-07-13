@@ -15,7 +15,7 @@ namespace andrefmello91.OnPlaneComponents
 	/// </summary>
 	/// <typeparam name="TQuantity">The quantity that represents the value of components of the vector.</typeparam>
 	/// <typeparam name="TUnit">The unit enumeration that represents the quantity of the components of this vector.</typeparam>
-	public abstract partial class QuantityVector<TQuantity, TUnit> : DenseVector, IUnitConvertible<TUnit>, ICloneable<QuantityVector<TQuantity, TUnit>>, IEquatable<QuantityVector<TQuantity, TUnit>>, IEnumerable<TQuantity>
+	public abstract partial class QuantityVector<TQuantity, TUnit> : DenseVector, IUnitConvertible<TUnit>, ICloneable<QuantityVector<TQuantity, TUnit>>, IApproachable<QuantityVector<TQuantity, TUnit>, TQuantity>, IEquatable<QuantityVector<TQuantity, TUnit>>, IEnumerable<TQuantity>
 		where TQuantity : struct, IQuantity<TUnit>
 		where TUnit : Enum
 	{
@@ -291,7 +291,7 @@ namespace andrefmello91.OnPlaneComponents
 			.GetEnumerator();
 
 		/// <inheritdoc />
-		public bool Equals(QuantityVector<TQuantity, TUnit>? other) =>
+		public virtual bool Equals(QuantityVector<TQuantity, TUnit>? other) =>
 			other is not null &&
 			base.Equals(Unit.Equals(other.Unit)
 				? other
@@ -307,9 +307,6 @@ namespace andrefmello91.OnPlaneComponents
 			var multiplier = 1.As(Unit).As(unit);
 			MapInplace(x => x * multiplier);
 
-			// for (var i = 0; i < Count; i++)
-			// 	Values[i] = this[i].As(unit);
-
 			_unit = unit;
 		}
 
@@ -319,12 +316,14 @@ namespace andrefmello91.OnPlaneComponents
 
 		#region Object override
 
+		/// <inheritdoc />
+		public bool Approaches(QuantityVector<TQuantity, TUnit>? other, TQuantity tolerance) => other is not null &&
+			(this - other).AbsoluteMaximum().As(Unit) <= tolerance.As(Unit);
+		
 		/// <inheritdoc cref="object.Equals(object)" />
 		public new bool Equals(object? obj) =>
 			obj is QuantityVector<TQuantity, TUnit> other && Equals(other);
-
-
-
+		
 		/// <inheritdoc cref="object.ToString" />
 		public new string ToString() =>
 			$"Unit: {Unit} \n" +

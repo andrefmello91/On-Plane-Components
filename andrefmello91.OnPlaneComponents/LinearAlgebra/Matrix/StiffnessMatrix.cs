@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using andrefmello91.Extensions;
 using MathNet.Numerics.LinearAlgebra;
 using UnitsNet;
 using UnitsNet.Units;
@@ -15,7 +16,7 @@ namespace andrefmello91.OnPlaneComponents
 	///         <c>{F} = [K] {u}</c>
 	///     </para>
 	/// </remarks>
-	public class StiffnessMatrix : QuantityMatrix<ForcePerLength, ForcePerLengthUnit>
+	public partial class StiffnessMatrix : QuantityMatrix<ForcePerLength, ForcePerLengthUnit>
 	{
 
 		#region Properties
@@ -88,15 +89,16 @@ namespace andrefmello91.OnPlaneComponents
 		/// </summary>
 		/// <param name="forceVector">The force vector.</param>
 		/// <param name="useSimplified">Use simplified matrix and vector?</param>
-		/// <param name="unit">The unit to return.</param>
 		/// <remarks>
 		///     <c>{F} = [K] {u}</c>
 		/// </remarks>
 		/// <returns>
 		///     The resulting displacement vector.
 		/// </returns>
-		public DisplacementVector Solve(ForceVector forceVector, bool useSimplified = true, LengthUnit unit = LengthUnit.Millimeter)
+		public DisplacementVector Solve(ForceVector forceVector, bool useSimplified = true)
 		{
+			var returnUnit = Unit.GetLenghtUnit();
+			
 			// Convert
 			var stiffnessMatrix = Unit is ForcePerLengthUnit.NewtonPerMillimeter
 				? this
@@ -106,11 +108,11 @@ namespace andrefmello91.OnPlaneComponents
 				? forceVector
 				: (ForceVector) forceVector.Convert(ForceUnit.Newton);
 
-			var k = useSimplified
+			Matrix<double> k = useSimplified
 				? stiffnessMatrix.Simplified()
 				: stiffnessMatrix;
 
-			var f = useSimplified
+			Vector<double> f = useSimplified
 				? forces.Simplified(ConstraintIndex)
 				: forces;
 
@@ -119,9 +121,9 @@ namespace andrefmello91.OnPlaneComponents
 			var dv = new DisplacementVector(d);
 
 			return
-				unit is LengthUnit.Millimeter
+				returnUnit is LengthUnit.Millimeter
 					? dv
-					: (DisplacementVector) dv.Convert(unit);
+					: (DisplacementVector) dv.Convert(returnUnit);
 		}
 
 		/// <summary>
@@ -135,8 +137,10 @@ namespace andrefmello91.OnPlaneComponents
 		/// <returns>
 		///     The resulting force vector.
 		/// </returns>
-		public ForceVector Solve(DisplacementVector displacementVector, bool useSimplified = true, ForceUnit unit = ForceUnit.Newton)
+		public ForceVector Solve(DisplacementVector displacementVector, bool useSimplified = true)
 		{
+			var returnUnit = Unit.GetForceUnit();
+
 			// Convert
 			var stiffnessMatrix = Unit is ForcePerLengthUnit.NewtonPerMillimeter
 				? this
@@ -159,9 +163,9 @@ namespace andrefmello91.OnPlaneComponents
 			var fv = new ForceVector(f);
 
 			return
-				unit is ForceUnit.Newton
+				returnUnit is ForceUnit.Newton
 					? fv
-					: (ForceVector) fv.Convert(unit);
+					: (ForceVector) fv.Convert(returnUnit);
 		}
 
 		/// <inheritdoc />
@@ -174,32 +178,8 @@ namespace andrefmello91.OnPlaneComponents
 			return value;
 		}
 
-		#region Object override
-
-		/// <summary>
-		///     Solve the displacement vector by multiplying the inverse of stiffness and the force vector.
-		/// </summary>
-		/// <remarks>
-		///     This uses the simplified stiffness matrix and forces.
-		/// </remarks>
-		/// <returns>
-		///     The <see cref="DisplacementVector" /> with components in <see cref="LengthUnit.Millimeter" />.
-		/// </returns>
-		public static DisplacementVector operator /(StiffnessMatrix stiffnessMatrix, ForceVector forceVector) => stiffnessMatrix.Solve(forceVector);
-
-
-		/// <summary>
-		///     Solve the force vector by multiplying the stiffness and the displacement vector.
-		/// </summary>
-		/// <remarks>
-		///     This uses the simplified stiffness matrix and displacements.
-		/// </remarks>
-		/// <returns>
-		///     The <see cref="ForceVector" /> with components in <see cref="ForceUnit.Newton" />.
-		/// </returns>
-		public static ForceVector operator *(StiffnessMatrix stiffnessMatrix, DisplacementVector displacementVector) => stiffnessMatrix.Solve(displacementVector);
-
-		#endregion
+		/// <inheritdoc />
+		public override bool Equals(QuantityMatrix<ForcePerLength, ForcePerLengthUnit>? other) => Approaches(other, Tolerance);
 
 		#endregion
 

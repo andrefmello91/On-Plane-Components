@@ -1,5 +1,6 @@
 ﻿using andrefmello91.Extensions;
 using MathNet.Numerics.LinearAlgebra;
+using UnitsNet.Units;
 
 namespace andrefmello91.OnPlaneComponents
 {
@@ -56,6 +57,48 @@ namespace andrefmello91.OnPlaneComponents
 
 		/// <inheritdoc cref="Negate" />
 		public static QuantityMatrix<TQuantity, TUnit> operator -(QuantityMatrix<TQuantity, TUnit> right) => right.Negate();
+	}
 
+	public partial class MaterialMatrix
+	{
+		#region Object override
+
+		/// <inheritdoc cref="Solve(StressState)" />
+		public static StrainState operator /(StressState stresses, MaterialMatrix matrix) => matrix.Solve(stresses);
+
+		/// <inheritdoc cref="Solve(StrainState)" />
+		public static StressState operator *(MaterialMatrix matrix, StrainState strains) => matrix.Solve(strains);
+
+		#endregion
+	}
+
+	public partial class StiffnessMatrix
+	{
+		#region Object override
+
+		/// <summary>
+		///     Solve the displacement vector by multiplying the inverse of stiffness and the force vector.
+		/// </summary>
+		/// <remarks>
+		///     This uses the simplified stiffness matrix and forces.
+		/// </remarks>
+		/// <returns>
+		///     The <see cref="DisplacementVector" /> with components in <see cref="LengthUnit.Millimeter" />.
+		/// </returns>
+		public static DisplacementVector operator /(StiffnessMatrix stiffnessMatrix, ForceVector forceVector) => stiffnessMatrix.Solve(forceVector);
+
+
+		/// <summary>
+		///     Solve the force vector by multiplying the stiffness and the displacement vector.
+		/// </summary>
+		/// <remarks>
+		///     This uses the simplified stiffness matrix and displacements.
+		/// </remarks>
+		/// <returns>
+		///     The <see cref="ForceVector" /> with components in <see cref="ForceUnit.Newton" />.
+		/// </returns>
+		public static ForceVector operator *(StiffnessMatrix stiffnessMatrix, DisplacementVector displacementVector) => stiffnessMatrix.Solve(displacementVector);
+
+		#endregion
 	}
 }

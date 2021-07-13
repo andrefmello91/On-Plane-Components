@@ -17,11 +17,11 @@ namespace andrefmello91.OnPlaneComponents
 	///     </para>
 	///     Matrix must be 3x3.
 	/// </remarks>
-	public class MaterialMatrix : QuantityMatrix<Pressure, PressureUnit>
+	public partial class MaterialMatrix : QuantityMatrix<Pressure, PressureUnit>
 	{
 
 		/// <summary>
-		///		The rotation angle, related to horizontal (X) axis, of this matrix.
+		///		The rotation angle, related to horizontal (X) axis, of this matrix. Positive to counterclockwise.
 		/// </summary>
 		public double Angle { get; private set; }
 
@@ -33,7 +33,7 @@ namespace andrefmello91.OnPlaneComponents
 		#region Constructors
 
 		/// <inheritdoc />
-		/// <param name="angle">The rotation angle, related to horizontal (X) axis, of this matrix.</param>
+		/// <param name="angle">The rotation angle, related to horizontal (X) axis, of this matrix. Positive to counterclockwise.</param>
 		public MaterialMatrix(double[,] values, double angle = 0, PressureUnit unit = PressureUnit.Megapascal)
 			: base(values, unit)
 		{
@@ -41,7 +41,7 @@ namespace andrefmello91.OnPlaneComponents
 		}
 
 		/// <inheritdoc />
-		/// <param name="angle">The rotation angle, related to horizontal (X) axis, of this matrix.</param>
+		/// <param name="angle">The rotation angle, related to horizontal (X) axis, of this matrix. Positive to counterclockwise.</param>
 		public MaterialMatrix(Matrix<double> value, double angle = 0, PressureUnit unit = PressureUnit.Megapascal)
 			: base(value, unit)
 		{
@@ -49,7 +49,7 @@ namespace andrefmello91.OnPlaneComponents
 		}
 
 		/// <inheritdoc />
-		/// <param name="angle">The rotation angle, related to horizontal (X) axis, of this matrix.</param>
+		/// <param name="angle">The rotation angle, related to horizontal (X) axis, of this matrix. Positive to counterclockwise.</param>
 		public MaterialMatrix(Pressure[,] value, double angle = 0)
 			: base(value)
 		{
@@ -63,6 +63,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <summary>
 		///     Create a material stiffness matrix with zero elements.
 		/// </summary>
+		/// <param name="angle">The rotation angle, related to horizontal (X) axis, of this matrix. Positive to counterclockwise.</param>
 		/// <param name="unit">The required unit.</param>
 		public new static MaterialMatrix Zero(double angle = 0, PressureUnit unit = PressureUnit.Megapascal) => new(new double[3, 3], angle, unit);
 		
@@ -109,7 +110,7 @@ namespace andrefmello91.OnPlaneComponents
 				? stresses.AsVector(Unit)
 				: stresses.ToHorizontal().AsVector(Unit);
 
-			var matrix = IsHorizontal
+			Matrix<double> matrix = IsHorizontal
 				? this
 				: ToHorizontal();
 			
@@ -136,7 +137,7 @@ namespace andrefmello91.OnPlaneComponents
 				? strains.AsVector()
 				: strains.ToHorizontal().AsVector();
 
-			var matrix = IsHorizontal
+			Matrix<double> matrix = IsHorizontal
 				? this
 				: ToHorizontal();
 
@@ -169,16 +170,17 @@ namespace andrefmello91.OnPlaneComponents
 				: matrix.Transform(Angle - matrix.Angle));
 		}
 
-		#region Object override
+		/// <inheritdoc />
+		public override bool Approaches(QuantityMatrix<Pressure, PressureUnit>? other, Pressure tolerance) =>
+			other is MaterialMatrix matrix &&
+			base.Approaches(matrix.Angle.Approx(Angle, 1E-6)
+				? matrix
+				: matrix.Transform(Angle - matrix.Angle),
+				tolerance);
 
-		/// <inheritdoc cref="Solve(StressState)" />
-		public static StrainState operator /(StressState stresses, MaterialMatrix matrix) => matrix.Solve(stresses);
-
-		/// <inheritdoc cref="Solve(StrainState)" />
-		public static StressState operator *(MaterialMatrix matrix, StrainState strains) => matrix.Solve(strains);
-
-		#endregion
-
+		/// <inheritdoc />
+		public override bool Equals(QuantityMatrix<Pressure, PressureUnit>? other) => Approaches(other, StressState.Tolerance);
+		
 		#endregion
 
 	}
