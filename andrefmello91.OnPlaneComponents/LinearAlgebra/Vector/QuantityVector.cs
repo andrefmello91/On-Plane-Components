@@ -291,16 +291,11 @@ namespace andrefmello91.OnPlaneComponents
 			.GetEnumerator();
 
 		/// <inheritdoc />
-		public bool Equals(QuantityVector<TQuantity, TUnit>? other)
-		{
-			if (other is null)
-				return false;
-
-			return
-				base.Equals(Unit.Equals(other.Unit)
-					? other
-					: other.Convert(Unit));
-		}
+		public bool Equals(QuantityVector<TQuantity, TUnit>? other) =>
+			other is not null &&
+			base.Equals(Unit.Equals(other.Unit)
+				? other
+				: other.Convert(Unit));
 
 		/// <inheritdoc />
 		public void ChangeUnit(TUnit unit)

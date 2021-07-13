@@ -371,7 +371,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc />
 		public bool Equals(QuantityMatrix<TQuantity, TUnit>? other) =>
 			other is not null &&
-			Equals(other.Unit.Equals(Unit)
+			base.Equals(other.Unit.Equals(Unit)
 				? other
 				: other.Convert(Unit));
 
