@@ -155,7 +155,7 @@ namespace andrefmello91.OnPlaneComponents
 		}
 
 		/// <inheritdoc cref="Matrix{T}.Add(Matrix{T})" />
-		public QuantityMatrix<TQuantity, TUnit> Add(QuantityMatrix<TQuantity, TUnit> other)
+		public virtual QuantityMatrix<TQuantity, TUnit> Add(QuantityMatrix<TQuantity, TUnit> other)
 		{
 			var result = other.Clone();
 
@@ -310,7 +310,7 @@ namespace andrefmello91.OnPlaneComponents
 		}
 
 		/// <inheritdoc cref="Matrix{T}.Subtract(Matrix{T})" />
-		public QuantityMatrix<TQuantity, TUnit> Subtract(QuantityMatrix<TQuantity, TUnit> other)
+		public virtual QuantityMatrix<TQuantity, TUnit> Subtract(QuantityMatrix<TQuantity, TUnit> other)
 		{
 			var result = other.Clone();
 

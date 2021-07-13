@@ -147,16 +147,6 @@ namespace andrefmello91.OnPlaneComponents
 			new(stressVector[0], stressVector[1], stressVector[2], thetaX, unit);
 
 		/// <summary>
-		///     Get a <see cref="StressState" /> from a <see cref="StrainState" />.
-		/// </summary>
-		/// <param name="strainState">The <see cref="StrainState" /> to transform.</param>
-		/// <param name="stiffnessMatrix">
-		///     The stiffness <see cref="Matrix" /> (3 x 3), related to <paramref name="strainState" />
-		///     direction.
-		/// </param>
-		public static StressState FromStrains(StrainState strainState, Matrix<double> stiffnessMatrix) => strainState.IsZero ? Zero : FromVector(stiffnessMatrix * strainState.AsVector(), strainState.ThetaX);
-
-		/// <summary>
 		///     Get <see cref="StressState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
 		/// </summary>
 		/// <param name="stressState">The <see cref="StressState" /> to transform.</param>
