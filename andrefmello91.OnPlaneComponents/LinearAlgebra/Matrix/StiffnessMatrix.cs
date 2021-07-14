@@ -65,7 +65,7 @@ namespace andrefmello91.OnPlaneComponents
 		///     Create a stiffness matrix with zero elements.
 		/// </summary>
 		/// <param name="size">The size of the matrix.</param>
-		public new static StiffnessMatrix Zero(int size) => new(new double[size, size]);
+		public new static StiffnessMatrix Zero(int size, ForcePerLengthUnit unit = ForcePerLengthUnit.NewtonPerMillimeter) => new(new double[size, size], unit);
 
 		/// <inheritdoc cref="QuantityMatrix{TQuantity,TUnit}.Clone" />
 		public override QuantityMatrix<ForcePerLength, ForcePerLengthUnit> Clone() => new StiffnessMatrix(ToArray(), Unit)

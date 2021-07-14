@@ -188,6 +188,19 @@ namespace andrefmello91.OnPlaneComponents
 
 			return result;
 		}
+		
+		/// <summary>
+		///		Multiply this vector by a matrix.
+		/// </summary>
+		/// <param name="matrix">The double matrix.</param>
+		public QuantityVector<TQuantity, TUnit> Multiply(Matrix<double> matrix)
+		{
+			var result = Clone();
+
+			matrix.Multiply(this, result);
+
+			return result;
+		}
 
 		/// <inheritdoc cref="Vector{T}.Negate()" />
 		public new QuantityVector<TQuantity, TUnit> Negate()

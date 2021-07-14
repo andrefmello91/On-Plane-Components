@@ -31,6 +31,9 @@ namespace andrefmello91.OnPlaneComponents
 
 		/// <inheritdoc cref="Multiply(double)" />
 		public static QuantityVector<TQuantity, TUnit> operator *(double multiplier, QuantityVector<TQuantity, TUnit> right) => right.Multiply(multiplier);
+		
+		/// <inheritdoc cref="Multiply(Matrix{double})" />
+		public static QuantityVector<TQuantity, TUnit> operator *(Matrix<double> multiplier, QuantityVector<TQuantity, TUnit> right) => right.Multiply(multiplier);
 
 		/// <inheritdoc cref="DotProduct" />
 		public static double operator *(QuantityVector<TQuantity, TUnit> left, QuantityVector<TQuantity, TUnit> right) => left.DotProduct(right);
