@@ -97,20 +97,16 @@ namespace andrefmello91.OnPlaneComponents
 		/// </returns>
 		public DisplacementVector Solve(ForceVector forceVector, bool useSimplified = true)
 		{
-			var returnUnit = Unit.GetLenghtUnit();
+			var lenghtUnit = Unit.GetLenghtUnit();
+			var forceUnit  = Unit.GetForceUnit();
 			
-			// Convert
-			var stiffnessMatrix = Unit is ForcePerLengthUnit.NewtonPerMillimeter
-				? this
-				: (StiffnessMatrix) Convert(ForcePerLengthUnit.NewtonPerMillimeter);
-
-			var forces = forceVector.Unit is ForceUnit.Newton
+			var forces = forceVector.Unit == forceUnit
 				? forceVector
-				: (ForceVector) forceVector.Convert(ForceUnit.Newton);
+				: (ForceVector) forceVector.Convert(forceUnit);
 
 			Matrix<double> k = useSimplified
-				? stiffnessMatrix.Simplified()
-				: stiffnessMatrix;
+				? Simplified()
+				: this;
 
 			Vector<double> f = useSimplified
 				? forces.Simplified(ConstraintIndex)
@@ -118,12 +114,9 @@ namespace andrefmello91.OnPlaneComponents
 
 			// Solve
 			var d  = k.Solve(f);
-			var dv = new DisplacementVector(d);
-
+			
 			return
-				returnUnit is LengthUnit.Millimeter
-					? dv
-					: (DisplacementVector) dv.Convert(returnUnit);
+				new DisplacementVector(d, lenghtUnit);
 		}
 
 		/// <summary>
@@ -139,20 +132,17 @@ namespace andrefmello91.OnPlaneComponents
 		/// </returns>
 		public ForceVector Solve(DisplacementVector displacementVector, bool useSimplified = true)
 		{
-			var returnUnit = Unit.GetForceUnit();
+			var lenghtUnit = Unit.GetLenghtUnit();
+			var forceUnit  = Unit.GetForceUnit();
 
 			// Convert
-			var stiffnessMatrix = Unit is ForcePerLengthUnit.NewtonPerMillimeter
-				? this
-				: (StiffnessMatrix) Convert(ForcePerLengthUnit.NewtonPerMillimeter);
-
-			var displacements = displacementVector.Unit is LengthUnit.Millimeter
+			var displacements = displacementVector.Unit == lenghtUnit
 				? displacementVector
-				: (DisplacementVector) displacementVector.Convert(LengthUnit.Millimeter);
+				: (DisplacementVector) displacementVector.Convert(lenghtUnit);
 
 			Matrix<double> k = useSimplified
-				? stiffnessMatrix.Simplified()
-				: stiffnessMatrix;
+				? Simplified()
+				: this;
 
 			Vector<double> d = useSimplified
 				? displacements.Simplified(ConstraintIndex)
@@ -160,12 +150,9 @@ namespace andrefmello91.OnPlaneComponents
 
 			// Solve
 			var f  = k * d;
-			var fv = new ForceVector(f);
-
+			
 			return
-				returnUnit is ForceUnit.Newton
-					? fv
-					: (ForceVector) fv.Convert(returnUnit);
+				new ForceVector(f, forceUnit);
 		}
 
 		/// <inheritdoc />
