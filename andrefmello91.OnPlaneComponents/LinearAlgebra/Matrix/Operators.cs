@@ -40,11 +40,11 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Multiply(double)" />
 		public static QuantityMatrix<TQuantity, TUnit> operator *(double multiplier, QuantityMatrix<TQuantity, TUnit> matrix) => matrix.Multiply(multiplier);
 
-		/// <inheritdoc cref="Multiply(Matrix{double})" />
-		public static QuantityMatrix<TQuantity, TUnit> operator *(QuantityMatrix<TQuantity, TUnit> matrix, Matrix<double> multiplier) => matrix.Multiply(multiplier);
+		/// <inheritdoc cref="RightMultiply" />
+		public static QuantityMatrix<TQuantity, TUnit> operator *(QuantityMatrix<TQuantity, TUnit> matrix, Matrix<double> multiplier) => matrix.RightMultiply(multiplier);
 
-		/// <inheritdoc cref="MultiplyBy(Matrix{double})" />
-		public static QuantityMatrix<TQuantity, TUnit> operator *(Matrix<double> multiplier, QuantityMatrix<TQuantity, TUnit> matrix) => matrix.MultiplyBy(multiplier);
+		/// <inheritdoc cref="LeftMultiply" />
+		public static QuantityMatrix<TQuantity, TUnit> operator *(Matrix<double> multiplier, QuantityMatrix<TQuantity, TUnit> matrix) => matrix.LeftMultiply(multiplier);
 
 		/// <inheritdoc cref="Subtract(TQuantity)" />
 		public static QuantityMatrix<TQuantity, TUnit> operator -(QuantityMatrix<TQuantity, TUnit> left, TQuantity right) => left.Subtract(right);
@@ -83,9 +83,9 @@ namespace andrefmello91.OnPlaneComponents
 		///     This uses the simplified stiffness matrix and forces.
 		/// </remarks>
 		/// <returns>
-		///     The <see cref="DisplacementVector" /> with components in <see cref="LengthUnit.Millimeter" />.
+		///     The resultant <see cref="DisplacementVector" />.
 		/// </returns>
-		public static DisplacementVector operator /(StiffnessMatrix stiffnessMatrix, ForceVector forceVector) => stiffnessMatrix.Solve(forceVector);
+		public static DisplacementVector operator /(ForceVector forceVector, StiffnessMatrix stiffnessMatrix) => stiffnessMatrix.Solve(forceVector);
 
 
 		/// <summary>
@@ -95,7 +95,7 @@ namespace andrefmello91.OnPlaneComponents
 		///     This uses the simplified stiffness matrix and displacements.
 		/// </remarks>
 		/// <returns>
-		///     The <see cref="ForceVector" /> with components in <see cref="ForceUnit.Newton" />.
+		///     The resultant <see cref="ForceVector" />.
 		/// </returns>
 		public static ForceVector operator *(StiffnessMatrix stiffnessMatrix, DisplacementVector displacementVector) => stiffnessMatrix.Solve(displacementVector);
 

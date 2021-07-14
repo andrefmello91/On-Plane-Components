@@ -142,6 +142,22 @@ namespace andrefmello91.OnPlaneComponents
 			}
 		}
 
+		/// <inheritdoc cref="BuildSame()"/>
+		///	<param name="rows">The number of rows of the required matrix.</param>
+		///	<param name="columns">The number of columns of the required matrix.</param>
+		/// <returns>
+		///		A new <see cref="QuantityMatrix{TQuantity,TUnit}"/>, with zero elements.
+		/// </returns>
+		public abstract QuantityMatrix<TQuantity, TUnit> BuildSame(int rows, int columns);
+		
+		/// <summary>
+		///		Build a quantity matrix from the same type of this matrix, with zero elements.
+		/// </summary>
+		/// <returns>
+		///		A new <see cref="QuantityMatrix{TQuantity,TUnit}"/>, with the same size of this matrix and zero elements.
+		/// </returns>
+		public QuantityMatrix<TQuantity, TUnit> BuildSame() => BuildSame(RowCount, ColumnCount);
+		
 		/// <inheritdoc cref="Matrix{T}.Add(T)" />
 		public QuantityMatrix<TQuantity, TUnit> Add(TQuantity scalar)
 		{
@@ -160,9 +176,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Matrix{T}.Add(Matrix{T})" />
 		public virtual QuantityMatrix<TQuantity, TUnit> Add(QuantityMatrix<TQuantity, TUnit> other)
 		{
-			var result = other.Clone();
-
-			result.Clear();
+			var result = BuildSame();
 
 			Add(other.Unit.Equals(Unit)
 				? other
@@ -205,9 +219,6 @@ namespace andrefmello91.OnPlaneComponents
 		{
 			var result = Build.Dense(RowCount, ColumnCount);
 
-			if (scalar.Value.Equals(0))
-				return result;
-
 			DoDivideByThis(scalar.As(Unit), result);
 
 			return result;
@@ -231,12 +242,17 @@ namespace andrefmello91.OnPlaneComponents
 			return result;
 		}
 
+		/// <summary>
+		///     Multiply this matrix by other on the right side.
+		/// </summary>
 		/// <inheritdoc cref="Matrix{T}.Multiply(Matrix{T})" />
-		public new QuantityMatrix<TQuantity, TUnit> Multiply(Matrix<double> other)
+		/// <remarks>
+		///		<c>Result = this * other</c>
+		/// </remarks>
+		public QuantityMatrix<TQuantity, TUnit> RightMultiply(Matrix<double> other)
 		{
-			var result = Clone();
-
-			result.Clear();
+			// Build the result size
+			var result = BuildSame(RowCount, other.ColumnCount);
 
 			Multiply(other, result);
 
@@ -244,14 +260,15 @@ namespace andrefmello91.OnPlaneComponents
 		}
 
 		/// <summary>
-		///     Multiply the other matrix by this.
+		///     Multiply this matrix by other on the left side.
 		/// </summary>
 		/// <param name="other">The matrix to multiply by this</param>
-		public QuantityMatrix<TQuantity, TUnit> MultiplyBy(Matrix<double> other)
+		/// <remarks>
+		///		<c>Result = other * this</c>
+		/// </remarks>
+		public QuantityMatrix<TQuantity, TUnit> LeftMultiply(Matrix<double> other)
 		{
-			var result = Clone();
-
-			result.Clear();
+			var result = BuildSame(other.RowCount, ColumnCount);
 
 			other.Multiply(this, result);
 
@@ -261,9 +278,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Matrix{T}.Negate()" />
 		public new QuantityMatrix<TQuantity, TUnit> Negate()
 		{
-			var result = Clone();
-
-			result.Clear();
+			var result = BuildSame();
 
 			DoNegate(result);
 
@@ -300,12 +315,10 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Matrix{T}.Subtract(T)" />
 		public QuantityMatrix<TQuantity, TUnit> Subtract(TQuantity scalar)
 		{
-			var result = Clone();
-
 			if (scalar.Value.Equals(0))
-				return result;
+				return Clone();
 
-			result.Clear();
+			var result = BuildSame();
 
 			DoSubtract(scalar.As(Unit), result);
 
@@ -315,9 +328,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Matrix{T}.Subtract(Matrix{T})" />
 		public virtual QuantityMatrix<TQuantity, TUnit> Subtract(QuantityMatrix<TQuantity, TUnit> other)
 		{
-			var result = other.Clone();
-
-			result.Clear();
+			var result = BuildSame();
 
 			Subtract(other.Unit.Equals(Unit)
 				? other
@@ -329,12 +340,10 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Matrix{T}.SubtractFrom(T)" />
 		public QuantityMatrix<TQuantity, TUnit> SubtractFrom(TQuantity scalar)
 		{
-			var result = Clone();
-
 			if (scalar.Value.Equals(0))
-				return result;
+				return -Clone();
 
-			result.Clear();
+			var result = BuildSame();
 
 			DoSubtractFrom(scalar.As(Unit), result);
 
@@ -357,9 +366,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Matrix{T}.Transpose()" />
 		public new QuantityMatrix<TQuantity, TUnit> Transpose()
 		{
-			var result = Clone();
-
-			result.Clear();
+			var result = BuildSame(ColumnCount, RowCount);
 
 			Transpose(result);
 

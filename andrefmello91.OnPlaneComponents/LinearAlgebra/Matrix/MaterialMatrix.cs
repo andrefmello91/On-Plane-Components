@@ -149,6 +149,10 @@ namespace andrefmello91.OnPlaneComponents
 		}
 
 		/// <inheritdoc />
+		public override QuantityMatrix<Pressure, PressureUnit> BuildSame(int rows, int columns) =>
+			new MaterialMatrix(new double[rows, columns], Angle, Unit);
+
+		/// <inheritdoc />
 		public override QuantityMatrix<Pressure, PressureUnit> Add(QuantityMatrix<Pressure, PressureUnit> other)
 		{
 			if (other is not MaterialMatrix matrix)

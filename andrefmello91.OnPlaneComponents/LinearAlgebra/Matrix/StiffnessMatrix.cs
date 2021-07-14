@@ -169,6 +169,10 @@ namespace andrefmello91.OnPlaneComponents
 		}
 
 		/// <inheritdoc />
+		public override QuantityMatrix<ForcePerLength, ForcePerLengthUnit> BuildSame(int rows, int columns) =>
+			new StiffnessMatrix(new double[rows, columns], Unit);
+
+		/// <inheritdoc />
 		public override QuantityMatrix<ForcePerLength, ForcePerLengthUnit> Transform(Matrix<double> transformationMatrix)
 		{
 			var value = (StiffnessMatrix) base.Transform(transformationMatrix);

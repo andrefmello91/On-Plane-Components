@@ -88,15 +88,29 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Vector{T}.AbsoluteMinimum" />
 		public new TQuantity AbsoluteMinimum() => (TQuantity) base.AbsoluteMinimum().As(Unit);
 
+		/// <inheritdoc cref="BuildSame()"/>
+		///	<param name="count">The number of elements of the required vector.</param>
+		/// <returns>
+		///		A new <see cref="QuantityVector{TQuantity,TUnit}"/>, with zero elements.
+		/// </returns>
+		public abstract QuantityVector<TQuantity, TUnit> BuildSame(int count);
+		
+		/// <summary>
+		///		Build a quantity vector from the same type of this vector, with zero elements.
+		/// </summary>
+		/// <returns>
+		///		A new <see cref="QuantityVector{TQuantity,TUnit}"/>, with the same size of this vector and zero elements.
+		/// </returns>
+		public QuantityVector<TQuantity, TUnit> BuildSame() => BuildSame(Count);
+		
 		/// <inheritdoc cref="Vector{T}.Add(T)" />
 		public QuantityVector<TQuantity, TUnit> Add(TQuantity scalar)
 		{
-			var result = Clone();
-
 			if (scalar.Value.Equals(0))
-				return result;
+				return Clone();
 
-			result.Clear();
+			var result = BuildSame();
+			
 			DoAdd(scalar.As(Unit), result);
 
 			return result;
@@ -106,10 +120,8 @@ namespace andrefmello91.OnPlaneComponents
 		public QuantityVector<TQuantity, TUnit> Add(QuantityVector<TQuantity, TUnit> other)
 		{
 			var result = Count == other.Count
-				? Clone()
+				? BuildSame()
 				: throw new ArgumentException("All vectors must have the same dimensionality.", nameof(other));
-
-			result.Clear();
 
 			DoAdd(Unit.Equals(other.Unit)
 					? other
@@ -133,12 +145,10 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Vector{T}.Divide(T)" />
 		public new QuantityVector<TQuantity, TUnit> Divide(double scalar)
 		{
-			var result = Clone();
-
 			if (scalar.Equals(1))
-				return result;
+				return Clone();
 
-			result.Clear();
+			var result = BuildSame();
 
 			DoDivide(scalar, result);
 
@@ -174,12 +184,10 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Vector{T}.Multiply(T)" />
 		public new QuantityVector<TQuantity, TUnit> Multiply(double scalar)
 		{
-			var result = Clone();
-
 			if (scalar.Equals(1))
-				return result;
+				return Clone();
 
-			result.Clear();
+			var result = BuildSame();
 
 			if (scalar.Equals(0))
 				return result;
@@ -190,14 +198,39 @@ namespace andrefmello91.OnPlaneComponents
 		}
 		
 		/// <summary>
-		///		Multiply this vector by a matrix.
+		///		Multiply this vector by a matrix on the right side.
 		/// </summary>
+		/// <remarks>
+		///		<c>Result = matrix * this</c>
+		/// </remarks>
 		/// <param name="matrix">The double matrix.</param>
-		public QuantityVector<TQuantity, TUnit> Multiply(Matrix<double> matrix)
+		public QuantityVector<TQuantity, TUnit> RightMultiply(Matrix<double> matrix)
 		{
-			var result = Clone();
+			if (Count != matrix.ColumnCount)
+				throw new ArgumentException("Matrix and vector sizes don's match.");
+			
+			var result = BuildSame(matrix.RowCount);
 
 			matrix.Multiply(this, result);
+
+			return result;
+		}
+		
+		/// <summary>
+		///		Multiply this vector by a matrix on the left side.
+		/// </summary>
+		/// <remarks>
+		///		<c>Result = this * matrix</c>
+		/// </remarks>
+		/// <param name="matrix">The double matrix.</param>
+		public QuantityVector<TQuantity, TUnit> LeftMultiply(Matrix<double> matrix)
+		{
+			if (Count != matrix.RowCount)
+				throw new ArgumentException("Matrix and vector sizes don's match.");
+			
+			var result = BuildSame(matrix.ColumnCount);
+
+			matrix.LeftMultiply(this, result);
 
 			return result;
 		}
@@ -205,9 +238,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Vector{T}.Negate()" />
 		public new QuantityVector<TQuantity, TUnit> Negate()
 		{
-			var result = Clone();
-
-			result.Clear();
+			var result = BuildSame();
 
 			DoNegate(result);
 
@@ -245,12 +276,11 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Vector{T}.Subtract(T)" />
 		public QuantityVector<TQuantity, TUnit> Subtract(TQuantity scalar)
 		{
-			var result = Clone();
-
 			if (scalar.Value.Equals(0))
-				return result;
+				return Clone();
 
-			result.Clear();
+			var result = BuildSame();
+			
 			DoSubtract(scalar.As(Unit), result);
 
 			return result;
@@ -260,10 +290,8 @@ namespace andrefmello91.OnPlaneComponents
 		public QuantityVector<TQuantity, TUnit> Subtract(QuantityVector<TQuantity, TUnit> other)
 		{
 			var result = Count == other.Count
-				? Clone()
+				? BuildSame()
 				: throw new ArgumentException("All vectors must have the same dimensionality.", nameof(other));
-
-			result.Clear();
 
 			DoSubtract(Unit.Equals(other.Unit)
 					? other
@@ -276,12 +304,11 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Vector{T}.SubtractFrom(T)" />
 		public QuantityVector<TQuantity, TUnit> SubtractFrom(TQuantity scalar)
 		{
-			var result = Clone();
-
 			if (scalar.Value.Equals(0))
-				return result;
+				return -Clone();
 
-			result.Clear();
+			var result = BuildSame();
+			
 			DoSubtractFrom(scalar.As(Unit), result);
 
 			return result;

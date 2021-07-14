@@ -49,6 +49,9 @@ namespace andrefmello91.OnPlaneComponents
 		/// <param name="unit">The unit.</param>
 		public new static DisplacementVector Zero(int size, LengthUnit unit = LengthUnit.Millimeter) => new(new double[size], unit);
 
+		/// <inheritdoc />
+		public override QuantityVector<Length, LengthUnit> BuildSame(int count) => Zero(count, Unit);
+
 		/// <inheritdoc cref="ICloneable.Clone" />
 		public override QuantityVector<Length, LengthUnit> Clone() => new DisplacementVector(Values, Unit);
 

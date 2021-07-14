@@ -52,6 +52,9 @@ namespace andrefmello91.OnPlaneComponents
 		/// <param name="unit">The unit.</param>
 		public new static ForceVector Zero(int size, ForceUnit unit = ForceUnit.Newton) => new(new double[size], unit);
 
+		/// <inheritdoc />
+		public override QuantityVector<Force, ForceUnit> BuildSame(int count) => Zero(count, Unit);
+
 		/// <inheritdoc cref="ICloneable.Clone" />
 		public override QuantityVector<Force, ForceUnit> Clone() => new ForceVector(Values, Unit);
 
