@@ -151,22 +151,25 @@ namespace andrefmello91.OnPlaneComponents
 		public abstract QuantityMatrix<TQuantity, TUnit> BuildSame(int rows, int columns);
 		
 		/// <summary>
-		///		Build a quantity matrix from the same type of this matrix, with zero elements.
+		///		Create a clone of this matrix and clear its content.
 		/// </summary>
 		/// <returns>
-		///		A new <see cref="QuantityMatrix{TQuantity,TUnit}"/>, with the same size of this matrix and zero elements.
+		///		A cleared <see cref="QuantityMatrix{TQuantity,TUnit}"/> clone of this matrix.
 		/// </returns>
-		public QuantityMatrix<TQuantity, TUnit> BuildSame() => BuildSame(RowCount, ColumnCount);
+		public QuantityMatrix<TQuantity, TUnit> CloneAndClear()
+		{
+			var result = Clone();
+			result.Clear();
+			return result;
+		}
 		
 		/// <inheritdoc cref="Matrix{T}.Add(T)" />
 		public QuantityMatrix<TQuantity, TUnit> Add(TQuantity scalar)
 		{
-			var result = Clone();
-
 			if (scalar.Value.Equals(0))
-				return result;
+				return Clone();
 
-			result.Clear();
+			var result = CloneAndClear();
 
 			DoAdd(scalar.As(Unit), result);
 
@@ -176,7 +179,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Matrix{T}.Add(Matrix{T})" />
 		public virtual QuantityMatrix<TQuantity, TUnit> Add(QuantityMatrix<TQuantity, TUnit> other)
 		{
-			var result = BuildSame();
+			var result = CloneAndClear();
 
 			Add(other.Unit.Equals(Unit)
 				? other
@@ -199,12 +202,10 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Matrix{T}.Divide(T)" />
 		public new QuantityMatrix<TQuantity, TUnit> Divide(double scalar)
 		{
-			var result = Clone();
-
 			if (scalar.Equals(1))
-				return result;
+				return Clone();
 
-			result.Clear();
+			var result = CloneAndClear();
 
 			DoDivide(scalar, result);
 
@@ -227,12 +228,10 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Matrix{T}.Multiply(T)" />
 		public new QuantityMatrix<TQuantity, TUnit> Multiply(double scalar)
 		{
-			var result = Clone();
-
 			if (scalar.Equals(1))
-				return result;
+				return Clone();
 
-			result.Clear();
+			var result = CloneAndClear();
 
 			if (scalar.Equals(0))
 				return result;
@@ -278,7 +277,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Matrix{T}.Negate()" />
 		public new QuantityMatrix<TQuantity, TUnit> Negate()
 		{
-			var result = BuildSame();
+			var result = CloneAndClear();
 
 			DoNegate(result);
 
@@ -318,7 +317,7 @@ namespace andrefmello91.OnPlaneComponents
 			if (scalar.Value.Equals(0))
 				return Clone();
 
-			var result = BuildSame();
+			var result = CloneAndClear();
 
 			DoSubtract(scalar.As(Unit), result);
 
@@ -328,7 +327,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Matrix{T}.Subtract(Matrix{T})" />
 		public virtual QuantityMatrix<TQuantity, TUnit> Subtract(QuantityMatrix<TQuantity, TUnit> other)
 		{
-			var result = BuildSame();
+			var result = CloneAndClear();
 
 			Subtract(other.Unit.Equals(Unit)
 				? other
@@ -343,7 +342,7 @@ namespace andrefmello91.OnPlaneComponents
 			if (scalar.Value.Equals(0))
 				return -Clone();
 
-			var result = BuildSame();
+			var result = CloneAndClear();
 
 			DoSubtractFrom(scalar.As(Unit), result);
 
