@@ -61,6 +61,25 @@ namespace andrefmello91.OnPlaneComponents
 		#region Methods
 
 		/// <summary>
+		///		Calculate the tangent matrix from a stress state and a strain state.
+		/// </summary>
+		/// <param name="stressState">The known stress state.</param>
+		/// <param name="strainState">The known strain state.</param>
+		/// <returns>
+		///		The tangent <see cref="MaterialMatrix"/>.
+		/// </returns>
+		public static MaterialMatrix Tangent(StressState stressState, StrainState strainState)
+		{
+			// Rotate
+			var stress = stressState.ToHorizontal().AsVector(stressState.Unit);
+			var strain = strainState.ToHorizontal().AsVector();
+			
+			var matrix = stress.ToColumnMatrix() * strain.ToRowMatrix();
+
+			return
+				new MaterialMatrix(matrix, unit: stressState.Unit);
+		}
+		/// <summary>
 		///     Create a material stiffness matrix with zero elements.
 		/// </summary>
 		/// <param name="angle">The rotation angle, related to horizontal (X) axis, of this matrix. Positive to counterclockwise.</param>

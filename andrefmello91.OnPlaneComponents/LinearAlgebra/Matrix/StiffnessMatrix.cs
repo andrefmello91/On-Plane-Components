@@ -62,6 +62,38 @@ namespace andrefmello91.OnPlaneComponents
 		#region Methods
 
 		/// <summary>
+		///		Calculate the tangent matrix from a force vector and a displacement vector.
+		/// </summary>
+		/// <param name="forceVector">The known force vector.</param>
+		/// <param name="displacementVector">The known displacement vector.</param>
+		/// <returns>
+		///		The tangent <see cref="StiffnessMatrix"/>.
+		/// </returns>
+		public static StiffnessMatrix Tangent(ForceVector forceVector, DisplacementVector displacementVector)
+		{
+			// Get unit
+			var unit = forceVector.Unit.Per(displacementVector.Unit);
+
+			// Do conversions if needed
+			var fVec = unit is ForcePerLengthUnit.Undefined
+				? forceVector.Convert(ForceUnit.Newton)
+				: forceVector;
+
+			var dVec = unit is ForcePerLengthUnit.Undefined
+				? displacementVector.Convert(LengthUnit.Millimeter)
+				: displacementVector;
+
+			unit = unit is ForcePerLengthUnit.Undefined
+				? ForcePerLengthUnit.NewtonPerMillimeter
+				: unit;
+			
+			var matrix = fVec.ToColumnMatrix() * dVec.ToRowMatrix();
+
+			return
+				new StiffnessMatrix(matrix, unit);
+		}
+		
+		/// <summary>
 		///     Create a stiffness matrix with zero elements.
 		/// </summary>
 		/// <param name="size">The size of the matrix.</param>

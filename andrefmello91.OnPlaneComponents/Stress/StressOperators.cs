@@ -90,6 +90,9 @@ namespace andrefmello91.OnPlaneComponents
 		/// </summary>
 		public static StressState operator /(StressState stressState, int divider) => stressState / (double) divider;
 
+		/// <inheritdoc cref="MaterialMatrix.Tangent"/>
+		public static MaterialMatrix operator / (StressState stressState, StrainState strainState) => MaterialMatrix.Tangent(stressState, strainState);
+		
 		/// <summary>
 		///     Convert a <see cref="PrincipalStressState" /> into a <see cref="StressState" />.
 		/// </summary>
@@ -97,6 +100,5 @@ namespace andrefmello91.OnPlaneComponents
 		///     See: <see cref="PrincipalStressState.AsStressState" />.
 		/// </remarks>
 		public static explicit operator StressState(PrincipalStressState principalStressState) => principalStressState.AsStressState();
-
 	}
 }

@@ -15,7 +15,7 @@ namespace andrefmello91.OnPlaneComponents
 	///         Quantity is <see cref="Force" />.
 	///     </para>
 	/// </remarks>
-	public class ForceVector : QuantityVector<Force, ForceUnit>
+	public partial class ForceVector : QuantityVector<Force, ForceUnit>
 	{
 
 		#region Constructors

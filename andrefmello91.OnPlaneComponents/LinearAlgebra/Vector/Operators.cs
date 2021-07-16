@@ -53,4 +53,10 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Negate()" />
 		public static QuantityVector<TQuantity, TUnit> operator -(QuantityVector<TQuantity, TUnit> vector) => vector.Negate();
 	}
+
+	public partial class ForceVector
+	{
+		/// <inheritdoc cref="StiffnessMatrix.Tangent"/>
+		public static StiffnessMatrix operator / (ForceVector forceVector, DisplacementVector displacementVector) => StiffnessMatrix.Tangent(forceVector, displacementVector);
+	}
 }
