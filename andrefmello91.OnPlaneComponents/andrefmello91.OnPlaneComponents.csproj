@@ -4,7 +4,7 @@
         <TargetFrameworks>net5.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
         <LangVersion>9.0</LangVersion>
         <Nullable>enable</Nullable>
-        <Version>1.1.4</Version>
+        <Version>1.1.5</Version>
         <Authors>andrefmello91</Authors>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
@@ -19,7 +19,7 @@
         <PackageId>andrefmello91.OnPlaneComponents</PackageId>
         <PackageDescription>Implementation of forces, displacements, stress and strain states on plane.</PackageDescription>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageReleaseNotes>Implemented quantity matrices and vectors.</PackageReleaseNotes>
+        <PackageReleaseNotes>Corrected operators.</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
