@@ -273,7 +273,7 @@ namespace andrefmello91.OnPlaneComponents
 				return 0;
 
 			// This point is bigger
-			if (Y > other.Y || EqualsY(other) && X > other.X)
+			if (Y - other.Y >= Tolerance || EqualsY(other) && X - other.X >= Tolerance)
 				return 1;
 
 			// this Point is smaller
@@ -301,7 +301,7 @@ namespace andrefmello91.OnPlaneComponents
 		public override int GetHashCode() => (int) X.Value * (int) Y.Value;
 
 		/// <inheritdoc />
-		public override string ToString() => $"({X:0.00}, {Y:0.00})";
+		public override string ToString() => $"Point:\t({X},\t{Y})";
 
 		#endregion
 
