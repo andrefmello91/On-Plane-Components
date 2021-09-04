@@ -14,16 +14,22 @@ namespace andrefmello91.OnPlaneComponents
 	public readonly partial struct PrincipalStrainState : IPrincipalState<double>, IApproachable<IState<double>, double>, IEquatable<IState<double>>, ICloneable<PrincipalStrainState>
 	{
 
-		#region Fields
+		#region Properties
 
 		/// <summary>
 		///     Get a <see cref="PrincipalStrainState" /> with zero elements.
 		/// </summary>
 		public static PrincipalStrainState Zero { get; } = new(0, 0);
 
-		#endregion
+		/// <summary>
+		///     Get maximum principal strain.
+		/// </summary>
+		public double Epsilon1 { get; }
 
-		#region Properties
+		/// <summary>
+		///     Get minimum principal strain.
+		/// </summary>
+		public double Epsilon2 { get; }
 
 		/// <inheritdoc />
 		public PrincipalCase Case =>
@@ -37,10 +43,6 @@ namespace andrefmello91.OnPlaneComponents
 				_                       => PrincipalCase.TensionCompression
 			};
 
-		double IPrincipalState<double>.S1 => Epsilon1;
-
-		double IPrincipalState<double>.S2 => Epsilon2;
-
 		/// <summary>
 		///     Returns true if <see cref="Epsilon1" /> is nearly zero.
 		/// </summary>
@@ -52,33 +54,13 @@ namespace andrefmello91.OnPlaneComponents
 		public bool Is2Zero => Epsilon2.ApproxZero();
 
 		/// <inheritdoc />
+		public bool IsAt45Degrees => Theta1.Approx(Constants.PiOver4) || Theta2.Approx(Constants.PiOver4) || Theta1.Approx(-Constants.PiOver4) || Theta2.Approx(-Constants.PiOver4);
+
+		/// <inheritdoc />
 		public bool IsHorizontal => Theta1.ApproxZero() || Theta1.Approx(Constants.Pi);
 
 		/// <inheritdoc />
 		public bool IsVertical => Theta1.Approx(Constants.PiOver2) || Theta1.Approx(Constants.Pi3Over2);
-
-		bool IState<double>.IsPrincipal => true;
-
-		bool IState<double>.IsPureShear => false;
-
-		double IState<double>.ThetaX => Theta1;
-
-		double IState<double>.ThetaY => Theta2;
-
-		/// <inheritdoc />
-		public bool IsAt45Degrees => Theta1.Approx(Constants.PiOver4) || Theta2.Approx(Constants.PiOver4) || Theta1.Approx(-Constants.PiOver4) || Theta2.Approx(-Constants.PiOver4);
-
-		double IState<double>.X => Epsilon1;
-
-		double IState<double>.Y => Epsilon2;
-
-		double IState<double>.XY => 0;
-
-		bool IState<double>.IsXZero => Is1Zero;
-
-		bool IState<double>.IsYZero => Is2Zero;
-
-		bool IState<double>.IsXYZero => true;
 
 		/// <inheritdoc />
 		public bool IsZero => Is1Zero && Is2Zero;
@@ -92,15 +74,29 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc />
 		public Matrix<double> TransformationMatrix { get; }
 
-		/// <summary>
-		///     Get maximum principal strain.
-		/// </summary>
-		public double Epsilon1 { get; }
+		bool IState<double>.IsPrincipal => true;
 
-		/// <summary>
-		///     Get minimum principal strain.
-		/// </summary>
-		public double Epsilon2 { get; }
+		bool IState<double>.IsPureShear => false;
+
+		bool IState<double>.IsXYZero => true;
+
+		bool IState<double>.IsXZero => Is1Zero;
+
+		bool IState<double>.IsYZero => Is2Zero;
+
+		double IPrincipalState<double>.S1 => Epsilon1;
+
+		double IPrincipalState<double>.S2 => Epsilon2;
+
+		double IState<double>.ThetaX => Theta1;
+
+		double IState<double>.ThetaY => Theta2;
+
+		double IState<double>.X => Epsilon1;
+
+		double IState<double>.XY => 0;
+
+		double IState<double>.Y => Epsilon2;
 
 		#endregion
 
@@ -167,9 +163,9 @@ namespace andrefmello91.OnPlaneComponents
 				return false;
 
 			var principal = other.ToPrincipal();
-			
-			return 
-				Theta1.Approx(principal.Theta1, 1E-3)  &&
+
+			return
+				Theta1.Approx(principal.Theta1, 1E-3) &&
 				Epsilon1.Approx(principal.S1, tolerance) && Epsilon2.Approx(principal.S2, tolerance);
 		}
 
@@ -186,14 +182,14 @@ namespace andrefmello91.OnPlaneComponents
 		///     = 0).
 		/// </summary>
 		public StrainState ToHorizontal() => StrainState.ToHorizontal(this);
-		
+
 		IState<double> IState<double>.ToHorizontal() => ToHorizontal();
 
 		/// <summary>
 		///     Get this <see cref="PrincipalStrainState" /> transformed by a rotation angle.
 		/// </summary>
 		public StrainState Transform(double rotationAngle) => StrainState.Transform(this, rotationAngle);
-		
+
 		/// <inheritdoc />
 		IState<double> IState<double>.Transform(double rotationAngle) => Transform(rotationAngle);
 

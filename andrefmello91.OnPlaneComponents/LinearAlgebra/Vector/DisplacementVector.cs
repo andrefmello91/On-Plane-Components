@@ -55,15 +55,16 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="ICloneable.Clone" />
 		public override QuantityVector<Length, LengthUnit> Clone() => new DisplacementVector(Values, Unit);
 
+		/// <inheritdoc />
+		public override bool Equals(QuantityVector<Length, LengthUnit>? other) => Approaches(other, PlaneDisplacement.Tolerance);
+
 		/// <inheritdoc cref="QuantityVector{TQuantity,TUnit}.Simplified(IEnumerable{int}?, double?)" />
 		/// <remarks>
 		///     This uses the default tolerance.
 		/// </remarks>
 		public DisplacementVector Simplified(IEnumerable<int>? indexes = null) => (DisplacementVector) Simplified(indexes, PlaneDisplacement.Tolerance);
 
-		/// <inheritdoc />
-		public override bool Equals(QuantityVector<Length, LengthUnit>? other) => Approaches(other, PlaneDisplacement.Tolerance);
-
 		#endregion
+
 	}
 }

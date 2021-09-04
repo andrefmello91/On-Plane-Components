@@ -142,27 +142,6 @@ namespace andrefmello91.OnPlaneComponents
 			}
 		}
 
-		/// <inheritdoc cref="BuildSame()"/>
-		///	<param name="rows">The number of rows of the required matrix.</param>
-		///	<param name="columns">The number of columns of the required matrix.</param>
-		/// <returns>
-		///		A new <see cref="QuantityMatrix{TQuantity,TUnit}"/>, with zero elements.
-		/// </returns>
-		public abstract QuantityMatrix<TQuantity, TUnit> BuildSame(int rows, int columns);
-		
-		/// <summary>
-		///		Create a clone of this matrix and clear its content.
-		/// </summary>
-		/// <returns>
-		///		A cleared <see cref="QuantityMatrix{TQuantity,TUnit}"/> clone of this matrix.
-		/// </returns>
-		public QuantityMatrix<TQuantity, TUnit> CloneAndClear()
-		{
-			var result = Clone();
-			result.Clear();
-			return result;
-		}
-		
 		/// <inheritdoc cref="Matrix{T}.Add(T)" />
 		public QuantityMatrix<TQuantity, TUnit> Add(TQuantity scalar)
 		{
@@ -185,6 +164,27 @@ namespace andrefmello91.OnPlaneComponents
 				? other
 				: other.Convert(Unit), result);
 
+			return result;
+		}
+
+		/// <inheritdoc cref="BuildSame()" />
+		/// <param name="rows">The number of rows of the required matrix.</param>
+		/// <param name="columns">The number of columns of the required matrix.</param>
+		/// <returns>
+		///     A new <see cref="QuantityMatrix{TQuantity,TUnit}" />, with zero elements.
+		/// </returns>
+		public abstract QuantityMatrix<TQuantity, TUnit> BuildSame(int rows, int columns);
+
+		/// <summary>
+		///     Create a clone of this matrix and clear its content.
+		/// </summary>
+		/// <returns>
+		///     A cleared <see cref="QuantityMatrix{TQuantity,TUnit}" /> clone of this matrix.
+		/// </returns>
+		public QuantityMatrix<TQuantity, TUnit> CloneAndClear()
+		{
+			var result = Clone();
+			result.Clear();
 			return result;
 		}
 
@@ -225,6 +225,22 @@ namespace andrefmello91.OnPlaneComponents
 			return result;
 		}
 
+		/// <summary>
+		///     Multiply this matrix by other on the left side.
+		/// </summary>
+		/// <param name="other">The matrix to multiply by this</param>
+		/// <remarks>
+		///     <c>Result = other * this</c>
+		/// </remarks>
+		public QuantityMatrix<TQuantity, TUnit> LeftMultiply(Matrix<double> other)
+		{
+			var result = BuildSame(other.RowCount, ColumnCount);
+
+			other.Multiply(this, result);
+
+			return result;
+		}
+
 		/// <inheritdoc cref="Matrix{T}.Multiply(T)" />
 		public new QuantityMatrix<TQuantity, TUnit> Multiply(double scalar)
 		{
@@ -241,12 +257,22 @@ namespace andrefmello91.OnPlaneComponents
 			return result;
 		}
 
+		/// <inheritdoc cref="Matrix{T}.Negate()" />
+		public new QuantityMatrix<TQuantity, TUnit> Negate()
+		{
+			var result = CloneAndClear();
+
+			DoNegate(result);
+
+			return result;
+		}
+
 		/// <summary>
 		///     Multiply this matrix by other on the right side.
 		/// </summary>
 		/// <inheritdoc cref="Matrix{T}.Multiply(Matrix{T})" />
 		/// <remarks>
-		///		<c>Result = this * other</c>
+		///     <c>Result = this * other</c>
 		/// </remarks>
 		public QuantityMatrix<TQuantity, TUnit> RightMultiply(Matrix<double> other)
 		{
@@ -254,32 +280,6 @@ namespace andrefmello91.OnPlaneComponents
 			var result = BuildSame(RowCount, other.ColumnCount);
 
 			Multiply(other, result);
-
-			return result;
-		}
-
-		/// <summary>
-		///     Multiply this matrix by other on the left side.
-		/// </summary>
-		/// <param name="other">The matrix to multiply by this</param>
-		/// <remarks>
-		///		<c>Result = other * this</c>
-		/// </remarks>
-		public QuantityMatrix<TQuantity, TUnit> LeftMultiply(Matrix<double> other)
-		{
-			var result = BuildSame(other.RowCount, ColumnCount);
-
-			other.Multiply(this, result);
-
-			return result;
-		}
-
-		/// <inheritdoc cref="Matrix{T}.Negate()" />
-		public new QuantityMatrix<TQuantity, TUnit> Negate()
-		{
-			var result = CloneAndClear();
-
-			DoNegate(result);
 
 			return result;
 		}
@@ -372,6 +372,8 @@ namespace andrefmello91.OnPlaneComponents
 			return result;
 		}
 
+		#endregion
+
 		#region Interface Implementations
 
 		/// <inheritdoc />
@@ -422,7 +424,7 @@ namespace andrefmello91.OnPlaneComponents
 
 		/// <inheritdoc />
 		public override int GetHashCode() => _unit.GetHashCode() * base.GetHashCode();
-		
+
 		/// <inheritdoc cref="object.ToString" />
 		public new string ToString() =>
 			$"Unit: {Unit} \n" +
@@ -430,8 +432,6 @@ namespace andrefmello91.OnPlaneComponents
 
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-		#endregion
 
 		#endregion
 

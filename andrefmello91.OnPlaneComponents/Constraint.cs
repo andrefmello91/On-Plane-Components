@@ -8,10 +8,18 @@ namespace andrefmello91.OnPlaneComponents
 	/// </summary>
 	public struct Constraint : IPlaneComponent<bool>, IEquatable<Constraint>, ICloneable<Constraint>
 	{
+
+		#region Properties
+
 		/// <summary>
 		///     A free constraint.
 		/// </summary>
 		public static Constraint Free { get; } = new(false, false);
+
+		/// <summary>
+		///     A constraint in both directions.
+		/// </summary>
+		public static Constraint Full { get; } = new(true, true);
 
 		/// <summary>
 		///     A constraint in X direction.
@@ -24,23 +32,16 @@ namespace andrefmello91.OnPlaneComponents
 		public static Constraint YOnly { get; } = new(false, true);
 
 		/// <summary>
-		///     A constraint in both directions.
+		///     Get the constraint direction.
 		/// </summary>
-		public static Constraint Full { get; } = new(true, true);
-
-		/// <summary>
-		///     Get/set the X (horizontal) constraint.
-		/// </summary>
-		/// <remarks>
-		///     True if point is constrained in this direction.
-		/// </remarks>
-		public bool X { get; set; }
-
-		/// <summary>
-		///     Get/set the Y (vertical) constraint.
-		/// </summary>
-		/// <inheritdoc cref="X" />
-		public bool Y { get; set; }
+		public ComponentDirection Direction =>
+			X switch
+			{
+				false when !Y => ComponentDirection.None,
+				false when Y  => ComponentDirection.Y,
+				true when !Y  => ComponentDirection.X,
+				_             => ComponentDirection.Both
+			};
 
 		/// <summary>
 		///     Returns true if the displacement in X direction from this constraint will be zero.
@@ -69,16 +70,22 @@ namespace andrefmello91.OnPlaneComponents
 		public bool IsZero => Direction is ComponentDirection.Both;
 
 		/// <summary>
-		///     Get the constraint direction.
+		///     Get/set the X (horizontal) constraint.
 		/// </summary>
-		public ComponentDirection Direction =>
-			X switch
-			{
-				false when !Y => ComponentDirection.None,
-				false when Y  => ComponentDirection.Y,
-				true when !Y  => ComponentDirection.X,
-				_             => ComponentDirection.Both
-			};
+		/// <remarks>
+		///     True if point is constrained in this direction.
+		/// </remarks>
+		public bool X { get; set; }
+
+		/// <summary>
+		///     Get/set the Y (vertical) constraint.
+		/// </summary>
+		/// <inheritdoc cref="X" />
+		public bool Y { get; set; }
+
+		#endregion
+
+		#region Constructors
 
 		/// <summary>
 		///     Constraint constructor.
@@ -97,6 +104,10 @@ namespace andrefmello91.OnPlaneComponents
 			Y = y;
 		}
 
+		#endregion
+
+		#region Methods
+
 		/// <summary>
 		///     Get a <see cref="Constraint" /> from a <see cref="ComponentDirection" />.
 		/// </summary>
@@ -110,12 +121,19 @@ namespace andrefmello91.OnPlaneComponents
 				_                       => Free
 			};
 
+		/// <inheritdoc />
+		public override string ToString() => $"Constraint direction: {Direction}";
+
+		/// <inheritdoc />
+		public Constraint Clone() => new(X, Y);
+
 
 		/// <inheritdoc />
 		public bool Equals(Constraint other) => Direction == other.Direction;
 
-		/// <inheritdoc />
-		public Constraint Clone() => new(X, Y);
+		#endregion
+
+		#region Operators
 
 		/// <summary>
 		///     Returns true if objects are equal.
@@ -127,7 +145,7 @@ namespace andrefmello91.OnPlaneComponents
 		/// </summary>
 		public static bool operator !=(Constraint left, Constraint right) => !left.Equals(right);
 
-		/// <inheritdoc />
-		public override string ToString() => $"Constraint direction: {Direction}";
+		#endregion
+
 	}
 }

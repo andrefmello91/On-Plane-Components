@@ -58,15 +58,16 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="ICloneable.Clone" />
 		public override QuantityVector<Force, ForceUnit> Clone() => new ForceVector(Values, Unit);
 
+		/// <inheritdoc />
+		public override bool Equals(QuantityVector<Force, ForceUnit>? other) => Approaches(other, PlaneForce.Tolerance);
+
 		/// <inheritdoc cref="QuantityVector{TQuantity,TUnit}.Simplified(IEnumerable{int}?, double?)" />
 		/// <remarks>
 		///     This uses the default tolerance.
 		/// </remarks>
 		public ForceVector Simplified(IEnumerable<int>? indexes = null) => (ForceVector) Simplified(indexes, PlaneForce.Tolerance);
 
-		/// <inheritdoc />
-		public override bool Equals(QuantityVector<Force, ForceUnit>? other) => Approaches(other, PlaneForce.Tolerance);
-
 		#endregion
+
 	}
 }

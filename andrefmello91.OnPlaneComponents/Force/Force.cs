@@ -12,62 +12,17 @@ namespace andrefmello91.OnPlaneComponents
 	public partial struct PlaneForce : IPlaneComponent<Force>, IUnitConvertible<ForceUnit>, IApproachable<PlaneForce, Force>, IEquatable<PlaneForce>, ICloneable<PlaneForce>
 	{
 
-		#region Fields
-
-		/// <summary>
-		///     Get a <see cref="PlaneForce" /> with zero value.
-		/// </summary>
-		public static PlaneForce Zero { get; } = new(0, 0);
+		#region Properties
 
 		/// <summary>
 		///     The tolerance to consider forces equal.
 		/// </summary>
 		public static Force Tolerance { get; } = Force.FromNewtons(1E-6);
 
-		#endregion
-
-		#region Properties
-
 		/// <summary>
-		///     Get/set the force unit (<see cref="ForceUnit" />).
+		///     Get a <see cref="PlaneForce" /> with zero value.
 		/// </summary>
-		public ForceUnit Unit
-		{
-			get => X.Unit;
-			set => ChangeUnit(value);
-		}
-
-		/// <summary>
-		///     Get the applied force directions.
-		/// </summary>
-		public ComponentDirection Direction => IsZero
-			? ComponentDirection.None
-			: IsXZero switch
-			{
-				false when IsYZero => ComponentDirection.X,
-				true when !IsYZero => ComponentDirection.Y,
-				_                  => ComponentDirection.Both
-			};
-
-
-		/// <inheritdoc />
-		public bool IsZero => IsXZero && IsYZero;
-
-		/// <inheritdoc />
-		public bool IsXZero => X.ApproxZero(Tolerance);
-
-		/// <inheritdoc />
-		public bool IsYZero => Y.ApproxZero(Tolerance);
-
-		/// <summary>
-		///     Get the force component in X direction.
-		/// </summary>
-		public Force X { get; private set; }
-
-		/// <summary>
-		///     Get the force component in Y direction.
-		/// </summary>
-		public Force Y { get; private set; }
+		public static PlaneForce Zero { get; } = new(0, 0);
 
 		/// <summary>
 		///     Verify if force resultant is approximately zero.
@@ -83,6 +38,47 @@ namespace andrefmello91.OnPlaneComponents
 		///     Get the resultant force angle, in radians.
 		/// </summary>
 		public double ResultantAngle => CalculateResultantAngle(X, Y);
+
+		/// <summary>
+		///     Get the applied force directions.
+		/// </summary>
+		public ComponentDirection Direction => IsZero
+			? ComponentDirection.None
+			: IsXZero switch
+			{
+				false when IsYZero => ComponentDirection.X,
+				true when !IsYZero => ComponentDirection.Y,
+				_                  => ComponentDirection.Both
+			};
+
+		/// <inheritdoc />
+		public bool IsXZero => X.ApproxZero(Tolerance);
+
+		/// <inheritdoc />
+		public bool IsYZero => Y.ApproxZero(Tolerance);
+
+
+		/// <inheritdoc />
+		public bool IsZero => IsXZero && IsYZero;
+
+		/// <summary>
+		///     Get the force component in X direction.
+		/// </summary>
+		public Force X { get; private set; }
+
+		/// <summary>
+		///     Get the force component in Y direction.
+		/// </summary>
+		public Force Y { get; private set; }
+
+		/// <summary>
+		///     Get/set the force unit (<see cref="ForceUnit" />).
+		/// </summary>
+		public ForceUnit Unit
+		{
+			get => X.Unit;
+			set => ChangeUnit(value);
+		}
 
 		#endregion
 

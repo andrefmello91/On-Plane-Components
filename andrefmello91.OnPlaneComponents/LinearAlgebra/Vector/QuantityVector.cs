@@ -88,26 +88,6 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Vector{T}.AbsoluteMinimum" />
 		public new TQuantity AbsoluteMinimum() => (TQuantity) base.AbsoluteMinimum().As(Unit);
 
-		/// <inheritdoc cref="CloneAndClear()"/>
-		///	<param name="count">The number of elements of the required vector.</param>
-		/// <returns>
-		///		A new <see cref="QuantityVector{TQuantity,TUnit}"/>, with zero elements.
-		/// </returns>
-		public abstract QuantityVector<TQuantity, TUnit> BuildSame(int count);
-		
-		/// <summary>
-		///		Create a clone of this vector and clear its content.
-		/// </summary>
-		/// <returns>
-		///		A cleared <see cref="QuantityVector{TQuantity,TUnit}"/> clone of this vector.
-		/// </returns>
-		public QuantityVector<TQuantity, TUnit> CloneAndClear()
-		{
-			var result = Clone();
-			result.Clear();
-			return result;
-		}
-		
 		/// <inheritdoc cref="Vector{T}.Add(T)" />
 		public QuantityVector<TQuantity, TUnit> Add(TQuantity scalar)
 		{
@@ -115,7 +95,7 @@ namespace andrefmello91.OnPlaneComponents
 				return Clone();
 
 			var result = CloneAndClear();
-			
+
 			DoAdd(scalar.As(Unit), result);
 
 			return result;
@@ -133,6 +113,26 @@ namespace andrefmello91.OnPlaneComponents
 					: other.Convert(Unit),
 				result);
 
+			return result;
+		}
+
+		/// <inheritdoc cref="CloneAndClear()" />
+		/// <param name="count">The number of elements of the required vector.</param>
+		/// <returns>
+		///     A new <see cref="QuantityVector{TQuantity,TUnit}" />, with zero elements.
+		/// </returns>
+		public abstract QuantityVector<TQuantity, TUnit> BuildSame(int count);
+
+		/// <summary>
+		///     Create a clone of this vector and clear its content.
+		/// </summary>
+		/// <returns>
+		///     A cleared <see cref="QuantityVector{TQuantity,TUnit}" /> clone of this vector.
+		/// </returns>
+		public QuantityVector<TQuantity, TUnit> CloneAndClear()
+		{
+			var result = Clone();
+			result.Clear();
 			return result;
 		}
 
@@ -180,6 +180,25 @@ namespace andrefmello91.OnPlaneComponents
 				: other.Convert(Unit))
 			: throw new ArgumentException("All vectors must have the same dimensionality.", nameof(other));
 
+		/// <summary>
+		///     Multiply this vector by a matrix on the left side.
+		/// </summary>
+		/// <remarks>
+		///     <c>Result = this * matrix</c>
+		/// </remarks>
+		/// <param name="matrix">The double matrix.</param>
+		public QuantityVector<TQuantity, TUnit> LeftMultiply(Matrix<double> matrix)
+		{
+			if (Count != matrix.RowCount)
+				throw new ArgumentException("Matrix and vector sizes don's match.");
+
+			var result = BuildSame(matrix.ColumnCount);
+
+			matrix.LeftMultiply(this, result);
+
+			return result;
+		}
+
 		/// <inheritdoc cref="Vector{T}.Maximum" />
 		public TQuantity Maximum() => (TQuantity) base.Maximum().As(Unit);
 
@@ -201,44 +220,6 @@ namespace andrefmello91.OnPlaneComponents
 
 			return result;
 		}
-		
-		/// <summary>
-		///		Multiply this vector by a matrix on the right side.
-		/// </summary>
-		/// <remarks>
-		///		<c>Result = matrix * this</c>
-		/// </remarks>
-		/// <param name="matrix">The double matrix.</param>
-		public QuantityVector<TQuantity, TUnit> RightMultiply(Matrix<double> matrix)
-		{
-			if (Count != matrix.ColumnCount)
-				throw new ArgumentException("Matrix and vector sizes don's match.");
-			
-			var result = BuildSame(matrix.RowCount);
-
-			matrix.Multiply(this, result);
-
-			return result;
-		}
-		
-		/// <summary>
-		///		Multiply this vector by a matrix on the left side.
-		/// </summary>
-		/// <remarks>
-		///		<c>Result = this * matrix</c>
-		/// </remarks>
-		/// <param name="matrix">The double matrix.</param>
-		public QuantityVector<TQuantity, TUnit> LeftMultiply(Matrix<double> matrix)
-		{
-			if (Count != matrix.RowCount)
-				throw new ArgumentException("Matrix and vector sizes don's match.");
-			
-			var result = BuildSame(matrix.ColumnCount);
-
-			matrix.LeftMultiply(this, result);
-
-			return result;
-		}
 
 		/// <inheritdoc cref="Vector{T}.Negate()" />
 		public new QuantityVector<TQuantity, TUnit> Negate()
@@ -246,6 +227,25 @@ namespace andrefmello91.OnPlaneComponents
 			var result = CloneAndClear();
 
 			DoNegate(result);
+
+			return result;
+		}
+
+		/// <summary>
+		///     Multiply this vector by a matrix on the right side.
+		/// </summary>
+		/// <remarks>
+		///     <c>Result = matrix * this</c>
+		/// </remarks>
+		/// <param name="matrix">The double matrix.</param>
+		public QuantityVector<TQuantity, TUnit> RightMultiply(Matrix<double> matrix)
+		{
+			if (Count != matrix.ColumnCount)
+				throw new ArgumentException("Matrix and vector sizes don's match.");
+
+			var result = BuildSame(matrix.RowCount);
+
+			matrix.Multiply(this, result);
 
 			return result;
 		}
@@ -285,7 +285,7 @@ namespace andrefmello91.OnPlaneComponents
 				return Clone();
 
 			var result = CloneAndClear();
-			
+
 			DoSubtract(scalar.As(Unit), result);
 
 			return result;
@@ -313,7 +313,7 @@ namespace andrefmello91.OnPlaneComponents
 				return -Clone();
 
 			var result = CloneAndClear();
-			
+
 			DoSubtractFrom(scalar.As(Unit), result);
 
 			return result;
@@ -321,6 +321,8 @@ namespace andrefmello91.OnPlaneComponents
 
 		/// <inheritdoc cref="Vector{T}.Sum" />
 		public new TQuantity Sum() => (TQuantity) base.Sum().As(Unit);
+
+		#endregion
 
 		#region Interface Implementations
 
@@ -363,18 +365,16 @@ namespace andrefmello91.OnPlaneComponents
 
 		/// <inheritdoc />
 		public bool Approaches(QuantityVector<TQuantity, TUnit>? other, TQuantity tolerance) => other is not null &&
-			(this - other).AbsoluteMaximum().As(Unit) <= tolerance.As(Unit);
-		
+		                                                                                        (this - other).AbsoluteMaximum().As(Unit) <= tolerance.As(Unit);
+
 		/// <inheritdoc cref="object.Equals(object)" />
 		public new bool Equals(object? obj) =>
 			obj is QuantityVector<TQuantity, TUnit> other && Equals(other);
-		
+
 		/// <inheritdoc cref="object.ToString" />
 		public new string ToString() =>
 			$"Unit: {Unit} \n" +
 			$"Value: {base.ToString()}";
-
-		#endregion
 
 		#endregion
 

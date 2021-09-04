@@ -23,16 +23,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
-        <PackageReference Include="UnitsNet" Version="4.97.1" />
+        <PackageReference Include="MathNet.Numerics" Version="4.15.0"/>
+        <PackageReference Include="UnitsNet" Version="4.97.1"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(Configuration)'=='Release'">
-        <PackageReference Include="andrefmello91.Extensions" Version="1.0.9" />
+        <PackageReference Include="andrefmello91.Extensions" Version="1.0.9"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(Configuration)'=='Debug'">
-        <ProjectReference Include="..\..\Extensions\andrefmello91.Extensions\andrefmello91.Extensions.csproj" />
+        <ProjectReference Include="..\..\Extensions\andrefmello91.Extensions\andrefmello91.Extensions.csproj"/>
     </ItemGroup>
 
 </Project>

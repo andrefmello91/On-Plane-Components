@@ -1,11 +1,13 @@
 ﻿using andrefmello91.Extensions;
 using MathNet.Numerics.LinearAlgebra;
-using UnitsNet.Units;
 
 namespace andrefmello91.OnPlaneComponents
 {
 	public partial class QuantityMatrix<TQuantity, TUnit>
 	{
+
+		#region Operators
+
 		/// <inheritdoc cref="Add(TQuantity)" />
 		public static QuantityMatrix<TQuantity, TUnit> operator +(QuantityMatrix<TQuantity, TUnit> left, TQuantity right) => left.Add(right);
 
@@ -57,10 +59,14 @@ namespace andrefmello91.OnPlaneComponents
 
 		/// <inheritdoc cref="Negate" />
 		public static QuantityMatrix<TQuantity, TUnit> operator -(QuantityMatrix<TQuantity, TUnit> right) => right.Negate();
+
+		#endregion
+
 	}
 
 	public partial class MaterialMatrix
 	{
+
 		#region Object override
 
 		/// <inheritdoc cref="Solve(StressState)" />
@@ -70,10 +76,12 @@ namespace andrefmello91.OnPlaneComponents
 		public static StressState operator *(MaterialMatrix matrix, StrainState strains) => matrix.Solve(strains);
 
 		#endregion
+
 	}
 
 	public partial class StiffnessMatrix
 	{
+
 		#region Object override
 
 		/// <summary>
@@ -100,5 +108,6 @@ namespace andrefmello91.OnPlaneComponents
 		public static ForceVector operator *(StiffnessMatrix stiffnessMatrix, DisplacementVector displacementVector) => stiffnessMatrix.Solve(displacementVector);
 
 		#endregion
+
 	}
 }

@@ -62,12 +62,12 @@ namespace andrefmello91.OnPlaneComponents
 		#region Methods
 
 		/// <summary>
-		///		Calculate the tangent matrix from a force vector and a displacement vector.
+		///     Calculate the tangent matrix from a force vector and a displacement vector.
 		/// </summary>
 		/// <param name="forceVector">The known force vector.</param>
 		/// <param name="displacementVector">The known displacement vector.</param>
 		/// <returns>
-		///		The tangent <see cref="StiffnessMatrix"/>.
+		///     The tangent <see cref="StiffnessMatrix" />.
 		/// </returns>
 		public static StiffnessMatrix Tangent(ForceVector forceVector, DisplacementVector displacementVector)
 		{
@@ -86,24 +86,31 @@ namespace andrefmello91.OnPlaneComponents
 			unit = unit is ForcePerLengthUnit.Undefined
 				? ForcePerLengthUnit.NewtonPerMillimeter
 				: unit;
-			
+
 			var matrix = fVec.ToColumnMatrix() * dVec.ToRowMatrix();
 
 			return
 				new StiffnessMatrix(matrix, unit);
 		}
-		
+
 		/// <summary>
 		///     Create a stiffness matrix with zero elements.
 		/// </summary>
 		/// <param name="size">The size of the matrix.</param>
 		public new static StiffnessMatrix Zero(int size, ForcePerLengthUnit unit = ForcePerLengthUnit.NewtonPerMillimeter) => new(new double[size, size], unit);
 
+		/// <inheritdoc />
+		public override QuantityMatrix<ForcePerLength, ForcePerLengthUnit> BuildSame(int rows, int columns) =>
+			new StiffnessMatrix(new double[rows, columns], Unit);
+
 		/// <inheritdoc cref="QuantityMatrix{TQuantity,TUnit}.Clone" />
 		public override QuantityMatrix<ForcePerLength, ForcePerLengthUnit> Clone() => new StiffnessMatrix(ToArray(), Unit)
 		{
 			ConstraintIndex = ConstraintIndex
 		};
+
+		/// <inheritdoc />
+		public override bool Equals(QuantityMatrix<ForcePerLength, ForcePerLengthUnit>? other) => Approaches(other, Tolerance);
 
 		/// <inheritdoc cref="QuantityMatrix{TQuantity,TUnit}.Simplified(IEnumerable{int}?, double?)" />
 		public StiffnessMatrix Simplified() => (StiffnessMatrix) Simplified(ConstraintIndex, Tolerance);
@@ -143,7 +150,7 @@ namespace andrefmello91.OnPlaneComponents
 			var stiffness = Unit == unit
 				? this
 				: (StiffnessMatrix) Convert(unit);
-			
+
 			var forces = forceVector.Unit == forceUnit
 				? forceVector
 				: (ForceVector) forceVector.Convert(forceUnit);
@@ -157,8 +164,8 @@ namespace andrefmello91.OnPlaneComponents
 				: forces;
 
 			// Solve
-			var d  = k.Solve(f);
-			
+			var d = k.Solve(f);
+
 			return
 				new DisplacementVector(d, lenghtUnit);
 		}
@@ -205,15 +212,11 @@ namespace andrefmello91.OnPlaneComponents
 				: displacements;
 
 			// Solve
-			var f  = k * d;
-			
+			var f = k * d;
+
 			return
 				new ForceVector(f, forceUnit);
 		}
-
-		/// <inheritdoc />
-		public override QuantityMatrix<ForcePerLength, ForcePerLengthUnit> BuildSame(int rows, int columns) =>
-			new StiffnessMatrix(new double[rows, columns], Unit);
 
 		/// <inheritdoc />
 		public override QuantityMatrix<ForcePerLength, ForcePerLengthUnit> Transform(Matrix<double> transformationMatrix)
@@ -224,9 +227,6 @@ namespace andrefmello91.OnPlaneComponents
 
 			return value;
 		}
-
-		/// <inheritdoc />
-		public override bool Equals(QuantityMatrix<ForcePerLength, ForcePerLengthUnit>? other) => Approaches(other, Tolerance);
 
 		#endregion
 

@@ -12,30 +12,17 @@ namespace andrefmello91.OnPlaneComponents
 	public struct Point : IUnitConvertible<LengthUnit>, IApproachable<Point, Length>, IEquatable<Point>, IComparable<Point>, ICloneable<Point>
 	{
 
-		#region Fields
-
-		/// <summary>
-		///     The tolerance to consider points equal.
-		/// </summary>
-		public static Length Tolerance { get; } = Length.FromMillimeters(1E-3);
+		#region Properties
 
 		/// <summary>
 		///     The <see cref="Point" /> located at the origin of the coordinate system.
 		/// </summary>
 		public static Point Origin { get; } = new(0, 0);
 
-		#endregion
-
-		#region Properties
-
 		/// <summary>
-		///     Get/set the <see cref="LengthUnit" /> of this <see cref="Point" /> object.
+		///     The tolerance to consider points equal.
 		/// </summary>
-		public LengthUnit Unit
-		{
-			get => X.Unit;
-			set => ChangeUnit(value);
-		}
+		public static Length Tolerance { get; } = Length.FromMillimeters(1E-3);
 
 		/// <summary>
 		///     Returns true if this point is at <see cref="Origin" />.
@@ -61,6 +48,15 @@ namespace andrefmello91.OnPlaneComponents
 		///     Get the Y coordinate of this <see cref="Point" /> object.
 		/// </summary>
 		public Length Y { get; private set; }
+
+		/// <summary>
+		///     Get/set the <see cref="LengthUnit" /> of this <see cref="Point" /> object.
+		/// </summary>
+		public LengthUnit Unit
+		{
+			get => X.Unit;
+			set => ChangeUnit(value);
+		}
 
 		#endregion
 
@@ -89,18 +85,16 @@ namespace andrefmello91.OnPlaneComponents
 		#region Methods
 
 		/// <summary>
-		///     Change the <see cref="LengthUnit" /> of this <see cref="Point" />.
+		///     Returns true if <paramref name="other" /> X coordinate is approximately equal to this object's X coordinate.
 		/// </summary>
-		/// <param name="unit">The desired <see cref="LengthUnit" />.</param>
-		public void ChangeUnit(LengthUnit unit)
-		{
-			if (unit == Unit)
-				return;
+		/// <inheritdoc cref="Approaches" />
+		public bool ApproxX(Point other, Length tolerance) => X.Approx(other.X, tolerance);
 
-			// Update values
-			X = X.ToUnit(unit);
-			Y = Y.ToUnit(unit);
-		}
+		/// <summary>
+		///     Returns true if <paramref name="other" /> Y coordinate is approximately equal to this object's Y coordinate.
+		/// </summary>
+		/// <inheritdoc cref="Approaches" />
+		public bool ApproxY(Point other, Length tolerance) => Y.Approx(other.Y, tolerance);
 
 		/// <summary>
 		///     Create a new <see cref="Point" /> with converted <see cref="LengthUnit" />.
@@ -108,7 +102,64 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="ChangeUnit" />
 		public Point Convert(LengthUnit unit) => Unit == unit ? this : new Point(X.ToUnit(unit), Y.ToUnit(unit));
 
-		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
+		/// <inheritdoc />
+		public override bool Equals(object? obj) => obj is Point other && Equals(other);
+
+		/// <inheritdoc cref="ApproxX" />
+		/// <inheritdoc cref="Equals(Point)" />
+		public bool EqualsX(Point other) => ApproxX(other, Tolerance);
+
+		/// <inheritdoc cref="ApproxY" />
+		/// <inheritdoc cref="EqualsX" />
+		public bool EqualsY(Point other) => ApproxY(other, Tolerance);
+
+		/// <summary>
+		///     Get the angle related to horizontal axis, in radians, of a line connecting this <see cref="Point" /> to
+		///     <paramref name="other" />.
+		/// </summary>
+		/// <param name="other">The other <see cref="Point" /> to calculate the angle.</param>
+		public double GetAngle(Point other)
+		{
+			Length
+				x = GetDistanceInX(other, false),
+				y = GetDistanceInY(other, false);
+
+			bool
+				xZero = x.Abs() <= Tolerance,
+				yZero = y.Abs() <= Tolerance;
+
+			return xZero switch
+			{
+				true when yZero => 0,
+
+				true when !yZero => y > Length.Zero
+					? Constants.PiOver2
+					: Constants.Pi3Over2,
+
+				false when yZero => x > Length.Zero
+					? 0
+					: Constants.Pi,
+
+				_ => (y / x).Atan()
+			};
+		}
+
+		/// <summary>
+		///     Get the absolute distance, in <see cref="Unit" />, of a line connecting this <see cref="Point" /> to
+		///     <paramref name="other" />
+		///     .
+		/// </summary>
+		/// <inheritdoc cref="GetDistanceInX" />
+		public Length GetDistance(Point other)
+		{
+			double
+				x = GetDistanceInX(other).Value,
+				y = GetDistanceInY(other).Value,
+				h = (x * x + y * y).Sqrt();
+
+			return
+				Length.From(h, Unit);
+		}
 
 		/// <summary>
 		///     Get the horizontal distance, in <see cref="Unit" />, between this <see cref="Point" /> and
@@ -144,53 +195,14 @@ namespace andrefmello91.OnPlaneComponents
 				: y;
 		}
 
-		/// <summary>
-		///     Get the absolute distance, in <see cref="Unit" />, of a line connecting this <see cref="Point" /> to
-		///     <paramref name="other" />
-		///     .
-		/// </summary>
-		/// <inheritdoc cref="GetDistanceInX" />
-		public Length GetDistance(Point other)
-		{
-			double
-				x = GetDistanceInX(other).Value,
-				y = GetDistanceInY(other).Value,
-				h = (x * x + y * y).Sqrt();
-
-			return
-				Length.From(h, Unit);
-		}
+		/// <inheritdoc />
+		public override int GetHashCode() => (int) X.Value * (int) Y.Value;
 
 		/// <summary>
-		///     Get the angle related to horizontal axis, in radians, of a line connecting this <see cref="Point" /> to
-		///     <paramref name="other" />.
+		///     Get the midpoint between this and <paramref name="other" /> <see cref="Point" />.
 		/// </summary>
-		/// <param name="other">The other <see cref="Point" /> to calculate the angle.</param>
-		public double GetAngle(Point other)
-		{
-			Length
-				x = GetDistanceInX(other, false),
-				y = GetDistanceInY(other, false);
-
-			bool
-				xZero = x.Abs() <= Tolerance,
-				yZero = y.Abs() <= Tolerance;
-
-			return xZero switch
-			{
-				true when yZero => 0,
-
-				true when !yZero => y > Length.Zero
-					? Constants.PiOver2
-					: Constants.Pi3Over2,
-
-				false when yZero => x > Length.Zero
-					? 0
-					: Constants.Pi,
-
-				_ => (y / x).Atan()
-			};
-		}
+		/// <param name="other">The other <see cref="Point" />.</param>
+		public Point MidPoint(Point other) => new(0.5 * (X + other.X), 0.5 * (Y + other.Y));
 
 
 		/// <summary>
@@ -227,23 +239,8 @@ namespace andrefmello91.OnPlaneComponents
 		/// </returns>
 		public Point Rotate(double rotationAngle) => Rotate(Origin, rotationAngle);
 
-		/// <summary>
-		///     Get the midpoint between this and <paramref name="other" /> <see cref="Point" />.
-		/// </summary>
-		/// <param name="other">The other <see cref="Point" />.</param>
-		public Point MidPoint(Point other) => new(0.5 * (X + other.X), 0.5 * (Y + other.Y));
-
-		/// <summary>
-		///     Returns true if <paramref name="other" /> X coordinate is approximately equal to this object's X coordinate.
-		/// </summary>
-		/// <inheritdoc cref="Approaches" />
-		public bool ApproxX(Point other, Length tolerance) => X.Approx(other.X, tolerance);
-
-		/// <summary>
-		///     Returns true if <paramref name="other" /> Y coordinate is approximately equal to this object's Y coordinate.
-		/// </summary>
-		/// <inheritdoc cref="Approaches" />
-		public bool ApproxY(Point other, Length tolerance) => Y.Approx(other.Y, tolerance);
+		/// <inheritdoc />
+		public override string ToString() => $"Point:\t({X},\t{Y})";
 
 		/// <summary>
 		///     Returns true if <paramref name="other" /> coordinates are approximately equal to this object's coordinates.
@@ -286,72 +283,30 @@ namespace andrefmello91.OnPlaneComponents
 		/// </remarks>
 		public bool Equals(Point other) => Approaches(other, Tolerance);
 
-		/// <inheritdoc cref="ApproxX" />
-		/// <inheritdoc cref="Equals(Point)" />
-		public bool EqualsX(Point other) => ApproxX(other, Tolerance);
+		/// <summary>
+		///     Change the <see cref="LengthUnit" /> of this <see cref="Point" />.
+		/// </summary>
+		/// <param name="unit">The desired <see cref="LengthUnit" />.</param>
+		public void ChangeUnit(LengthUnit unit)
+		{
+			if (unit == Unit)
+				return;
 
-		/// <inheritdoc cref="ApproxY" />
-		/// <inheritdoc cref="EqualsX" />
-		public bool EqualsY(Point other) => ApproxY(other, Tolerance);
+			// Update values
+			X = X.ToUnit(unit);
+			Y = Y.ToUnit(unit);
+		}
 
-		/// <inheritdoc />
-		public override bool Equals(object? obj) => obj is Point other && Equals(other);
-
-		/// <inheritdoc />
-		public override int GetHashCode() => (int) X.Value * (int) Y.Value;
-
-		/// <inheritdoc />
-		public override string ToString() => $"Point:\t({X},\t{Y})";
+		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
 
 		#endregion
 
 		#region Operators
 
 		/// <summary>
-		///     Returns true if <see cref="Point" />'s are equal.
-		/// </summary>
-		public static bool operator ==(Point left, Point right) => left.Equals(right);
-
-		/// <summary>
-		///     Returns true if <see cref="Point" />'s are not equal.
-		/// </summary>
-		public static bool operator !=(Point left, Point right) => !left.Equals(right);
-
-		/// <summary>
-		///     Returns true if <paramref name="left" />'s position is above or right to <paramref name="right" />.
-		/// </summary>
-		public static bool operator >(Point left, Point right) => left.CompareTo(right) == 1;
-
-		/// <summary>
-		///     Returns true if <paramref name="left" />'s position is below or left to <paramref name="right" />.
-		/// </summary>
-		public static bool operator <(Point left, Point right) => left.CompareTo(right) == -1;
-
-		/// <summary>
-		///     Returns true if <paramref name="left" />'s position is equal, above or right to <paramref name="right" />.
-		/// </summary>
-		public static bool operator >=(Point left, Point right) => left.CompareTo(right) >= 0;
-
-		/// <summary>
-		///     Returns true if <paramref name="left" />'s position is equal, below or left to <paramref name="right" />.
-		/// </summary>
-		public static bool operator <=(Point left, Point right) => left.CompareTo(right) <= 0;
-
-		/// <summary>
 		///     Create a new <see cref="Point" /> by summing two <see cref="Point" />'s coordinates.
 		/// </summary>
 		public static Point operator +(Point left, Point right) => new(left.X + right.X, left.Y + right.Y);
-
-		/// <summary>
-		///     Create a new <see cref="Point" /> by subtracting <paramref name="right" />'s coordinates from
-		///     <paramref name="left" />'s.
-		/// </summary>
-		public static Point operator -(Point left, Point right) => new(left.X - right.X, left.Y - right.Y);
-
-		/// <summary>
-		///     Returns a <see cref="Point" /> object with negated components.
-		/// </summary>
-		public static Point operator -(Point point) => new(-point.X, -point.Y);
 
 		/// <summary>
 		///     Create a new <see cref="Point" /> by applying a <paramref name="displacement" /> in <paramref name="point" />'s
@@ -360,6 +315,44 @@ namespace andrefmello91.OnPlaneComponents
 		public static Point operator +(Point point, PlaneDisplacement displacement) => displacement.IsZero
 			? point
 			: new Point(point.X + displacement.X, point.Y + displacement.Y);
+
+		/// <summary>
+		///     Create a new <see cref="Point" /> by dividing <paramref name="point" />'s coordinates by a <see cref="number" />.
+		/// </summary>
+		public static Point operator /(Point point, double number) => new(point.X / number, point.Y / number);
+
+		/// <inheritdoc cref="operator /(Point,double)" />
+		public static Point operator /(Point point, int number) => new(point.X / number, point.Y / number);
+
+		/// <summary>
+		///     Returns true if <see cref="Point" />'s are equal.
+		/// </summary>
+		public static bool operator ==(Point left, Point right) => left.Equals(right);
+
+		/// <summary>
+		///     Returns true if <paramref name="left" />'s position is above or right to <paramref name="right" />.
+		/// </summary>
+		public static bool operator >(Point left, Point right) => left.CompareTo(right) == 1;
+
+		/// <summary>
+		///     Returns true if <paramref name="left" />'s position is equal, above or right to <paramref name="right" />.
+		/// </summary>
+		public static bool operator >=(Point left, Point right) => left.CompareTo(right) >= 0;
+
+		/// <summary>
+		///     Returns true if <see cref="Point" />'s are not equal.
+		/// </summary>
+		public static bool operator !=(Point left, Point right) => !left.Equals(right);
+
+		/// <summary>
+		///     Returns true if <paramref name="left" />'s position is below or left to <paramref name="right" />.
+		/// </summary>
+		public static bool operator <(Point left, Point right) => left.CompareTo(right) == -1;
+
+		/// <summary>
+		///     Returns true if <paramref name="left" />'s position is equal, below or left to <paramref name="right" />.
+		/// </summary>
+		public static bool operator <=(Point left, Point right) => left.CompareTo(right) <= 0;
 
 		/// <summary>
 		///     Create a new <see cref="Point" /> by multiplying <paramref name="point" />'s coordinates by a <see cref="number" />
@@ -377,12 +370,15 @@ namespace andrefmello91.OnPlaneComponents
 		public static Point operator *(int number, Point point) => point * number;
 
 		/// <summary>
-		///     Create a new <see cref="Point" /> by dividing <paramref name="point" />'s coordinates by a <see cref="number" />.
+		///     Create a new <see cref="Point" /> by subtracting <paramref name="right" />'s coordinates from
+		///     <paramref name="left" />'s.
 		/// </summary>
-		public static Point operator /(Point point, double number) => new(point.X / number, point.Y / number);
+		public static Point operator -(Point left, Point right) => new(left.X - right.X, left.Y - right.Y);
 
-		/// <inheritdoc cref="operator /(Point,double)" />
-		public static Point operator /(Point point, int number) => new(point.X / number, point.Y / number);
+		/// <summary>
+		///     Returns a <see cref="Point" /> object with negated components.
+		/// </summary>
+		public static Point operator -(Point point) => new(-point.X, -point.Y);
 
 		#endregion
 

@@ -13,66 +13,17 @@ namespace andrefmello91.OnPlaneComponents
 	public readonly partial struct StrainState : IState<double>, IApproachable<IState<double>, double>, IEquatable<IState<double>>, ICloneable<StrainState>
 	{
 
-		#region Fields
-
-		/// <summary>
-		///     Get a <see cref="StrainState" /> with zero elements.
-		/// </summary>
-		public static StrainState Zero { get; } = new(0, 0, 0);
+		#region Properties
 
 		/// <summary>
 		///     The default tolerance for strains.
 		/// </summary>
 		public static double Tolerance => 1E-12;
 
-		#endregion
-
-		#region Properties
-
-		double IState<double>.X => EpsilonX;
-
-		double IState<double>.Y => EpsilonY;
-
-		double IState<double>.XY => GammaXY;
-
 		/// <summary>
-		///     Returns true if <see cref="EpsilonX" /> is zero.
+		///     Get a <see cref="StrainState" /> with zero elements.
 		/// </summary>
-		public bool IsXZero => EpsilonX.ApproxZero();
-
-		/// <summary>
-		///     Returns true if <see cref="EpsilonY" /> is zero.
-		/// </summary>
-		public bool IsYZero => EpsilonY.ApproxZero();
-
-		/// <summary>
-		///     Returns true if <see cref="GammaXY" /> is zero.
-		/// </summary>
-		public bool IsXYZero => GammaXY.ApproxZero();
-
-		/// <inheritdoc />
-		public bool IsHorizontal => ThetaX.ApproxZero() || ThetaX.Approx(Constants.Pi);
-
-		/// <inheritdoc />
-		public bool IsVertical => ThetaX.Approx(Constants.PiOver2) || ThetaX.Approx(Constants.Pi3Over2);
-
-		/// <inheritdoc />
-		public bool IsPrincipal => !IsXZero && !IsYZero && IsXYZero;
-
-		/// <inheritdoc />
-		public bool IsPureShear => IsXZero && IsYZero && !IsXYZero;
-
-		/// <inheritdoc />
-		public bool IsZero => IsXZero && IsYZero && IsXYZero;
-
-		/// <inheritdoc />
-		public double ThetaX { get; }
-
-		/// <inheritdoc />
-		public double ThetaY => ThetaX + Constants.PiOver2;
-
-		/// <inheritdoc />
-		public Matrix<double> TransformationMatrix { get; }
+		public static StrainState Zero { get; } = new(0, 0, 0);
 
 		/// <summary>
 		///     Get the normal strain in X direction.
@@ -88,6 +39,51 @@ namespace andrefmello91.OnPlaneComponents
 		///     Get the shear strain.
 		/// </summary>
 		public double GammaXY { get; }
+
+		/// <inheritdoc />
+		public bool IsHorizontal => ThetaX.ApproxZero() || ThetaX.Approx(Constants.Pi);
+
+		/// <inheritdoc />
+		public bool IsPrincipal => !IsXZero && !IsYZero && IsXYZero;
+
+		/// <inheritdoc />
+		public bool IsPureShear => IsXZero && IsYZero && !IsXYZero;
+
+		/// <inheritdoc />
+		public bool IsVertical => ThetaX.Approx(Constants.PiOver2) || ThetaX.Approx(Constants.Pi3Over2);
+
+		/// <summary>
+		///     Returns true if <see cref="GammaXY" /> is zero.
+		/// </summary>
+		public bool IsXYZero => GammaXY.ApproxZero();
+
+		/// <summary>
+		///     Returns true if <see cref="EpsilonX" /> is zero.
+		/// </summary>
+		public bool IsXZero => EpsilonX.ApproxZero();
+
+		/// <summary>
+		///     Returns true if <see cref="EpsilonY" /> is zero.
+		/// </summary>
+		public bool IsYZero => EpsilonY.ApproxZero();
+
+		/// <inheritdoc />
+		public bool IsZero => IsXZero && IsYZero && IsXYZero;
+
+		/// <inheritdoc />
+		public double ThetaX { get; }
+
+		/// <inheritdoc />
+		public double ThetaY => ThetaX + Constants.PiOver2;
+
+		/// <inheritdoc />
+		public Matrix<double> TransformationMatrix { get; }
+
+		double IState<double>.X => EpsilonX;
+
+		double IState<double>.XY => GammaXY;
+
+		double IState<double>.Y => EpsilonY;
 
 		#endregion
 
@@ -116,7 +112,7 @@ namespace andrefmello91.OnPlaneComponents
 			: this(state.X, state.Y, state.XY, state.ThetaX)
 		{
 		}
-		
+
 		#endregion
 
 		#region

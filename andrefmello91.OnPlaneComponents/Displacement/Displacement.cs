@@ -12,7 +12,7 @@ namespace andrefmello91.OnPlaneComponents
 	public partial struct PlaneDisplacement : IPlaneComponent<Length>, IUnitConvertible<LengthUnit>, IApproachable<PlaneDisplacement, Length>, IEquatable<PlaneDisplacement>, ICloneable<PlaneDisplacement>
 	{
 
-		#region Fields
+		#region Properties
 
 		/// <summary>
 		///     The tolerance to consider displacements equal.
@@ -23,56 +23,6 @@ namespace andrefmello91.OnPlaneComponents
 		///     Get a <see cref="PlaneDisplacement" /> with zero value.
 		/// </summary>
 		public static PlaneDisplacement Zero { get; } = new(0, 0);
-
-		#endregion
-
-		#region Properties
-
-		/// <summary>
-		///     Verify if displacement components are zero.
-		/// </summary>
-		public bool IsZero => IsXZero && IsYZero;
-
-		/// <summary>
-		///     Verify if X component is approximately zero.
-		/// </summary>
-		public bool IsXZero => X.ApproxZero(Tolerance);
-
-		/// <summary>
-		///     Verify if Y component is approximately zero.
-		/// </summary>
-		public bool IsYZero => Y.ApproxZero(Tolerance);
-
-		/// <summary>
-		///     Get the existent displacement directions.
-		/// </summary>
-		public ComponentDirection Direction => IsZero
-			? ComponentDirection.None
-			: IsXZero switch
-			{
-				false when IsYZero => ComponentDirection.X,
-				true when !IsYZero => ComponentDirection.Y,
-				_                  => ComponentDirection.Both
-			};
-
-		/// <summary>
-		///     Get/set the displacement unit (<see cref="LengthUnit" />).
-		/// </summary>
-		public LengthUnit Unit
-		{
-			get => X.Unit;
-			set => ChangeUnit(value);
-		}
-
-		/// <summary>
-		///     Get the displacement component in X direction.
-		/// </summary>
-		public Length X { get; private set; }
-
-		/// <summary>
-		///     Get the displacement component in Y direction.
-		/// </summary>
-		public Length Y { get; private set; }
 
 		/// <summary>
 		///     Verify if displacement resultant is approximately zero.
@@ -88,6 +38,52 @@ namespace andrefmello91.OnPlaneComponents
 		///     Get the resultant displacement angle, in radians.
 		/// </summary>
 		public double ResultantAngle => CalculateResultantAngle(X, Y);
+
+		/// <summary>
+		///     Get the existent displacement directions.
+		/// </summary>
+		public ComponentDirection Direction => IsZero
+			? ComponentDirection.None
+			: IsXZero switch
+			{
+				false when IsYZero => ComponentDirection.X,
+				true when !IsYZero => ComponentDirection.Y,
+				_                  => ComponentDirection.Both
+			};
+
+		/// <summary>
+		///     Verify if X component is approximately zero.
+		/// </summary>
+		public bool IsXZero => X.ApproxZero(Tolerance);
+
+		/// <summary>
+		///     Verify if Y component is approximately zero.
+		/// </summary>
+		public bool IsYZero => Y.ApproxZero(Tolerance);
+
+		/// <summary>
+		///     Verify if displacement components are zero.
+		/// </summary>
+		public bool IsZero => IsXZero && IsYZero;
+
+		/// <summary>
+		///     Get the displacement component in X direction.
+		/// </summary>
+		public Length X { get; private set; }
+
+		/// <summary>
+		///     Get the displacement component in Y direction.
+		/// </summary>
+		public Length Y { get; private set; }
+
+		/// <summary>
+		///     Get/set the displacement unit (<see cref="LengthUnit" />).
+		/// </summary>
+		public LengthUnit Unit
+		{
+			get => X.Unit;
+			set => ChangeUnit(value);
+		}
 
 		#endregion
 

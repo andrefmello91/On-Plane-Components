@@ -16,69 +16,17 @@ namespace andrefmello91.OnPlaneComponents
 	public partial struct StressState : IState<Pressure>, IUnitConvertible<PressureUnit>, IApproachable<IState<Pressure>, Pressure>, IEquatable<IState<Pressure>>, ICloneable<StressState>
 	{
 
-		#region Fields
-
-		/// <summary>
-		///     Get a <see cref="StressState" /> with zero elements.
-		/// </summary>
-		public static StressState Zero { get; } = new(0, 0, 0);
+		#region Properties
 
 		/// <summary>
 		///     The default tolerance for stresses.
 		/// </summary>
 		public static Pressure Tolerance { get; } = Pressure.FromPascals(1E-3);
 
-		#endregion
-
-		#region Properties
-
 		/// <summary>
-		///     Get/set the stress unit (<see cref="PressureUnit" />).
+		///     Get a <see cref="StressState" /> with zero elements.
 		/// </summary>
-		public PressureUnit Unit
-		{
-			get => SigmaX.Unit;
-			set => ChangeUnit(value);
-		}
-
-		/// <inheritdoc />
-		public bool IsHorizontal => ThetaX.ApproxZero() || ThetaX.Approx(Constants.Pi);
-
-		/// <inheritdoc />
-		public bool IsVertical => ThetaX.Approx(Constants.PiOver2) || ThetaX.Approx(Constants.Pi3Over2);
-
-		/// <inheritdoc />
-		public bool IsPrincipal => !IsXZero && !IsYZero && IsXYZero;
-
-		/// <inheritdoc />
-		public bool IsPureShear => IsXZero && IsYZero && !IsXYZero;
-
-		/// <inheritdoc />
-		public bool IsXZero => SigmaX.ApproxZero(Tolerance);
-
-		/// <inheritdoc />
-		public bool IsYZero => SigmaY.ApproxZero(Tolerance);
-
-		/// <inheritdoc />
-		public bool IsXYZero => TauXY.ApproxZero(Tolerance);
-
-		Pressure IState<Pressure>.X => SigmaX;
-
-		Pressure IState<Pressure>.Y => SigmaY;
-
-		Pressure IState<Pressure>.XY => TauXY;
-
-		/// <inheritdoc />
-		public bool IsZero => IsXZero && IsYZero && IsXYZero;
-
-		/// <inheritdoc />
-		public double ThetaX { get; }
-
-		/// <inheritdoc />
-		public double ThetaY => ThetaX + Constants.PiOver2;
-
-		/// <inheritdoc />
-		public Matrix<double> TransformationMatrix { get; }
+		public static StressState Zero { get; } = new(0, 0, 0);
 
 		/// <summary>
 		///     Get the normal stress in X direction.
@@ -94,6 +42,54 @@ namespace andrefmello91.OnPlaneComponents
 		///     Get the shear stress.
 		/// </summary>
 		public Pressure TauXY { get; private set; }
+
+		/// <inheritdoc />
+		public bool IsHorizontal => ThetaX.ApproxZero() || ThetaX.Approx(Constants.Pi);
+
+		/// <inheritdoc />
+		public bool IsPrincipal => !IsXZero && !IsYZero && IsXYZero;
+
+		/// <inheritdoc />
+		public bool IsPureShear => IsXZero && IsYZero && !IsXYZero;
+
+		/// <inheritdoc />
+		public bool IsVertical => ThetaX.Approx(Constants.PiOver2) || ThetaX.Approx(Constants.Pi3Over2);
+
+		/// <inheritdoc />
+		public bool IsXYZero => TauXY.ApproxZero(Tolerance);
+
+		/// <inheritdoc />
+		public bool IsXZero => SigmaX.ApproxZero(Tolerance);
+
+		/// <inheritdoc />
+		public bool IsYZero => SigmaY.ApproxZero(Tolerance);
+
+		/// <inheritdoc />
+		public bool IsZero => IsXZero && IsYZero && IsXYZero;
+
+		/// <inheritdoc />
+		public double ThetaX { get; }
+
+		/// <inheritdoc />
+		public double ThetaY => ThetaX + Constants.PiOver2;
+
+		/// <inheritdoc />
+		public Matrix<double> TransformationMatrix { get; }
+
+		Pressure IState<Pressure>.X => SigmaX;
+
+		Pressure IState<Pressure>.XY => TauXY;
+
+		Pressure IState<Pressure>.Y => SigmaY;
+
+		/// <summary>
+		///     Get/set the stress unit (<see cref="PressureUnit" />).
+		/// </summary>
+		public PressureUnit Unit
+		{
+			get => SigmaX.Unit;
+			set => ChangeUnit(value);
+		}
 
 		#endregion
 
@@ -135,46 +131,6 @@ namespace andrefmello91.OnPlaneComponents
 		#region Methods
 
 		/// <summary>
-		///     Get a <see cref="StressState" /> from a <see cref="Vector" />.
-		/// </summary>
-		/// <param name="stressVector">
-		///     The vector of stresses, in considered <paramref name="unit" />.
-		///     <para>{SigmaX, SigmaY, TauXY}</para>
-		/// </param>
-		/// <param name="thetaX">The angle of X direction, related to horizontal axis.</param>
-		/// <param name="unit">The <see cref="PressureUnit" /> of stresses (default: <see cref="PressureUnit.Megapascal" />).</param>
-		public static StressState FromVector(Vector<double> stressVector, double thetaX = 0, PressureUnit unit = PressureUnit.Megapascal) =>
-			new(stressVector[0], stressVector[1], stressVector[2], thetaX, unit);
-
-		/// <summary>
-		///     Get <see cref="StressState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
-		/// </summary>
-		/// <param name="stressState">The <see cref="StressState" /> to transform.</param>
-		public static StressState ToHorizontal(IState<Pressure> stressState) =>
-			Transform(stressState, -stressState.ThetaX);
-		
-		/// <summary>
-		///     Get <see cref="StressState" /> transformed by a rotation angle.
-		/// </summary>
-		/// <param name="stressState">The <see cref="StressState" /> to transform.</param>
-		/// <inheritdoc cref="Transform(double)" />
-		public static StressState Transform(IState<Pressure> stressState, double theta)
-		{
-			var state = stressState is StressState stresses
-				? stresses
-				: new StressState(stressState);
-			
-			if (theta.ApproxZero(1E-6))
-				return state;
-
-			// Get the strain vector transformed
-			var sVec = StressRelations.Transform(state.AsVector(), theta);
-
-			// Return with corrected angle
-			return FromVector(sVec, state.ThetaX + theta, state.Unit);
-		}
-
-		/// <summary>
 		///     Get <see cref="StressState" /> from a <see cref="PrincipalStressState" /> in horizontal direction (
 		///     <see cref="ThetaX" /> = 0).
 		/// </summary>
@@ -192,58 +148,44 @@ namespace andrefmello91.OnPlaneComponents
 		}
 
 		/// <summary>
-		///     Get this <see cref="StressState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
+		///     Get a <see cref="StressState" /> from a <see cref="Vector" />.
 		/// </summary>
-		public StressState ToHorizontal() => ToHorizontal(this);
-		
-		IState<Pressure> IState<Pressure>.ToHorizontal() => ToHorizontal();
+		/// <param name="stressVector">
+		///     The vector of stresses, in considered <paramref name="unit" />.
+		///     <para>{SigmaX, SigmaY, TauXY}</para>
+		/// </param>
+		/// <param name="thetaX">The angle of X direction, related to horizontal axis.</param>
+		/// <param name="unit">The <see cref="PressureUnit" /> of stresses (default: <see cref="PressureUnit.Megapascal" />).</param>
+		public static StressState FromVector(Vector<double> stressVector, double thetaX = 0, PressureUnit unit = PressureUnit.Megapascal) =>
+			new(stressVector[0], stressVector[1], stressVector[2], thetaX, unit);
 
 		/// <summary>
-		///     Get this <see cref="StressState" /> transformed by a rotation angle.
+		///     Get <see cref="StressState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
 		/// </summary>
-		/// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
-		public StressState Transform(double theta) => Transform(this, theta);
-		
-		IState<Pressure> IState<Pressure>.Transform(double theta) => Transform(theta);
+		/// <param name="stressState">The <see cref="StressState" /> to transform.</param>
+		public static StressState ToHorizontal(IState<Pressure> stressState) =>
+			Transform(stressState, -stressState.ThetaX);
 
 		/// <summary>
-		///     Get the <see cref="PrincipalStressState" /> related to this <see cref="StressState" />.
+		///     Get <see cref="StressState" /> transformed by a rotation angle.
 		/// </summary>
-		public PrincipalStressState ToPrincipal() => PrincipalStressState.FromStress(this);
-		
-		IPrincipalState<Pressure> IState<Pressure>.ToPrincipal() => ToPrincipal();
-
-		/// <summary>
-		///     Change the <see cref="PressureUnit" /> of this <see cref="StressState" />.
-		/// </summary>
-		/// <param name="unit">The <see cref="PressureUnit" /> to convert.</param>
-		public void ChangeUnit(PressureUnit unit)
+		/// <param name="stressState">The <see cref="StressState" /> to transform.</param>
+		/// <inheritdoc cref="Transform(double)" />
+		public static StressState Transform(IState<Pressure> stressState, double theta)
 		{
-			if (Unit == unit)
-				return;
+			var state = stressState is StressState stresses
+				? stresses
+				: new StressState(stressState);
 
-			SigmaX = SigmaX.ToUnit(unit);
-			SigmaY = SigmaY.ToUnit(unit);
-			TauXY  = TauXY.ToUnit(unit);
+			if (theta.ApproxZero(1E-6))
+				return state;
+
+			// Get the strain vector transformed
+			var sVec = StressRelations.Transform(state.AsVector(), theta);
+
+			// Return with corrected angle
+			return FromVector(sVec, state.ThetaX + theta, state.Unit);
 		}
-
-		/// <summary>
-		///     Convert this <see cref="StressState" /> to another <see cref="PressureUnit" />.
-		/// </summary>
-		/// <inheritdoc cref="ChangeUnit" />
-		public StressState Convert(PressureUnit unit) => unit == Unit
-			? this
-			: new StressState(SigmaX.ToUnit(unit), SigmaY.ToUnit(unit), TauXY.ToUnit(unit), ThetaX);
-
-		IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
-
-		/// <summary>
-		///     Get the stresses as an <see cref="Array" />.
-		/// </summary>
-		/// <remarks>
-		///     { SigmaX, SigmaY, TauXY }
-		/// </remarks>
-		public Pressure[] AsArray() => new[] { SigmaX, SigmaY, TauXY };
 
 		/// <summary>
 		///     Get the stresses as <see cref="Vector" />, in a desired <see cref="PressureUnit" />.
@@ -254,20 +196,13 @@ namespace andrefmello91.OnPlaneComponents
 		/// <param name="unit">The <see cref="PressureUnit" />.</param>
 		public Vector<double> AsVector(PressureUnit unit = PressureUnit.Megapascal) => AsArray().Select(s => s.ToUnit(unit).Value).ToVector();
 
-		/// <inheritdoc />
-		public StressState Clone() => new(SigmaX, SigmaY, TauXY, ThetaX);
-
-		/// <inheritdoc />
-		public bool Approaches(IState<Pressure>? other, Pressure tolerance) =>
-			other is not null &&
-			ThetaX.Approx(other.ThetaX, 1E-3) && SigmaX.Approx(other.X, tolerance) &&
-			SigmaY.Approx(other.Y, tolerance) && TauXY.Approx(other.XY, tolerance);
-
 		/// <summary>
-		///     Compare two <see cref="StressState" /> objects.
+		///     Convert this <see cref="StressState" /> to another <see cref="PressureUnit" />.
 		/// </summary>
-		/// <param name="other">The <see cref="StressState" /> to compare.</param>
-		public bool Equals(IState<Pressure>? other) => Approaches(other, Tolerance);
+		/// <inheritdoc cref="ChangeUnit" />
+		public StressState Convert(PressureUnit unit) => unit == Unit
+			? this
+			: new StressState(SigmaX.ToUnit(unit), SigmaY.ToUnit(unit), TauXY.ToUnit(unit), ThetaX);
 
 		/// <inheritdoc />
 		public override bool Equals(object? obj) =>
@@ -277,6 +212,19 @@ namespace andrefmello91.OnPlaneComponents
 				PrincipalStressState principalStress => Equals(principalStress),
 				_                                    => false
 			};
+
+		/// <inheritdoc />
+		public override int GetHashCode() => (int) (SigmaX.Value * SigmaY.Value * TauXY.Value);
+
+		/// <summary>
+		///     Get this <see cref="StressState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
+		/// </summary>
+		public StressState ToHorizontal() => ToHorizontal(this);
+
+		/// <summary>
+		///     Get the <see cref="PrincipalStressState" /> related to this <see cref="StressState" />.
+		/// </summary>
+		public PrincipalStressState ToPrincipal() => PrincipalStressState.FromStress(this);
 
 		/// <inheritdoc />
 		public override string ToString()
@@ -293,8 +241,56 @@ namespace andrefmello91.OnPlaneComponents
 				$"{theta}x = {ThetaX:0.00} rad";
 		}
 
+		/// <summary>
+		///     Get this <see cref="StressState" /> transformed by a rotation angle.
+		/// </summary>
+		/// <param name="theta">The rotation angle, in radians (positive to counterclockwise).</param>
+		public StressState Transform(double theta) => Transform(this, theta);
+
 		/// <inheritdoc />
-		public override int GetHashCode() => (int) (SigmaX.Value * SigmaY.Value * TauXY.Value);
+		public bool Approaches(IState<Pressure>? other, Pressure tolerance) =>
+			other is not null &&
+			ThetaX.Approx(other.ThetaX, 1E-3) && SigmaX.Approx(other.X, tolerance) &&
+			SigmaY.Approx(other.Y, tolerance) && TauXY.Approx(other.XY, tolerance);
+
+		/// <inheritdoc />
+		public StressState Clone() => new(SigmaX, SigmaY, TauXY, ThetaX);
+
+		/// <summary>
+		///     Compare two <see cref="StressState" /> objects.
+		/// </summary>
+		/// <param name="other">The <see cref="StressState" /> to compare.</param>
+		public bool Equals(IState<Pressure>? other) => Approaches(other, Tolerance);
+
+		/// <summary>
+		///     Get the stresses as an <see cref="Array" />.
+		/// </summary>
+		/// <remarks>
+		///     { SigmaX, SigmaY, TauXY }
+		/// </remarks>
+		public Pressure[] AsArray() => new[] { SigmaX, SigmaY, TauXY };
+
+		IState<Pressure> IState<Pressure>.ToHorizontal() => ToHorizontal();
+
+		IPrincipalState<Pressure> IState<Pressure>.ToPrincipal() => ToPrincipal();
+
+		IState<Pressure> IState<Pressure>.Transform(double theta) => Transform(theta);
+
+		/// <summary>
+		///     Change the <see cref="PressureUnit" /> of this <see cref="StressState" />.
+		/// </summary>
+		/// <param name="unit">The <see cref="PressureUnit" /> to convert.</param>
+		public void ChangeUnit(PressureUnit unit)
+		{
+			if (Unit == unit)
+				return;
+
+			SigmaX = SigmaX.ToUnit(unit);
+			SigmaY = SigmaY.ToUnit(unit);
+			TauXY  = TauXY.ToUnit(unit);
+		}
+
+		IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
 
 		#endregion
 

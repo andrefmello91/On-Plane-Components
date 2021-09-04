@@ -5,7 +5,10 @@ namespace andrefmello91.OnPlaneComponents
 {
 	public partial class QuantityVector<TQuantity, TUnit>
 	{
-				/// <inheritdoc cref="Add(TQuantity)" />
+
+		#region Operators
+
+		/// <inheritdoc cref="Add(TQuantity)" />
 		public static QuantityVector<TQuantity, TUnit> operator +(QuantityVector<TQuantity, TUnit> left, TQuantity right) => left.Add(right);
 
 		/// <inheritdoc cref="Add(QuantityVector{TQuantity, TUnit})" />
@@ -31,10 +34,10 @@ namespace andrefmello91.OnPlaneComponents
 
 		/// <inheritdoc cref="Multiply(double)" />
 		public static QuantityVector<TQuantity, TUnit> operator *(double multiplier, QuantityVector<TQuantity, TUnit> right) => right.Multiply(multiplier);
-		
+
 		/// <inheritdoc cref="RightMultiply" />
 		public static QuantityVector<TQuantity, TUnit> operator *(Matrix<double> multiplier, QuantityVector<TQuantity, TUnit> right) => right.RightMultiply(multiplier);
-		
+
 		/// <inheritdoc cref="LeftMultiply" />
 		public static QuantityVector<TQuantity, TUnit> operator *(QuantityVector<TQuantity, TUnit> left, Matrix<double> multiplier) => left.LeftMultiply(multiplier);
 
@@ -52,11 +55,20 @@ namespace andrefmello91.OnPlaneComponents
 
 		/// <inheritdoc cref="Negate()" />
 		public static QuantityVector<TQuantity, TUnit> operator -(QuantityVector<TQuantity, TUnit> vector) => vector.Negate();
+
+		#endregion
+
 	}
 
 	public partial class ForceVector
 	{
-		/// <inheritdoc cref="StiffnessMatrix.Tangent"/>
-		public static StiffnessMatrix operator / (ForceVector forceVector, DisplacementVector displacementVector) => StiffnessMatrix.Tangent(forceVector, displacementVector);
+
+		#region Operators
+
+		/// <inheritdoc cref="StiffnessMatrix.Tangent" />
+		public static StiffnessMatrix operator /(ForceVector forceVector, DisplacementVector displacementVector) => StiffnessMatrix.Tangent(forceVector, displacementVector);
+
+		#endregion
+
 	}
 }
