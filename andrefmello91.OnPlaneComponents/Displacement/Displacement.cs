@@ -120,7 +120,27 @@ namespace andrefmello91.OnPlaneComponents
 
 		#endregion
 
-		#region
+		#region Methods
+
+		/// <summary>
+		///     Get a <see cref="PlaneDisplacement" /> in from a resultant.
+		/// </summary>
+		/// <param name="resultant">Absolute value of displacement resultant.</param>
+		/// <param name="angle">Angle that displacement resultant is pointing at, in radians.</param>
+		/// <param name="unit">The <see cref="LengthUnit" /> of displacement (default: <see cref="LengthUnit.Millimeter" />).</param>
+		public static PlaneDisplacement FromResultant(double resultant, double angle, LengthUnit unit = LengthUnit.Millimeter) => FromResultant(Length.From(resultant, unit), angle);
+
+		/// <summary>
+		///     Get a <see cref="PlaneDisplacement" /> in from a resultant.
+		/// </summary>
+		/// <param name="resultantDisplacement">Absolute value of displacement resultant.</param>
+		/// <param name="angle">Angle that displacement resultant is pointing at, in radians.</param>
+		public static PlaneDisplacement FromResultant(Length resultantDisplacement, double angle)
+		{
+			var (x, y) = CalculateComponents(resultantDisplacement, angle);
+
+			return new PlaneDisplacement(x, y);
+		}
 
 		/// <summary>
 		///     Get a <see cref="PlaneDisplacement" /> in X direction.
@@ -149,24 +169,35 @@ namespace andrefmello91.OnPlaneComponents
 		public static PlaneDisplacement InY(Length displacement) => new(Length.Zero, displacement);
 
 		/// <summary>
-		///     Get a <see cref="PlaneDisplacement" /> in from a resultant.
+		///     Convert this <see cref="PlaneDisplacement" /> to another <see cref="LengthUnit" />.
 		/// </summary>
-		/// <param name="resultant">Absolute value of displacement resultant.</param>
-		/// <param name="angle">Angle that displacement resultant is pointing at, in radians.</param>
-		/// <param name="unit">The <see cref="LengthUnit" /> of displacement (default: <see cref="LengthUnit.Millimeter" />).</param>
-		public static PlaneDisplacement FromResultant(double resultant, double angle, LengthUnit unit = LengthUnit.Millimeter) => FromResultant(Length.From(resultant, unit), angle);
+		/// <param name="unit">The <see cref="LengthUnit" /> to convert.</param>
+		public PlaneDisplacement Convert(LengthUnit unit) => unit == Unit
+			? this
+			: new PlaneDisplacement(X.ToUnit(unit), Y.ToUnit(unit));
 
-		/// <summary>
-		///     Get a <see cref="PlaneDisplacement" /> in from a resultant.
-		/// </summary>
-		/// <param name="resultantDisplacement">Absolute value of displacement resultant.</param>
-		/// <param name="angle">Angle that displacement resultant is pointing at, in radians.</param>
-		public static PlaneDisplacement FromResultant(Length resultantDisplacement, double angle)
-		{
-			var (x, y) = CalculateComponents(resultantDisplacement, angle);
+		/// <inheritdoc />
+		public override bool Equals(object? obj) => obj is PlaneDisplacement other && Equals(other);
 
-			return new PlaneDisplacement(x, y);
-		}
+		/// <inheritdoc />
+		public override int GetHashCode() => (int) (X.Value * Y.Value);
+
+		/// <inheritdoc />
+		public override string ToString() =>
+			$"ux = {X}\n" +
+			$"uy = {Y}";
+
+		/// <inheritdoc />
+		public bool Approaches(PlaneDisplacement other, Length tolerance) => X.Approx(other.X, tolerance) && Y.Approx(other.Y, tolerance);
+
+		/// <inheritdoc />
+		public PlaneDisplacement Clone() => new(X, Y);
+
+		/// <inheritdoc cref="Approaches" />
+		/// <remarks>
+		///     Default <see cref="Tolerance" /> is considered.
+		/// </remarks>
+		public bool Equals(PlaneDisplacement other) => Approaches(other, Tolerance);
 
 		/// <summary>
 		///     Change the <see cref="LengthUnit" /> of this object.
@@ -183,38 +214,7 @@ namespace andrefmello91.OnPlaneComponents
 			Resultant = CalculateResultant(X, Y).ToUnit(unit);
 		}
 
-		/// <summary>
-		///     Convert this <see cref="PlaneDisplacement" /> to another <see cref="LengthUnit" />.
-		/// </summary>
-		/// <param name="unit">The <see cref="LengthUnit" /> to convert.</param>
-		public PlaneDisplacement Convert(LengthUnit unit) => unit == Unit
-			? this
-			: new PlaneDisplacement(X.ToUnit(unit), Y.ToUnit(unit));
-
 		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
-
-		/// <inheritdoc />
-		public bool Approaches(PlaneDisplacement other, Length tolerance) => X.Approx(other.X, tolerance) && Y.Approx(other.Y, tolerance);
-
-		/// <inheritdoc />
-		public PlaneDisplacement Clone() => new(X, Y);
-
-		/// <inheritdoc cref="Approaches" />
-		/// <remarks>
-		///     Default <see cref="Tolerance" /> is considered.
-		/// </remarks>
-		public bool Equals(PlaneDisplacement other) => Approaches(other, Tolerance);
-
-		/// <inheritdoc />
-		public override bool Equals(object? obj) => obj is PlaneDisplacement other && Equals(other);
-
-		/// <inheritdoc />
-		public override string ToString() =>
-			$"ux = {X}\n" +
-			$"uy = {Y}";
-
-		/// <inheritdoc />
-		public override int GetHashCode() => (int) (X.Value * Y.Value);
 
 		#endregion
 

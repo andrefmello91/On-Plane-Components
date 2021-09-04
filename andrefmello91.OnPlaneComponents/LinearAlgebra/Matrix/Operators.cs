@@ -67,7 +67,7 @@ namespace andrefmello91.OnPlaneComponents
 	public partial class MaterialMatrix
 	{
 
-		#region Object override
+		#region Operators
 
 		/// <inheritdoc cref="Solve(StressState)" />
 		public static StrainState operator /(StressState stresses, MaterialMatrix matrix) => matrix.Solve(stresses);
@@ -82,7 +82,7 @@ namespace andrefmello91.OnPlaneComponents
 	public partial class StiffnessMatrix
 	{
 
-		#region Object override
+		#region Operators
 
 		/// <summary>
 		///     Solve the displacement vector by multiplying the inverse of stiffness and the force vector.

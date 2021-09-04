@@ -40,16 +40,12 @@ namespace andrefmello91.OnPlaneComponents
 			set => base[rowIndex, columnIndex] = value.As(_unit);
 		}
 
-		#region Interface Implementations
-
 		/// <inheritdoc />
 		public TUnit Unit
 		{
 			get => _unit;
 			set => ChangeUnit(value);
 		}
-
-		#endregion
 
 		#endregion
 
@@ -225,6 +221,13 @@ namespace andrefmello91.OnPlaneComponents
 			return result;
 		}
 
+		/// <inheritdoc />
+		public override bool Equals(object? obj) =>
+			obj is QuantityMatrix<TQuantity, TUnit> other && Equals(other);
+
+		/// <inheritdoc />
+		public override int GetHashCode() => _unit.GetHashCode() * base.GetHashCode();
+
 		/// <summary>
 		///     Multiply this matrix by other on the left side.
 		/// </summary>
@@ -349,6 +352,11 @@ namespace andrefmello91.OnPlaneComponents
 			return result;
 		}
 
+		/// <inheritdoc cref="object.ToString" />
+		public new string ToString() =>
+			$"Unit: {Unit} \n" +
+			$"Value: {base.ToString()}";
+
 		/// <summary>
 		///     Transform this stiffness to another coordinate system.
 		/// </summary>
@@ -372,12 +380,22 @@ namespace andrefmello91.OnPlaneComponents
 			return result;
 		}
 
-		#endregion
-
-		#region Interface Implementations
+		/// <inheritdoc />
+		public virtual bool Approaches(QuantityMatrix<TQuantity, TUnit>? other, TQuantity tolerance) =>
+			other is not null &&
+			(this - other).Values.MaximumAbsolute().As(Unit).Value <= tolerance.As(Unit);
 
 		/// <inheritdoc />
 		public abstract QuantityMatrix<TQuantity, TUnit> Clone();
+
+		/// <inheritdoc />
+		public IEnumerator<TQuantity> GetEnumerator() => Values
+			.Select(v => v.As(Unit))
+			.Cast<TQuantity>()
+			.GetEnumerator();
+
+		/// <inheritdoc />
+		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 		/// <inheritdoc />
 		public virtual bool Equals(QuantityMatrix<TQuantity, TUnit>? other) =>
@@ -402,36 +420,6 @@ namespace andrefmello91.OnPlaneComponents
 
 		/// <inheritdoc />
 		IUnitConvertible<TUnit> IUnitConvertible<TUnit>.Convert(TUnit unit) => Convert(unit);
-
-		#endregion
-
-		#region Object override
-
-		/// <inheritdoc />
-		public virtual bool Approaches(QuantityMatrix<TQuantity, TUnit>? other, TQuantity tolerance) =>
-			other is not null &&
-			(this - other).Values.MaximumAbsolute().As(Unit).Value <= tolerance.As(Unit);
-
-		/// <inheritdoc />
-		public IEnumerator<TQuantity> GetEnumerator() => Values
-			.Select(v => v.As(Unit))
-			.Cast<TQuantity>()
-			.GetEnumerator();
-
-		/// <inheritdoc />
-		public override bool Equals(object? obj) =>
-			obj is QuantityMatrix<TQuantity, TUnit> other && Equals(other);
-
-		/// <inheritdoc />
-		public override int GetHashCode() => _unit.GetHashCode() * base.GetHashCode();
-
-		/// <inheritdoc cref="object.ToString" />
-		public new string ToString() =>
-			$"Unit: {Unit} \n" +
-			$"Value: {base.ToString()}";
-
-		/// <inheritdoc />
-		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 		#endregion
 

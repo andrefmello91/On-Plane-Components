@@ -38,16 +38,12 @@ namespace andrefmello91.OnPlaneComponents
 			set => Values[index] = value.As(_unit);
 		}
 
-		#region Interface Implementations
-
 		/// <inheritdoc />
 		public TUnit Unit
 		{
 			get => _unit;
 			set => ChangeUnit(value);
 		}
-
-		#endregion
 
 		#endregion
 
@@ -179,6 +175,10 @@ namespace andrefmello91.OnPlaneComponents
 				? other
 				: other.Convert(Unit))
 			: throw new ArgumentException("All vectors must have the same dimensionality.", nameof(other));
+
+		/// <inheritdoc cref="object.Equals(object)" />
+		public new bool Equals(object? obj) =>
+			obj is QuantityVector<TQuantity, TUnit> other && Equals(other);
 
 		/// <summary>
 		///     Multiply this vector by a matrix on the left side.
@@ -322,20 +322,25 @@ namespace andrefmello91.OnPlaneComponents
 		/// <inheritdoc cref="Vector{T}.Sum" />
 		public new TQuantity Sum() => (TQuantity) base.Sum().As(Unit);
 
-		#endregion
+		/// <inheritdoc cref="object.ToString" />
+		public new string ToString() =>
+			$"Unit: {Unit} \n" +
+			$"Value: {base.ToString()}";
 
-		#region Interface Implementations
+		/// <inheritdoc />
+		public bool Approaches(QuantityVector<TQuantity, TUnit>? other, TQuantity tolerance) => other is not null &&
+		                                                                                        (this - other).AbsoluteMaximum().As(Unit) <= tolerance.As(Unit);
 
 		/// <inheritdoc cref="ICloneable{T}.Clone" />
 		public abstract QuantityVector<TQuantity, TUnit> Clone();
 
 		/// <inheritdoc />
-		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-		/// <inheritdoc />
 		public IEnumerator<TQuantity> GetEnumerator() => Values
 			.GetQuantities<TQuantity, TUnit>(Unit)
 			.GetEnumerator();
+
+		/// <inheritdoc />
+		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 		/// <inheritdoc />
 		public virtual bool Equals(QuantityVector<TQuantity, TUnit>? other) =>
@@ -358,23 +363,6 @@ namespace andrefmello91.OnPlaneComponents
 		}
 
 		IUnitConvertible<TUnit> IUnitConvertible<TUnit>.Convert(TUnit unit) => Convert(unit);
-
-		#endregion
-
-		#region Object override
-
-		/// <inheritdoc />
-		public bool Approaches(QuantityVector<TQuantity, TUnit>? other, TQuantity tolerance) => other is not null &&
-		                                                                                        (this - other).AbsoluteMaximum().As(Unit) <= tolerance.As(Unit);
-
-		/// <inheritdoc cref="object.Equals(object)" />
-		public new bool Equals(object? obj) =>
-			obj is QuantityVector<TQuantity, TUnit> other && Equals(other);
-
-		/// <inheritdoc cref="object.ToString" />
-		public new string ToString() =>
-			$"Unit: {Unit} \n" +
-			$"Value: {base.ToString()}";
 
 		#endregion
 

@@ -115,7 +115,24 @@ namespace andrefmello91.OnPlaneComponents
 
 		#endregion
 
-		#region
+		#region Methods
+
+		/// <summary>
+		///     Get <see cref="StrainState" /> from a <see cref="PrincipalStrainState" /> in horizontal direction (
+		///     <see cref="ThetaX" /> = 0).
+		/// </summary>
+		/// <param name="principalStrainState">The <see cref="PrincipalStrainState" /> to horizontal <see cref="StrainState" />.</param>
+		public static StrainState FromPrincipal(PrincipalStrainState principalStrainState)
+		{
+			if (principalStrainState.Theta1.ApproxZero())
+				return FromVector(principalStrainState.AsVector());
+
+			// Get the strain vector transformed
+			var sVec = StrainsFromPrincipal(principalStrainState.Epsilon1, principalStrainState.Epsilon2, principalStrainState.Theta1);
+
+			// Return with corrected angle
+			return FromVector(sVec);
+		}
 
 		/// <summary>
 		///     Get a <see cref="StrainState" /> from a <see cref="Vector" /> of strains.
@@ -157,48 +174,6 @@ namespace andrefmello91.OnPlaneComponents
 		}
 
 		/// <summary>
-		///     Get <see cref="StrainState" /> from a <see cref="PrincipalStrainState" /> in horizontal direction (
-		///     <see cref="ThetaX" /> = 0).
-		/// </summary>
-		/// <param name="principalStrainState">The <see cref="PrincipalStrainState" /> to horizontal <see cref="StrainState" />.</param>
-		public static StrainState FromPrincipal(PrincipalStrainState principalStrainState)
-		{
-			if (principalStrainState.Theta1.ApproxZero())
-				return FromVector(principalStrainState.AsVector());
-
-			// Get the strain vector transformed
-			var sVec = StrainsFromPrincipal(principalStrainState.Epsilon1, principalStrainState.Epsilon2, principalStrainState.Theta1);
-
-			// Return with corrected angle
-			return FromVector(sVec);
-		}
-
-		/// <summary>
-		///     Get this <see cref="StrainState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
-		/// </summary>
-		public StrainState ToHorizontal() => ToHorizontal(this);
-
-		/// <inheritdoc />
-		IState<double> IState<double>.ToHorizontal() => ToHorizontal();
-
-		/// <summary>
-		///     Get this <see cref="StrainState" /> transformed by a rotation angle.
-		/// </summary>
-		/// <inheritdoc cref="IState{T}.Transform" />
-		public StrainState Transform(double rotationAngle) => Transform(this, rotationAngle);
-
-		/// <inheritdoc />
-		IState<double> IState<double>.Transform(double rotationAngle) => Transform(rotationAngle);
-
-		/// <summary>
-		///     Get strains as an <see cref="Array" />.
-		/// </summary>
-		/// <remarks>
-		///     { EpsilonX, EpsilonY, GammaXY }
-		/// </remarks>
-		public double[] AsArray() => new[] { EpsilonX, EpsilonY, GammaXY };
-
-		/// <summary>
 		///     Get strains as a <see cref="Vector" />.
 		/// </summary>
 		/// <remarks>
@@ -206,31 +181,21 @@ namespace andrefmello91.OnPlaneComponents
 		/// </remarks>
 		public Vector<double> AsVector() => AsArray().ToVector();
 
+		/// <inheritdoc />
+		public override bool Equals(object? obj) => obj is IState<double> state && Equals(state);
+
+		/// <inheritdoc />
+		public override int GetHashCode() => (int) (EpsilonX * EpsilonY * GammaXY);
+
+		/// <summary>
+		///     Get this <see cref="StrainState" /> transformed to horizontal direction (<see cref="ThetaX" /> = 0).
+		/// </summary>
+		public StrainState ToHorizontal() => ToHorizontal(this);
+
 		/// <summary>
 		///     Get the <see cref="PrincipalStrainState" /> related to this <see cref="StrainState" />.
 		/// </summary>
 		public PrincipalStrainState ToPrincipal() => PrincipalStrainState.FromStrain(this);
-
-		/// <inheritdoc />
-		IPrincipalState<double> IState<double>.ToPrincipal() => ToPrincipal();
-
-		/// <inheritdoc />
-		public bool Approaches(IState<double>? other, double tolerance) =>
-			other is not null &&
-			ThetaX.Approx(other.ThetaX, tolerance) && EpsilonX.Approx(other.X, tolerance) &&
-			EpsilonY.Approx(other.Y, tolerance) && GammaXY.Approx(other.XY, tolerance);
-
-		/// <inheritdoc />
-		public StrainState Clone() => new(EpsilonX, EpsilonY, GammaXY, ThetaX);
-
-		/// <summary>
-		///     Compare two <see cref="StrainState" /> objects.
-		/// </summary>
-		/// <param name="other">The strain to compare.</param>
-		public bool Equals(IState<double>? other) => Approaches(other, Tolerance);
-
-		/// <inheritdoc />
-		public override bool Equals(object? obj) => obj is IState<double> state && Equals(state);
 
 		/// <inheritdoc />
 		public override string ToString()
@@ -248,8 +213,43 @@ namespace andrefmello91.OnPlaneComponents
 				$"{theta}x = {ThetaX:0.00} rad";
 		}
 
+		/// <summary>
+		///     Get this <see cref="StrainState" /> transformed by a rotation angle.
+		/// </summary>
+		/// <inheritdoc cref="IState{T}.Transform" />
+		public StrainState Transform(double rotationAngle) => Transform(this, rotationAngle);
+
 		/// <inheritdoc />
-		public override int GetHashCode() => (int) (EpsilonX * EpsilonY * GammaXY);
+		public bool Approaches(IState<double>? other, double tolerance) =>
+			other is not null &&
+			ThetaX.Approx(other.ThetaX, tolerance) && EpsilonX.Approx(other.X, tolerance) &&
+			EpsilonY.Approx(other.Y, tolerance) && GammaXY.Approx(other.XY, tolerance);
+
+		/// <inheritdoc />
+		public StrainState Clone() => new(EpsilonX, EpsilonY, GammaXY, ThetaX);
+
+		/// <summary>
+		///     Compare two <see cref="StrainState" /> objects.
+		/// </summary>
+		/// <param name="other">The strain to compare.</param>
+		public bool Equals(IState<double>? other) => Approaches(other, Tolerance);
+
+		/// <summary>
+		///     Get strains as an <see cref="Array" />.
+		/// </summary>
+		/// <remarks>
+		///     { EpsilonX, EpsilonY, GammaXY }
+		/// </remarks>
+		public double[] AsArray() => new[] { EpsilonX, EpsilonY, GammaXY };
+
+		/// <inheritdoc />
+		IState<double> IState<double>.ToHorizontal() => ToHorizontal();
+
+		/// <inheritdoc />
+		IPrincipalState<double> IState<double>.ToPrincipal() => ToPrincipal();
+
+		/// <inheritdoc />
+		IState<double> IState<double>.Transform(double rotationAngle) => Transform(rotationAngle);
 
 		#endregion
 
