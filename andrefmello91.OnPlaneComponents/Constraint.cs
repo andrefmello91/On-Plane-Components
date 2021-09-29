@@ -1,5 +1,6 @@
 ﻿using System;
 using andrefmello91.Extensions;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace andrefmello91.OnPlaneComponents
 {
@@ -75,13 +76,13 @@ namespace andrefmello91.OnPlaneComponents
 		/// <remarks>
 		///     True if point is constrained in this direction.
 		/// </remarks>
-		public bool X { get; set; }
+		public bool X { get; }
 
 		/// <summary>
 		///     Get/set the Y (vertical) constraint.
 		/// </summary>
 		/// <inheritdoc cref="X" />
-		public bool Y { get; set; }
+		public bool Y { get; }
 
 		#endregion
 
@@ -130,6 +131,9 @@ namespace andrefmello91.OnPlaneComponents
 
 		/// <inheritdoc />
 		public bool Equals(Constraint other) => Direction == other.Direction;
+
+		/// <inheritdoc />
+		public Vector<double> AsVector() => new double[] { X ? 1 : 0, Y ? 1 : 0 }.ToVector();
 
 		#endregion
 

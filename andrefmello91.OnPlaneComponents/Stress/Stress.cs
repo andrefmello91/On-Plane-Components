@@ -270,6 +270,9 @@ namespace andrefmello91.OnPlaneComponents
 		/// </remarks>
 		public Pressure[] AsArray() => new[] { SigmaX, SigmaY, TauXY };
 
+		/// <inheritdoc />
+		public Vector<double> AsVector() => AsVector(Unit);
+
 		IState<Pressure> IState<Pressure>.ToHorizontal() => ToHorizontal();
 
 		IPrincipalState<Pressure> IState<Pressure>.ToPrincipal() => ToPrincipal();

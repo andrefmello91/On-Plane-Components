@@ -1,5 +1,6 @@
 ﻿using System;
 using andrefmello91.Extensions;
+using MathNet.Numerics.LinearAlgebra;
 using UnitsNet;
 using UnitsNet.Units;
 using static andrefmello91.OnPlaneComponents.ForceRelations;
@@ -193,6 +194,9 @@ namespace andrefmello91.OnPlaneComponents
 		///     Default <see cref="Tolerance" /> is considered.
 		/// </remarks>
 		public bool Equals(PlaneForce other) => Approaches(other, Tolerance);
+
+		/// <inheritdoc />
+		public Vector<double> AsVector() => new[] { X.Value, Y.Value }.ToVector();
 
 		/// <summary>
 		///     Change the <see cref="ForceUnit" /> of this object.

@@ -1,4 +1,5 @@
-﻿using MathNet.Numerics.LinearAlgebra;
+﻿using andrefmello91.Extensions;
+using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace andrefmello91.OnPlaneComponents
@@ -7,7 +8,7 @@ namespace andrefmello91.OnPlaneComponents
 	///     Plane component interface.
 	/// </summary>
 	/// <typeparam name="TStruct">The struct that represents the values of the object's components.</typeparam>
-	public interface IPlaneComponent<TStruct>
+	public interface IPlaneComponent<TStruct> : IVectorTransformable
 		where TStruct : struct
 	{
 
@@ -51,7 +52,7 @@ namespace andrefmello91.OnPlaneComponents
 	///     Interface to strain/stress states.
 	/// </summary>
 	/// <typeparam name="TStruct">The struct that represents the values of the object's components.</typeparam>
-	public interface IState<TStruct>
+	public interface IState<TStruct> : IVectorTransformable
 		where TStruct : struct
 	{
 
