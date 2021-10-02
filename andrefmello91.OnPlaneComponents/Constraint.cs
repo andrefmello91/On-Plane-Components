@@ -144,6 +144,9 @@ namespace andrefmello91.OnPlaneComponents
 		/// </summary>
 		public static bool operator ==(Constraint left, Constraint right) => left.Equals(right);
 
+		/// <inheritdoc cref="FromDirection" />
+		public static implicit operator Constraint(ComponentDirection direction) => FromDirection(direction);
+
 		/// <summary>
 		///     Returns true if objects are not equal.
 		/// </summary>
